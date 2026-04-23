@@ -2,9 +2,11 @@
 
 <main class="landing">
   <header class="landing-top">
-    <p class="landing-eyebrow">Homepage</p>
+    <%= link_to root_path, class: "landing-brand-link" do %>
+      <%= image_tag "landing/mezzanine-wordmark-branco-nb.png", alt: "Mezzanine", class: "landing-brand" %>
+    <% end %>
     <nav class="landing-nav" aria-label="Primary">
-      <%= link_to "Our space", "#" %>
+      <%= link_to "Our Space", "#" %>
       <%= link_to "Pricing", "#" %>
       <%= link_to "Location", "#" %>
       <%= link_to "#", class: "landing-nav-profile", "aria-label": "Account" do %>
@@ -31,7 +33,7 @@
   </section>
 
   <footer class="landing-footer">
-    <%= link_to "Send us an email", "mailto:hello@mezzanine.pt" %>
-    <%= link_to "Follow us on instagram", "https://instagram.com", target: "_blank", rel: "noreferrer" %>
+    <%= link_to "Send us an email", "mailto:hello@mezzaninecowork.com" %>
+    <%= link_to "Follow us on instagram", "https://www.instagram.com/mezzanine.cowork/", target: "_blank", rel: "noreferrer" %>
   </footer>
 </main>

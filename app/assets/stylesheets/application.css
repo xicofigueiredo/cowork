@@ -39,6 +39,11 @@ body {
   min-height: 100%;
 }
 
+/* Landing: side logos use large % widths — prevent grid from expanding past the viewport */
+body:has(.landing) {
+  overflow-x: hidden;
+}
+
 body {
   font-family: "Host Grotesk", "Avenir Next", "Segoe UI", sans-serif;
   background: #fff;
@@ -46,6 +51,7 @@ body {
 }
 
 .landing {
+  max-width: 100%;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -62,22 +68,33 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   padding: clamp(18px, 2.2vw, 36px) clamp(20px, 2.5vw, 40px);
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 500;
   letter-spacing: 0.02em;
   pointer-events: none;
 }
 
-.landing-top a {
+.landing-top a,
+.landing-top .landing-brand-link {
   pointer-events: auto;
 }
 
-.landing-eyebrow {
-  margin: 0;
-  color: #c8c8c8;
-  font-size: clamp(14px, 1.2vw, 18px);
-  font-weight: 500;
-  text-transform: capitalize;
+.landing-brand-link {
+  display: block;
+  line-height: 0;
+  margin-top: clamp(-150px, -22vw, -300px);
+  margin-left: clamp(-35px, -15vw, -75px);
+}
+
+/* White PNG — needs shadow to read on white side columns */
+.landing-brand {
+  display: block;
+  height: clamp(200px, 50vw, 320px);
+  width: auto;
+  max-width: min(80vw, 720px);
+  object-fit: contain;
+  object-position: left center;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.4)) drop-shadow(0 0 1px rgb(0 0 0 / 0.25));
 }
 
 .landing-nav {
@@ -109,12 +126,13 @@ body {
 .landing-hero {
   height: calc(100vh - 78px);
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .landing-panel {
   position: relative;
   overflow: hidden;
+  min-width: 0;
 }
 
 .landing-panel-side {

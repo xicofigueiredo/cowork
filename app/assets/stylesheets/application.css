@@ -8,3 +8,202 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+@font-face {
+  font-family: "Host Grotesk";
+  src: url("/assets/HostGrotesk-VariableFont_wght.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Host Grotesk";
+  src: url("/assets/HostGrotesk-Italic-VariableFont_wght.ttf") format("truetype");
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --landing-accent: #cb6246;
+  --landing-dark: #6c312e;
+  --landing-soft: #e2b5d2;
+  --landing-green: #5fa67d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Host Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  background: #fff;
+  color: #333;
+}
+
+.landing {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.landing-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: clamp(18px, 2.2vw, 36px) clamp(20px, 2.5vw, 40px);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.landing-top a {
+  pointer-events: auto;
+}
+
+.landing-eyebrow {
+  margin: 0;
+  color: #c8c8c8;
+  font-size: clamp(14px, 1.2vw, 18px);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.landing-nav {
+  display: flex;
+  gap: clamp(16px, 2vw, 32px);
+  align-items: center;
+}
+
+.landing-nav a {
+  color: #fff;
+  text-decoration: none;
+  text-transform: lowercase;
+  font-size: clamp(14px, 1.35vw, 20px);
+  font-weight: 500;
+}
+
+.landing-nav-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--landing-green);
+  margin-left: 4px;
+}
+
+.landing-nav-profile svg {
+  display: block;
+}
+
+.landing-hero {
+  height: calc(100vh - 78px);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.landing-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-panel-side {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-panel-center {
+  background: #fff;
+}
+
+/* Side logos */
+.landing-triptych-image-left {
+  display: block;
+  width: 450%;
+  height: 450%;
+  transform: translateX(27%) translateY(3%);
+}
+
+.landing-triptych-image-right {
+  display: block;
+  width: 450%;
+  height: 450%;
+  transform: translateX(-27%) translateY(1%);
+
+}
+
+.landing-triptych-image--center {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  object-position: center 50%;
+  transform: scale(1.08) translateY(-3.5%);
+  transform-origin: center center;
+}
+
+.landing-footer {
+  background: var(--landing-accent);
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 34px;
+  letter-spacing: 0.03em;
+}
+
+.landing-footer a {
+  color: #fff;
+  text-decoration: none;
+  font-size: clamp(14px, 1.25vw, 18px);
+  font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+  .landing {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .landing-top {
+    position: absolute;
+    padding: 16px 20px;
+  }
+
+  .landing-nav a,
+  .landing-nav-profile {
+    color: #fff;
+  }
+
+  .landing-hero {
+    grid-template-columns: 1fr;
+    height: auto;
+    flex: 1;
+  }
+
+  .landing-panel {
+    min-height: 28vh;
+  }
+
+  .landing-footer {
+    min-height: 68px;
+    padding: 0 20px;
+  }
+
+  .landing-footer a {
+    font-size: 14px;
+  }
+}

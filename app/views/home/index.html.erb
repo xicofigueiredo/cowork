@@ -1,0 +1,37 @@
+<% content_for :title, "Mezzanine" %>
+
+<main class="landing">
+  <header class="landing-top">
+    <p class="landing-eyebrow">Homepage</p>
+    <nav class="landing-nav" aria-label="Primary">
+      <%= link_to "Our space", "#" %>
+      <%= link_to "Pricing", "#" %>
+      <%= link_to "Location", "#" %>
+      <%= link_to "#", class: "landing-nav-profile", "aria-label": "Account" do %>
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="9" r="3.5" fill="none" stroke="currentColor" stroke-width="1.75" />
+          <path d="M5 20.5c1.6-4 12.4-4 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+        </svg>
+      <% end %>
+    </nav>
+  </header>
+
+  <section class="landing-hero">
+    <article class="landing-panel landing-panel-side landing-panel-left">
+      <%= image_tag "landing/logo-left.png", alt: "Mezzanine mark", class: "landing-triptych-image-left" %>
+    </article>
+
+    <article class="landing-panel landing-panel-center">
+      <%= image_tag "landing/center.jpg", alt: "Bright coworking space with someone working at a table", class: "landing-triptych-image--center" %>
+    </article>
+
+    <article class="landing-panel landing-panel-side landing-panel-right">
+      <%= image_tag "landing/logo-right.png", alt: "Mezzanine mark", class: "landing-triptych-image-right" %>
+    </article>
+  </section>
+
+  <footer class="landing-footer">
+    <%= link_to "Send us an email", "mailto:hello@mezzanine.pt" %>
+    <%= link_to "Follow us on instagram", "https://instagram.com", target: "_blank", rel: "noreferrer" %>
+  </footer>
+</main>

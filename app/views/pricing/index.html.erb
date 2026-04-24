@@ -3,14 +3,14 @@
 <main class="pricing">
 
   <section class="pricing-grid">
-    <div class="pricing-card pricing-card-daily" data-category="daily">
+    <div class="pricing-card pricing-card-daily active" data-category="daily">
       <h2 class="pricing-card-title">Daily</h2>
       <div class="pricing-card-content">
         <%= image_tag "pricing/logo-options.png", alt: "Mezzanine Daily", class: "pricing-card-logo" %>
       </div>
     </div>
 
-    <div class="pricing-card pricing-card-monthly active" data-category="monthly">
+    <div class="pricing-card pricing-card-monthly" data-category="monthly">
       <h2 class="pricing-card-title">Monthly</h2>
       <div class="pricing-card-content">
         <%= image_tag "pricing/logo-options.png", alt: "Mezzanine Monthly", class: "pricing-card-logo" %>
@@ -32,8 +32,272 @@
     </div>
   </section>
 
+  <section class="pricing-details">
+    <div class="pricing-details-content">
+      <h3 class="pricing-details-title">Daily > 5/10 days</h3>
+      
+      <div class="pricing-plans-grid">
+        <div class="pricing-plan">
+          <h4 class="pricing-plan-title">Tempo Parcial</h4>
+          <div class="pricing-plan-features">
+            <p class="pricing-plan-feature">Secretária flexível e áreas comuns</p>
+            <p class="pricing-plan-feature">2 dias fixos por semana</p>
+            <p class="pricing-plan-feature">Sala de reuniões / Cabine telefónica</p>
+            <p class="pricing-plan-feature">Eventos e descontos</p>
+            <p class="pricing-plan-feature">Internet de alta velocidade</p>
+            <p class="pricing-plan-feature">Café e chá ilimitados</p>
+            <p class="pricing-plan-feature">Compromisso mínimo: 1 mês</p>
+          </div>
+          <%= link_to "Book now", "#", class: "pricing-plan-button" %>
+        </div>
+
+        <div class="pricing-plan">
+          <h4 class="pricing-plan-title">Mesa dedicada</h4>
+          <div class="pricing-plan-features">
+            <p class="pricing-plan-feature">Mesa dedicada</p>
+            <p class="pricing-plan-feature">Acesso 24/7</p>
+            <p class="pricing-plan-feature">Sala de reuniões / Cabine telefónica</p>
+            <p class="pricing-plan-feature">Eventos e descontos</p>
+            <p class="pricing-plan-feature">Internet de alta velocidade</p>
+            <p class="pricing-plan-feature">Café e chá ilimitados</p>
+            <p class="pricing-plan-feature">Compromisso mínimo: 1 mês</p>
+          </div>
+          <%= link_to "Book now", "#", class: "pricing-plan-button" %>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer class="pricing-footer">
     <%= link_to "Send us an email", "mailto:hello@mezzaninecowork.com" %>
     <%= link_to "Follow us on instagram", "https://www.instagram.com/mezzanine.cowork/", target: "_blank", rel: "noreferrer" %>
   </footer>
 </main>
+
+<script>
+function initializePricing() {
+  console.log('Pricing JS loaded');
+  const pricingCards = document.querySelectorAll('.pricing-card');
+  const detailsTitle = document.querySelector('.pricing-details-title');
+  const plansGrid = document.querySelector('.pricing-plans-grid');
+
+  console.log('Found cards:', pricingCards.length);
+
+  const pricingData = {
+    daily: {
+      title: 'Daily > 5/10 days',
+      plans: [
+        {
+          title: 'Tempo Parcial',
+          features: [
+            'Secretária flexível e áreas comuns',
+            '2 dias fixos por semana',
+            'Sala de reuniões / Cabine telefónica',
+            'Eventos e descontos',
+            'Internet de alta velocidade',
+            'Café e chá ilimitados',
+            'Compromisso mínimo: 1 mês'
+          ]
+        },
+        {
+          title: 'Mesa dedicada',
+          features: [
+            'Mesa dedicada',
+            'Acesso 24/7',
+            'Sala de reuniões / Cabine telefónica',
+            'Eventos e descontos',
+            'Internet de alta velocidade',
+            'Café e chá ilimitados',
+            'Compromisso mínimo: 1 mês'
+          ]
+        }
+      ]
+    },
+    monthly: {
+      title: 'Monthly Plans',
+      plans: [
+        {
+          title: 'Basic Monthly',
+          features: [
+            'Full month access',
+            'Flexible workspace',
+            'Meeting rooms included',
+            'Events and discounts',
+            'High-speed internet',
+            'Free coffee and tea',
+            'Minimum commitment: 3 months'
+          ]
+        },
+        {
+          title: 'Premium Monthly',
+          features: [
+            'Dedicated desk',
+            '24/7 access',
+            'Priority meeting room booking',
+            'All events included',
+            'High-speed internet',
+            'Free coffee and tea',
+            'Minimum commitment: 3 months'
+          ]
+        }
+      ]
+    },
+    virtual: {
+      title: 'Virtual Office',
+      plans: [
+        {
+          title: 'Virtual Basic',
+          features: [
+            'Business address',
+            'Mail forwarding',
+            'Phone answering service',
+            'Meeting room access (2h/month)',
+            'Events and discounts',
+            'Online support',
+            'Minimum commitment: 6 months'
+          ]
+        },
+        {
+          title: 'Virtual Premium',
+          features: [
+            'Business address',
+            'Mail forwarding and scanning',
+            'Dedicated phone line',
+            'Meeting room access (8h/month)',
+            'All events included',
+            'Priority support',
+            'Minimum commitment: 6 months'
+          ]
+        }
+      ]
+    },
+    meeting: {
+      title: 'Meeting Room',
+      plans: [
+        {
+          title: 'Hourly Booking',
+          features: [
+            'Professional meeting space',
+            'AV equipment included',
+            'Whiteboard and flipchart',
+            'Coffee service available',
+            'High-speed internet',
+            'Flexible booking',
+            'No minimum commitment'
+          ]
+        },
+        {
+          title: 'Daily Booking',
+          features: [
+            'Full day access',
+            'Premium AV setup',
+            'Catering options',
+            'Dedicated support',
+            'High-speed internet',
+            'Flexible setup',
+            'No minimum commitment'
+          ]
+        }
+      ]
+    }
+  };
+
+  function updateContent(category) {
+    const data = pricingData[category];
+    detailsTitle.textContent = data.title;
+    
+    plansGrid.innerHTML = '';
+    data.plans.forEach(plan => {
+      const planElement = document.createElement('div');
+      planElement.className = 'pricing-plan';
+      
+      const featuresHTML = plan.features.map(feature => 
+        `<p class="pricing-plan-feature">${feature}</p>`
+      ).join('');
+      
+      planElement.innerHTML = `
+        <h4 class="pricing-plan-title">${plan.title}</h4>
+        <div class="pricing-plan-features">
+          ${featuresHTML}
+        </div>
+        <a href="#" class="pricing-plan-button">Book now</a>
+      `;
+      
+      plansGrid.appendChild(planElement);
+    });
+  }
+
+  function updateCardState(activeCard) {
+    pricingCards.forEach(card => {
+      card.classList.remove('active');
+      
+      if (card === activeCard) {
+        card.classList.add('active');
+        console.log('Card activated:', card.dataset.category);
+      } else {
+        console.log('Card deactivated:', card.dataset.category);
+      }
+    });
+  }
+
+  // Remove any existing listeners first
+  document.removeEventListener('click', handleCardClick);
+  
+  // Add event delegation for better reliability
+  function handleCardClick(event) {
+    const card = event.target.closest('.pricing-card');
+    if (card && card.dataset.category) {
+      console.log('Card clicked:', card.dataset.category);
+      const category = card.dataset.category;
+      updateCardState(card);
+      updateContent(category);
+      
+      // Scroll to details section
+      const detailsSection = document.querySelector('.pricing-details');
+      if (detailsSection) {
+        detailsSection.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    }
+  }
+  
+  // Add event listener to document for delegation
+  document.addEventListener('click', handleCardClick);
+  
+  // Also add direct listeners as backup
+  pricingCards.forEach((card, index) => {
+    console.log(`Adding listener to card ${index}:`, card.dataset.category);
+    card.addEventListener('click', function(event) {
+      event.stopPropagation(); // Prevent double triggering
+      console.log('Direct card clicked:', this.dataset.category);
+      const category = this.dataset.category;
+      updateCardState(this);
+      updateContent(category);
+      
+      // Scroll to details section
+      const detailsSection = document.querySelector('.pricing-details');
+      if (detailsSection) {
+        detailsSection.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    });
+  });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initializePricing);
+
+// Initialize on Turbo navigation (Rails 7)
+document.addEventListener('turbo:load', initializePricing);
+
+// Fallback for any other navigation
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializePricing);
+} else {
+  initializePricing();
+}
+</script>

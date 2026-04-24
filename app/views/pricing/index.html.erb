@@ -1,87 +1,33 @@
 <% content_for :title, "Pricing - Mezzanine" %>
 
 <main class="pricing">
-  <header class="pricing-top">
-    <%= link_to root_path, class: "pricing-brand-link" do %>
-      <%= image_tag "landing/mezzanine-wordmark-white.svg", alt: "Mezzanine", class: "pricing-brand" %>
-    <% end %>
-    <nav class="pricing-nav" aria-label="Primary">
-      <%= link_to "Our Space", root_path %>
-      <%= link_to "Pricing", pricing_path, class: "active" %>
-      <%= link_to "Location", "#" %>
-      <%= link_to "#", class: "pricing-nav-profile", "aria-label": "Account" do %>
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="9" r="3.5" fill="none" stroke="currentColor" stroke-width="1.75" />
-          <path d="M5 20.5c1.6-4 12.4-4 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
-        </svg>
-      <% end %>
-    </nav>
-  </header>
 
   <section class="pricing-grid">
     <div class="pricing-card pricing-card-daily" data-category="daily">
       <h2 class="pricing-card-title">Daily</h2>
       <div class="pricing-card-content">
-        <%= image_tag "pricing/logo-normal.png", alt: "Mezzanine", class: "pricing-card-logo pricing-card-logo-normal" %>
-        <%= image_tag "pricing/logo-selected.png", alt: "Mezzanine Selected", class: "pricing-card-logo pricing-card-logo-selected" %>
+        <%= image_tag "pricing/logo-options.png", alt: "Mezzanine Daily", class: "pricing-card-logo" %>
       </div>
     </div>
 
     <div class="pricing-card pricing-card-monthly active" data-category="monthly">
       <h2 class="pricing-card-title">Monthly</h2>
       <div class="pricing-card-content">
-        <%= image_tag "pricing/logo-normal.png", alt: "Mezzanine", class: "pricing-card-logo pricing-card-logo-normal" %>
-        <%= image_tag "pricing/logo-selected.png", alt: "Mezzanine Selected", class: "pricing-card-logo pricing-card-logo-selected" %>
+        <%= image_tag "pricing/logo-options.png", alt: "Mezzanine Monthly", class: "pricing-card-logo" %>
       </div>
     </div>
 
     <div class="pricing-card pricing-card-virtual" data-category="virtual">
       <h2 class="pricing-card-title">Virtual office</h2>
       <div class="pricing-card-content">
-        <%= image_tag "pricing/logo-normal.png", alt: "Mezzanine", class: "pricing-card-logo pricing-card-logo-normal" %>
-        <%= image_tag "pricing/logo-selected.png", alt: "Mezzanine Selected", class: "pricing-card-logo pricing-card-logo-selected" %>
+        <%= image_tag "pricing/logo-options.png", alt: "Mezzanine Virtual Office", class: "pricing-card-logo" %>
       </div>
     </div>
 
     <div class="pricing-card pricing-card-meeting" data-category="meeting">
       <h2 class="pricing-card-title">Meeting room</h2>
       <div class="pricing-card-content">
-        <%= image_tag "pricing/logo-normal.png", alt: "Mezzanine", class: "pricing-card-logo pricing-card-logo-normal" %>
-        <%= image_tag "pricing/logo-selected.png", alt: "Mezzanine Selected", class: "pricing-card-logo pricing-card-logo-selected" %>
-      </div>
-    </div>
-  </section>
-
-  <section class="pricing-plans">
-    <h3 class="pricing-plans-title">Daily > 5/10 days</h3>
-    
-    <div class="pricing-plans-grid">
-      <div class="pricing-plan pricing-plan-partial">
-        <h4 class="pricing-plan-title">Tempo Parcial</h4>
-        <div class="pricing-plan-details">
-          <p class="pricing-plan-feature">Segunda a 6ª, pós-confiant</p>
-          <p class="pricing-plan-feature">2 dias fijos por semana</p>
-          <p class="pricing-plan-feature">Seis de reunião / Caixa telefônica</p>
-          <p class="pricing-plan-feature">Events e discounts</p>
-          <p class="pricing-plan-feature">Internet de alta velocidade</p>
-          <p class="pricing-plan-feature">Café e chá gratuitos</p>
-          <p class="pricing-plan-price">Compromisso mínimo: 3 mês</p>
-        </div>
-        <%= link_to "Book now", "#", class: "pricing-plan-button" %>
-      </div>
-
-      <div class="pricing-plan pricing-plan-dedicated">
-        <h4 class="pricing-plan-title">Mesa dedicada</h4>
-        <div class="pricing-plan-details">
-          <p class="pricing-plan-feature">Mesa dedicada</p>
-          <p class="pricing-plan-feature">Acesso 24/7</p>
-          <p class="pricing-plan-feature">Seis de reunião / Caixa telefônica</p>
-          <p class="pricing-plan-feature">Events e discounts</p>
-          <p class="pricing-plan-feature">Internet de alta velocidade</p>
-          <p class="pricing-plan-feature">Café e chá gratuitos</p>
-          <p class="pricing-plan-price">Compromisso mínimo: 3 mês</p>
-        </div>
-        <%= link_to "Book now", "#", class: "pricing-plan-button" %>
+        <%= image_tag "pricing/logo-options.png", alt: "Mezzanine Meeting Room", class: "pricing-card-logo" %>
       </div>
     </div>
   </section>

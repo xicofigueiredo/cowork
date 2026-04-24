@@ -1,0 +1,21 @@
+<nav class="main-navbar" aria-label="Primary">
+  <div class="main-navbar-container">
+    <%= link_to root_path, class: "main-navbar-brand" do %>
+      <span class="main-navbar-logo">mezzanine</span>
+      <span class="main-navbar-subtitle">Cowork</span>
+    <% end %>
+    
+    <div class="main-navbar-links">
+      <%= link_to "Our space", root_path, class: "main-navbar-link" %>
+      <%= link_to "Pricing", pricing_path, class: "main-navbar-link" %>
+      <%= link_to "Location", "#", class: "main-navbar-link" %>
+      
+      <%= link_to "#", class: "main-navbar-profile", "aria-label": "Account" do %>
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="9" r="3.5" fill="none" stroke="currentColor" stroke-width="1.75" />
+          <path d="M5 20.5c1.6-4 12.4-4 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+        </svg>
+      <% end %>
+    </div>
+  </div>
+</nav>

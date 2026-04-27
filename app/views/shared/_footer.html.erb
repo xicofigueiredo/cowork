@@ -1,0 +1,27 @@
+<footer class="shared-footer">
+  <div class="shared-footer-content">
+    <div class="shared-footer-brand">
+      <%= link_to root_path, class: "shared-footer-logo-link" do %>
+        <%= image_tag "footer/mezzanine-logo.png", alt: "Mezzanine", class: "shared-footer-logo" %>
+      <% end %>
+      <p class="shared-footer-copyright">© 2026 All rights reserved</p>
+    </div>
+    
+    <div class="shared-footer-links">
+      <div class="shared-footer-column">
+        <%= link_to "Maps", "https://maps.app.goo.gl/9Me41t7Ln2zPe24J9", target: "_blank", rel: "noreferrer", class: "shared-footer-link" %>
+      </div>
+      
+      <div class="shared-footer-column">
+        <%= link_to "Our space", "#", class: "shared-footer-link" %>
+        <%= link_to "Pricing", pricing_path, class: "shared-footer-link" %>
+        <%= link_to "Location", "#", class: "shared-footer-link" %>
+      </div>
+      
+      <div class="shared-footer-column">
+        <%= link_to "Instagram", "https://www.instagram.com/mezzanine.cowork/", target: "_blank", rel: "noreferrer", class: "shared-footer-link" %>
+        <%= link_to "Facebook", "#", class: "shared-footer-link" %>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -28,5 +28,8 @@
       <%= render "shared/navbar" %>
     <% end %>
     <%= yield %>
+    <% unless controller_name == "home" && action_name == "index" %>
+      <%= render "shared/footer" %>
+    <% end %>
   </body>
 </html>

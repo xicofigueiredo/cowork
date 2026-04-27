@@ -50,6 +50,13 @@ body {
   font-family: "Host Grotesk", "Avenir Next", "Segoe UI", sans-serif;
   background: #fff;
   color: #333;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
 }
 
 .landing {
@@ -358,7 +365,7 @@ body {
   margin: 0;
   color: #fff;
   position: absolute;
-  top: 20px;
+  top: 15px;
   left: 70px;
   transform: none;
   z-index: 2;
@@ -591,5 +598,96 @@ body {
 
   .landing-footer a {
     font-size: 14px;
+  }
+}
+
+/* Shared Footer */
+.shared-footer {
+  background: var(--landing-accent);
+  margin-top: auto;
+  padding: 40px 24px 24px;
+}
+
+.shared-footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 60px;
+}
+
+.shared-footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.shared-footer-logo-link {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.shared-footer-logo {
+  height: 32px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.shared-footer-copyright {
+  color: #fff;
+  font-size: 14px;
+  margin: 0;
+  opacity: 0.8;
+}
+
+.shared-footer-links {
+  display: flex;
+  gap: 80px;
+}
+
+.shared-footer-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shared-footer-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 400;
+  transition: opacity 0.2s ease;
+}
+
+.shared-footer-link:hover {
+  opacity: 0.8;
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+  .shared-footer {
+    padding: 32px 20px 20px;
+  }
+  
+  .shared-footer-content {
+    flex-direction: column;
+    gap: 32px;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .shared-footer-brand {
+    align-items: center;
+  }
+  
+  .shared-footer-links {
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .shared-footer-column {
+    align-items: center;
   }
 }

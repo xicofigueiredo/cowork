@@ -491,6 +491,18 @@ main {
   opacity: 0.8;
 }
 
+.pricing-image {
+  width: 100%;
+  overflow: hidden;
+}
+
+.pricing-image-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
 .pricing-details {
   background-color: var(--landing-dark);
   padding: 40px 20px;

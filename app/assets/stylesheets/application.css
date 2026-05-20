@@ -865,3 +865,246 @@ main {
     grid-template-columns: 1fr;
   }
 }
+
+/* Location page */
+.location {
+  min-height: 100vh;
+}
+
+.location-contact {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  background: #6c312e;
+  box-sizing: border-box;
+}
+
+.location-contact-inner {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  max-width: 1728px;
+  margin: 0 auto;
+}
+
+.location-contact-intro {
+  position: absolute;
+  left: 2.89%;
+  right: 66.67%;
+  top: 44px;
+  font-family: "Gosha Sans", "Host Grotesk", "Avenir Next", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 50px;
+  color: #ffffff;
+}
+
+.location-contact-title {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.location-contact-subtitle {
+  margin: 16px 0 0;
+  font-family: "Gosha Sans", "Host Grotesk", "Avenir Next", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  color: #e2b5d2;
+}
+
+.location-contact-form {
+  position: static;
+}
+
+.location-label,
+.location-privacy {
+  position: absolute;
+  margin: 0;
+  font-family: "Gosha Sans", "Host Grotesk", "Avenir Next", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  color: #e2b5d2;
+  white-space: nowrap;
+}
+
+.location-label--first-name {
+  left: 34.78%;
+  top: 44px;
+}
+
+.location-label--last-name {
+  left: 66.72%;
+  top: 44px;
+}
+
+.location-label--email {
+  left: 34.78%;
+  top: 140px;
+}
+
+.location-label--message {
+  left: 34.78%;
+  top: 238px;
+}
+
+.location-privacy {
+  left: 34.78%;
+  right: 18.29%;
+  top: 356px;
+  white-space: normal;
+  line-height: 1.35;
+  font-size: 22px;
+}
+
+.location-line {
+  position: absolute;
+  height: 0;
+  border-top: 1px solid #e2b5d2;
+}
+
+.location-line--first-name {
+  left: 34.78%;
+  width: 30.44%;
+  top: 100px;
+}
+
+.location-line--last-name {
+  left: 66.67%;
+  width: 30.44%;
+  top: 100px;
+}
+
+.location-line--email {
+  left: 34.78%;
+  width: 62.33%;
+  top: 198px;
+}
+
+.location-line--message {
+  left: 34.78%;
+  width: 62.33%;
+  top: 296px;
+}
+
+.location-input {
+  position: absolute;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #ffffff;
+  font-family: "Gosha Sans", "Host Grotesk", "Avenir Next", sans-serif;
+  font-size: 24px;
+  line-height: 1;
+  outline: none;
+  resize: none;
+}
+
+.location-input--first-name {
+  left: 34.78%;
+  width: 30.44%;
+  top: 82px;
+  height: 8px;
+}
+
+.location-input--last-name {
+  left: 66.67%;
+  width: 30.44%;
+  top: 82px;
+  height: 8px;
+}
+
+.location-input--email {
+  left: 34.78%;
+  width: 62.33%;
+  top: 180px;
+  height: 8px;
+}
+
+.location-input--message {
+  left: 34.78%;
+  width: 62.33%;
+  top: 278px;
+  height: 8px;
+}
+
+.location-map {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: clamp(360px, 45vw, 520px);
+}
+
+.location-map-embed {
+  position: relative;
+  min-height: clamp(360px, 45vw, 520px);
+}
+
+.location-map-embed iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: clamp(360px, 45vw, 520px);
+  border: 0;
+}
+
+.location-map-side {
+  background: var(--landing-green);
+}
+
+@media (max-width: 768px) {
+  .location-contact {
+    height: auto;
+    min-height: 520px;
+    padding: 32px 24px;
+  }
+
+  .location-contact-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .location-contact-intro,
+  .location-label,
+  .location-line,
+  .location-input,
+  .location-privacy {
+    position: static;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: 100%;
+    height: auto;
+  }
+
+  .location-contact-intro {
+    font-size: clamp(28px, 6vw, 40px);
+    line-height: 1.25;
+  }
+
+  .location-contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .location-line {
+    border-top: 1px solid #e2b5d2;
+    margin-top: -8px;
+  }
+
+  .location-map {
+    grid-template-columns: 1fr;
+  }
+
+  .location-map-side {
+    min-height: 200px;
+  }
+}

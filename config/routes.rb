@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   root "home#index"
   get "pricing" => "pricing#index"
   get "our-space" => "our_space#index", as: :our_space
+  get "location" => "location#index"
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

@@ -1,0 +1,45 @@
+<% content_for :title, "Location - Mezzanine" %>
+
+<main class="location">
+
+  <section class="location-contact">
+    <div class="location-contact-inner">
+      <div class="location-contact-intro">
+        <h1 class="location-contact-title">Would you like to receive more informations?</h1>
+        <p class="location-contact-subtitle">Follow the next steps</p>
+      </div>
+
+      <form class="location-contact-form" action="#" method="post">
+        <label class="location-label location-label--first-name" for="location-first-name">First Name*</label>
+        <label class="location-label location-label--last-name" for="location-last-name">Last Name*</label>
+        <label class="location-label location-label--email" for="location-email">Email*</label>
+        <label class="location-label location-label--message" for="location-message">Message</label>
+
+        <input type="text" id="location-first-name" name="first_name" class="location-input location-input--first-name" required autocomplete="given-name">
+        <input type="text" id="location-last-name" name="last_name" class="location-input location-input--last-name" required autocomplete="family-name">
+        <input type="email" id="location-email" name="email" class="location-input location-input--email" required autocomplete="email">
+        <textarea id="location-message" name="message" class="location-input location-input--message" rows="1"></textarea>
+
+        <span class="location-line location-line--first-name" aria-hidden="true"></span>
+        <span class="location-line location-line--last-name" aria-hidden="true"></span>
+        <span class="location-line location-line--email" aria-hidden="true"></span>
+        <span class="location-line location-line--message" aria-hidden="true"></span>
+
+        <p class="location-privacy">I declare that I have read and accept the Privacy Policy</p>
+      </form>
+    </div>
+  </section>
+
+  <section class="location-map">
+    <div class="location-map-embed">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6000!2d-8.691271823268368!3d41.18253087132666!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd246f3a12497d49%3A0xdd9697361659ca3c!2sR.%20Brito%20e%20Cunha%2027%2C%204450-081%20Matosinhos!5e0!3m2!1spt-PT!2spt!4v1779300766318!5m2!1spt-PT!2spt"
+        title="Mezzanine Cowork location on Google Maps"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+    <div class="location-map-side" aria-hidden="true"></div>
+  </section>
+
+</main>

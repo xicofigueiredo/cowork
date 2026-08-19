@@ -1,0 +1,161 @@
+/* Our Space page */
+.ourspace {
+  min-height: 100vh;
+}
+
+.ourspace-hero {
+  position: relative;
+  height: clamp(380px, 48vw, 560px);
+  overflow: hidden;
+  width: 100%;
+}
+
+.ourspace-hero-photo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 65% center;
+}
+
+.ourspace-hero-mark {
+  position: absolute;
+  left: -65%;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ourspace-hero-title {
+  position: absolute;
+  left: clamp(32px, 4vw, 56px);
+  bottom: clamp(28px, 4vw, 48px);
+  margin: 0;
+  color: #fff;
+  font-size: clamp(40px, 5.5vw, 64px);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  z-index: 2;
+  line-height: 1;
+}
+
+.ourspace-benefits {
+  background: #fff;
+  padding: clamp(40px, 5vw, 64px) clamp(24px, 4vw, 48px);
+}
+
+.ourspace-benefits-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.ourspace-benefits-title {
+  margin: 0 0 clamp(32px, 4vw, 48px);
+  color: var(--landing-dark);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 600;
+}
+
+.ourspace-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 3vw, 40px) clamp(16px, 2vw, 32px);
+}
+
+.ourspace-benefit {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--landing-dark);
+  font-size: clamp(15px, 1.5vw, 18px);
+  font-weight: 500;
+}
+
+.ourspace-benefit-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+
+.ourspace-floorplan {
+  background: var(--landing-dark);
+  padding: clamp(40px, 5vw, 64px) clamp(24px, 4vw, 48px);
+}
+
+.ourspace-floorplan-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.ourspace-floorplan-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 4vw, 48px);
+}
+
+.ourspace-floorplan-tab {
+  display: block;
+  width: 100%;
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: #fff;
+  border: none;
+  border-radius: 12px;
+  color: var(--landing-dark);
+  font-family: inherit;
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.ourspace-floorplan-tab:hover,
+.ourspace-floorplan-tab.active {
+  opacity: 1;
+}
+
+.ourspace-floorplan-tab:not(.active) {
+  opacity: 0.85;
+}
+
+.ourspace-floorplan-diagram {
+  min-height: 280px;
+}
+
+.ourspace-floorplan-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ourspace-floorplan-info {
+  margin-top: clamp(24px, 3vw, 40px);
+  color: #fff;
+}
+
+.ourspace-floorplan-desk {
+  margin: 0 0 8px;
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 600;
+}
+
+.ourspace-floorplan-label {
+  margin: 0 0 4px;
+  font-size: clamp(14px, 1.5vw, 16px);
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .ourspace-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ourspace-floorplan-columns {
+    grid-template-columns: 1fr;
+  }
+}

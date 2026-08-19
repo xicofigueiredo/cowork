@@ -54,121 +54,26 @@ main {
   flex: 1;
 }
 
-/* Main navbar for all pages except landing */
-.main-navbar {
-  background-color: var(--landing-accent);
-  padding: 0;
+/* Shared navbar for all pages except landing */
+.landing-top--shared {
   position: sticky;
   top: 0;
-  z-index: 100;
-  min-height: 80px;
+  pointer-events: auto;
+  align-items: flex-start;
+  padding: clamp(10px, 1.2vw, 16px) clamp(20px, 2.5vw, 40px);
+  background-color: var(--landing-accent);
+  overflow: hidden;
+  max-height: 100px;
 }
 
-.main-navbar-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  max-width: none;
-  margin: 0;
-  min-height: 80px;
-  width: 100%;
+.landing-top--shared .landing-brand-link {
+  margin-top: clamp(-150px, -22vw, -300px);
+  margin-left: clamp(-35px, -15vw, -75px);
 }
 
-.main-navbar-brand {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: #fff;
-  gap: 12px;
-}
-
-.main-navbar-logo {
-  font-size: 32px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-.main-navbar-subtitle {
-  font-size: 28px;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-}
-
-.main-navbar-links {
-  display: flex;
-  align-items: center;
-  gap: 48px;
-}
-
-.main-navbar-link {
-  color: #fff;
-  text-decoration: none;
-  font-size: 20px;
-  font-weight: 500;
-  text-transform: capitalize;
-  transition: opacity 0.2s ease;
-  padding: 8px 0;
-}
-
-.main-navbar-link:hover {
-  opacity: 0.8;
-}
-
-.main-navbar-profile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  margin-left: 0;
-  transition: opacity 0.2s ease;
-  padding: 8px;
-}
-
-.main-navbar-profile:hover {
-  opacity: 0.8;
-}
-
-.main-navbar-profile svg {
-  display: block;
-  width: 28px;
-  height: 28px;
-}
-
-@media (max-width: 768px) {
-  .main-navbar {
-    min-height: 64px;
-  }
-  
-  .main-navbar-container {
-    padding: 16px 24px;
-    min-height: 64px;
-  }
-  
-  .main-navbar-links {
-    gap: 24px;
-  }
-  
-  .main-navbar-link {
-    font-size: 16px;
-  }
-  
-  .main-navbar-logo {
-    font-size: 24px;
-  }
-  
-  .main-navbar-subtitle {
-    font-size: 20px;
-  }
-  
-  .main-navbar-brand {
-    gap: 8px;
-  }
-  
-  .main-navbar-profile svg {
-    width: 24px;
-    height: 24px;
-  }
+.landing-top--shared .landing-brand {
+  height: clamp(200px, 50vw, 320px);
+  filter: brightness(0) invert(1);
 }
 
 /* Shared Footer */
@@ -239,24 +144,24 @@ main {
   .shared-footer {
     padding: 32px 20px 20px;
   }
-  
+
   .shared-footer-content {
     flex-direction: column;
     gap: 32px;
     align-items: center;
     text-align: center;
   }
-  
+
   .shared-footer-brand {
     align-items: center;
   }
-  
+
   .shared-footer-links {
     gap: 40px;
     flex-wrap: wrap;
     justify-content: center;
   }
-  
+
   .shared-footer-column {
     align-items: center;
   }

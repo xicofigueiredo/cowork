@@ -34,9 +34,7 @@
         <% end %>
       </div>
     <% end %>
-    <% unless controller_name == "home" && action_name == "index" %>
-      <%= render "shared/navbar" %>
-    <% end %>
+    <%= render "shared/navbar", transparent: controller_name == "home" && action_name == "index" %>
     <%= yield %>
     <% unless controller_name == "home" && action_name == "index" %>
       <%= render "shared/footer" %>

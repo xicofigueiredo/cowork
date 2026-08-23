@@ -1,4 +1,4 @@
-<header class="landing-top landing-top--shared">
+<header class="landing-top landing-top--shared<%= " landing-top--transparent" if local_assigns[:transparent] %>">
   <%= link_to root_path, class: "landing-brand-link" do %>
     <%= image_tag "landing/mezzanine-wordmark-branco-nb.png", alt: "Mezzanine", class: "landing-brand" %>
   <% end %>

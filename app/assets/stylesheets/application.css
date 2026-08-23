@@ -54,7 +54,7 @@ main {
   flex: 1;
 }
 
-/* Shared navbar for all pages except landing */
+/* Shared navbar */
 .landing-top.landing-top--shared {
   position: sticky;
   top: 0;
@@ -67,6 +67,14 @@ main {
   height: clamp(72px, 9vw, 100px);
 }
 
+.landing-top.landing-top--shared.landing-top--transparent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: transparent;
+}
+
 .landing-top--shared .landing-brand-link {
   margin: 0;
   margin-left: clamp(-20px, -3vw, -40px);
@@ -77,9 +85,15 @@ main {
 }
 
 .landing-top--shared .landing-brand {
-  height: clamp(140px, 28vw, 200px);
+  height: clamp(200px, 40vw, 280px);
   max-width: none;
   filter: brightness(0) invert(1);
+}
+
+@media (max-width: 768px) {
+  .landing-top--shared .landing-brand {
+    height: clamp(110px, 30vw, 150px);
+  }
 }
 
 /* Shared Footer */

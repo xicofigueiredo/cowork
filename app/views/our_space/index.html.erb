@@ -39,11 +39,11 @@
         </div>
         <div class="ourspace-benefit">
           <svg class="ourspace-benefit-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 21h8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          <span>Virtual office</span>
+          <span>Virtual office (coming soon)</span>
         </div>
         <div class="ourspace-benefit">
           <svg class="ourspace-benefit-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 8h6M9 12h6M9 16h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          <span>Vending machines</span>
+          <span>Honest Bar</span>
         </div>
         <div class="ourspace-benefit">
           <svg class="ourspace-benefit-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6M9 11h6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
@@ -59,7 +59,7 @@
         </div>
         <div class="ourspace-benefit">
           <svg class="ourspace-benefit-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6M9 11h6M9 15h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="16" cy="15" r="1" fill="currentColor"/></svg>
-          <span>Locker</span>
+          <span>Locker (coming soon)</span>
         </div>
       </div>
     </div>
@@ -71,55 +71,22 @@
         <div class="ourspace-floorplan-column">
           <button type="button" class="ourspace-floorplan-tab active" data-floor="main">Main floor</button>
           <div class="ourspace-floorplan-diagram" data-floor-panel="main">
-            <svg viewBox="0 0 400 280" class="ourspace-floorplan-svg" aria-label="Main floor plan">
-              <rect x="20" y="20" width="360" height="240" fill="none" stroke="#fff" stroke-width="1.5" rx="4"/>
-              <g fill="none" stroke="#fff" stroke-width="1">
-                <% 3.times do |row| %>
-                  <% 4.times do |col| %>
-                    <rect x="<%= 40 + col * 45 %>" y="<%= 40 + row * 35 %>" width="30" height="20" fill="<%= col == 2 && row == 1 ? 'var(--landing-accent)' : (col == 1 ? 'var(--landing-soft)' : 'none') %>" stroke="#fff"/>
-                  <% end %>
-                <% end %>
-                <% 2.times do |row| %>
-                  <% 3.times do |col| %>
-                    <rect x="<%= 220 + col * 45 %>" y="<%= 40 + row * 35 %>" width="30" height="20" fill="<%= col == 0 ? 'var(--landing-soft)' : 'none' %>" stroke="#fff"/>
-                  <% end %>
-                <% end %>
-                <rect x="40" y="160" width="140" height="80" fill="none" stroke="#fff" stroke-dasharray="4 3"/>
-                <rect x="220" y="140" width="140" height="100" fill="none" stroke="#fff"/>
-                <% 2.times do |row| %>
-                  <% 4.times do |col| %>
-                    <rect x="<%= 230 + col * 30 %>" y="<%= 150 + row * 35 %>" width="22" height="18" fill="none" stroke="#fff"/>
-                  <% end %>
-                <% end %>
-              </g>
-            </svg>
+            <%= raw Rails.root.join("app/assets/images/ourspace/floor-main.svg").read %>
           </div>
         </div>
 
         <div class="ourspace-floorplan-column">
           <button type="button" class="ourspace-floorplan-tab" data-floor="mezzanine">Mezzanine</button>
           <div class="ourspace-floorplan-diagram" data-floor-panel="mezzanine">
-            <svg viewBox="0 0 400 280" class="ourspace-floorplan-svg" aria-label="Mezzanine floor plan">
-              <rect x="20" y="20" width="360" height="240" fill="none" stroke="#fff" stroke-width="1.5" rx="4"/>
-              <g fill="none" stroke="#fff" stroke-width="1">
-                <% 6.times do |i| %>
-                  <rect x="<%= 50 + i * 50 %>" y="50" width="30" height="20" fill="<%= i == 2 ? 'var(--landing-soft)' : 'none' %>" stroke="#fff"/>
-                <% end %>
-                <rect x="50" y="120" width="300" height="60" fill="none" stroke="#fff"/>
-                <% 4.times do |i| %>
-                  <rect x="<%= 70 + i * 65 %>" y="135" width="40" height="30" fill="none" stroke="#fff"/>
-                <% end %>
-                <rect x="50" y="200" width="120" height="40" fill="none" stroke="#fff" stroke-dasharray="4 3"/>
-              </g>
-            </svg>
+            <%= raw Rails.root.join("app/assets/images/ourspace/floor-mezzanine.svg").read %>
           </div>
         </div>
       </div>
 
       <div class="ourspace-floorplan-info">
-        <p class="ourspace-floorplan-desk">Mesa 008</p>
-        <p class="ourspace-floorplan-label">Disponibilidade</p>
-        <p class="ourspace-floorplan-label">Características:</p>
+        <p class="ourspace-floorplan-desk" data-ourspace-desk-label>Desk 008</p>
+        <p class="ourspace-floorplan-label" data-ourspace-availability>Available</p>
+        <p class="ourspace-floorplan-label">Characteristics:</p>
       </div>
     </div>
   </section>
@@ -128,7 +95,14 @@
 
 <script>
 function initializeOurSpace() {
-  const tabs = document.querySelectorAll('.ourspace-floorplan-tab');
+  const root = document.querySelector('.ourspace-floorplan');
+  if (!root || root.dataset.ourspaceReady === 'true') return;
+  root.dataset.ourspaceReady = 'true';
+
+  const tabs = root.querySelectorAll('.ourspace-floorplan-tab');
+  const seats = root.querySelectorAll('.ourspace-seat');
+  const deskLabel = root.querySelector('[data-ourspace-desk-label]');
+  const availabilityLabel = root.querySelector('[data-ourspace-availability]');
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -136,7 +110,39 @@ function initializeOurSpace() {
       tab.classList.add('active');
     });
   });
+
+  function updateInfo(seat) {
+    if (!seat) return;
+
+    const desk = seat.dataset.desk;
+    const floor = seat.dataset.floor === 'mezzanine' ? 'Mezzanine' : 'Main floor';
+
+    deskLabel.textContent = `Desk ${desk}`;
+    availabilityLabel.textContent = seat.classList.contains('unavailable') ? 'Unavailable' : 'Available';
+
+    tabs.forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.floor === seat.dataset.floor);
+    });
+  }
+
+  seats.forEach(seat => {
+    seat.addEventListener('click', () => {
+      if (seat.classList.contains('unavailable')) return;
+
+      seats.forEach(s => s.classList.remove('selected'));
+      seat.classList.add('selected');
+      updateInfo(seat);
+    });
+  });
+
+  const initialSeat = root.querySelector('.ourspace-seat.selected') || root.querySelector('.ourspace-seat:not(.unavailable)');
+  if (initialSeat) updateInfo(initialSeat);
 }
+
+document.addEventListener('turbo:before-cache', () => {
+  const root = document.querySelector('.ourspace-floorplan');
+  if (root) delete root.dataset.ourspaceReady;
+});
 
 document.addEventListener('DOMContentLoaded', initializeOurSpace);
 document.addEventListener('turbo:load', initializeOurSpace);

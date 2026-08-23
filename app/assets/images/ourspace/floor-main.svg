@@ -1,4 +1,4 @@
-<svg viewBox="0 0 798 325" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 798 325" fill="none" xmlns="http://www.w3.org/2000/svg" class="ourspace-floorplan-svg" aria-label="Main floor plan">
 <path d="M1.5 248.487V1.5H90.9942H795.994V322.687H1.5V299.745" stroke="#E2B5D2" stroke-width="3"/>
 <path d="M228.645 1.5V224.719H167.88H107.115V1.5H167.88H228.645Z" fill="#E2B5D2" fill-opacity="0.4"/>
 <path d="M167.88 1.5H107.115V224.719H167.88M167.88 1.5H228.645V224.719H167.88M167.88 1.5V224.719" stroke="#E2B5D2" stroke-width="3"/>
@@ -6,7 +6,6 @@
 <path d="M407.634 1.5H346.869V224.719H407.634M407.634 1.5H468.399V224.719H407.634M407.634 1.5V224.719" stroke="#E2B5D2" stroke-width="3"/>
 <path d="M708.153 1.5V224.719H647.388H586.623V1.5H647.388H708.153Z" fill="#E2B5D2" fill-opacity="0.4"/>
 <path d="M647.388 1.5H586.623V224.719H647.388M647.388 1.5H708.153V224.719H647.388M647.388 1.5V224.719" stroke="#E2B5D2" stroke-width="3"/>
-<rect x="107.546" y="152.5" width="60" height="72" fill="#CB6246"/>
 <path d="M228.439 150.933H107.115" stroke="#E2B5D2" stroke-width="3"/>
 <path d="M468.193 150.933H346.869" stroke="#E2B5D2" stroke-width="3"/>
 <path d="M707.947 150.933H586.623" stroke="#E2B5D2" stroke-width="3"/>
@@ -31,4 +30,24 @@
 <path d="M251.381 168.708V206.324" stroke="#E2B5D2" stroke-width="3"/>
 <path d="M491.135 168.708V206.324" stroke="#E2B5D2" stroke-width="3"/>
 <path d="M730.888 168.708V206.324" stroke="#E2B5D2" stroke-width="3"/>
+<g class="ourspace-seats">
+  <rect class="ourspace-seat" data-desk="001" data-floor="main" x="107.115" y="1.5" width="60.765" height="75.026" rx="2"/>
+  <rect class="ourspace-seat" data-desk="002" data-floor="main" x="167.88" y="1.5" width="60.765" height="75.026" rx="2"/>
+  <rect class="ourspace-seat" data-desk="003" data-floor="main" x="107.115" y="76.526" width="60.765" height="74.407" rx="2"/>
+  <rect class="ourspace-seat" data-desk="004" data-floor="main" x="167.88" y="76.526" width="60.765" height="74.407" rx="2"/>
+  <rect class="ourspace-seat" data-desk="005" data-floor="main" x="107.115" y="150.933" width="60.765" height="73.786" rx="2"/>
+  <rect class="ourspace-seat" data-desk="006" data-floor="main" x="167.88" y="150.933" width="60.765" height="73.786" rx="2"/>
+  <rect class="ourspace-seat" data-desk="007" data-floor="main" x="346.869" y="1.5" width="60.765" height="75.026" rx="2"/>
+  <rect class="ourspace-seat selected" data-desk="008" data-floor="main" x="407.634" y="1.5" width="60.765" height="75.026" rx="2"/>
+  <rect class="ourspace-seat" data-desk="009" data-floor="main" x="346.869" y="76.526" width="60.765" height="74.407" rx="2"/>
+  <rect class="ourspace-seat" data-desk="010" data-floor="main" x="407.634" y="76.526" width="60.765" height="74.407" rx="2"/>
+  <rect class="ourspace-seat" data-desk="011" data-floor="main" x="346.869" y="150.933" width="60.765" height="73.786" rx="2"/>
+  <rect class="ourspace-seat" data-desk="012" data-floor="main" x="407.634" y="150.933" width="60.765" height="73.786" rx="2"/>
+  <rect class="ourspace-seat" data-desk="013" data-floor="main" x="586.623" y="1.5" width="60.765" height="75.026" rx="2"/>
+  <rect class="ourspace-seat" data-desk="014" data-floor="main" x="647.388" y="1.5" width="60.765" height="75.026" rx="2"/>
+  <rect class="ourspace-seat" data-desk="015" data-floor="main" x="586.623" y="76.526" width="60.765" height="74.407" rx="2"/>
+  <rect class="ourspace-seat" data-desk="016" data-floor="main" x="647.388" y="76.526" width="60.765" height="74.407" rx="2"/>
+  <rect class="ourspace-seat" data-desk="017" data-floor="main" x="586.623" y="150.933" width="60.765" height="73.786" rx="2"/>
+  <rect class="ourspace-seat" data-desk="018" data-floor="main" x="647.388" y="150.933" width="60.765" height="73.786" rx="2"/>
+</g>
 </svg>

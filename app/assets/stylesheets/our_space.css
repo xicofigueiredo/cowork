@@ -133,6 +133,26 @@
   height: auto;
 }
 
+.ourspace-seat {
+  fill: transparent;
+  stroke: none;
+  cursor: pointer;
+  transition: fill 0.15s ease;
+}
+
+.ourspace-seat:hover:not(.unavailable) {
+  fill: rgba(226, 181, 210, 0.55);
+}
+
+.ourspace-seat.selected {
+  fill: var(--landing-accent);
+}
+
+.ourspace-seat.unavailable {
+  fill: rgba(203, 98, 70, 0.45);
+  cursor: not-allowed;
+}
+
 .ourspace-floorplan-info {
   margin-top: clamp(24px, 3vw, 40px);
   color: #fff;

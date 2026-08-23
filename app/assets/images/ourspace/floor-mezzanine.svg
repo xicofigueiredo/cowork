@@ -1,4 +1,4 @@
-<svg viewBox="0 0 420 278" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 420 278" fill="none" xmlns="http://www.w3.org/2000/svg" class="ourspace-floorplan-svg" aria-label="Mezzanine floor plan">
 <path d="M417.969 276.39L417.969 1.50012L1.50032 1.50008L1.50029 276.39L24.6489 276.39M75.9066 276.39L270.603 276.39" stroke="#E2B5D2" stroke-width="3"/>
 <path d="M247.454 59.1646L247.454 1.29301" stroke="#E2B5D2" stroke-width="3"/>
 <path d="M321.86 59.1646L321.86 1.29301" stroke="#E2B5D2" stroke-width="3"/>
@@ -14,4 +14,13 @@
 <path d="M117.449 196.403L155.066 196.403" stroke="#E2B5D2" stroke-width="3"/>
 <path d="M43.0439 81.9001L80.6605 81.9002" stroke="#E2B5D2" stroke-width="3"/>
 <rect x="26.5117" y="2.09692" width="368.276" height="56.2669" fill="#E2B5D2" fill-opacity="0.4" stroke="#E2B5D2" stroke-width="3"/>
+<g class="ourspace-seats">
+  <rect class="ourspace-seat" data-desk="019" data-floor="mezzanine" x="26.512" y="2.097" width="72.543" height="56.267" rx="2"/>
+  <rect class="ourspace-seat" data-desk="020" data-floor="mezzanine" x="99.055" y="2.097" width="73.579" height="56.267" rx="2"/>
+  <rect class="ourspace-seat" data-desk="021" data-floor="mezzanine" x="172.634" y="2.097" width="74.82" height="56.267" rx="2"/>
+  <rect class="ourspace-seat" data-desk="022" data-floor="mezzanine" x="247.454" y="2.097" width="74.406" height="56.267" rx="2"/>
+  <rect class="ourspace-seat" data-desk="023" data-floor="mezzanine" x="321.86" y="2.097" width="72.928" height="56.267" rx="2"/>
+  <rect class="ourspace-seat" data-desk="024" data-floor="mezzanine" x="99.055" y="218.725" width="73.579" height="57.665" rx="2"/>
+  <rect class="ourspace-seat" data-desk="025" data-floor="mezzanine" x="172.634" y="218.725" width="74.82" height="57.665" rx="2"/>
+</g>
 </svg>

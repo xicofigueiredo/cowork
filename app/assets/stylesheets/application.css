@@ -55,25 +55,30 @@ main {
 }
 
 /* Shared navbar for all pages except landing */
-.landing-top--shared {
+.landing-top.landing-top--shared {
   position: sticky;
   top: 0;
+  z-index: 10;
   pointer-events: auto;
-  align-items: flex-start;
-  padding: clamp(10px, 1.2vw, 16px) clamp(20px, 2.5vw, 40px);
+  align-items: center;
+  padding: 0 clamp(20px, 2.5vw, 40px);
   background-color: var(--landing-accent);
   overflow: visible;
-  max-height: 100px;
+  height: clamp(72px, 9vw, 100px);
 }
 
 .landing-top--shared .landing-brand-link {
-  margin-top: clamp(-150px, -22vw, -300px);
-  margin-left: clamp(-35px, -15vw, -75px);
+  margin: 0;
+  margin-left: clamp(-20px, -3vw, -40px);
+  height: 100%;
+  display: flex;
+  align-items: center;
   overflow: hidden;
 }
 
 .landing-top--shared .landing-brand {
-  height: clamp(200px, 50vw, 320px);
+  height: clamp(140px, 28vw, 200px);
+  max-width: none;
   filter: brightness(0) invert(1);
 }
 

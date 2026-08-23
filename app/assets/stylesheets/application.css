@@ -62,13 +62,14 @@ main {
   align-items: flex-start;
   padding: clamp(10px, 1.2vw, 16px) clamp(20px, 2.5vw, 40px);
   background-color: var(--landing-accent);
-  overflow: hidden;
+  overflow: visible;
   max-height: 100px;
 }
 
 .landing-top--shared .landing-brand-link {
   margin-top: clamp(-150px, -22vw, -300px);
   margin-left: clamp(-35px, -15vw, -75px);
+  overflow: hidden;
 }
 
 .landing-top--shared .landing-brand {

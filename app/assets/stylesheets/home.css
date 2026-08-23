@@ -28,7 +28,8 @@ body:has(.landing) {
 }
 
 .landing-top a,
-.landing-top .landing-brand-link {
+.landing-top .landing-brand-link,
+.landing-top .landing-nav-profile-menu {
   pointer-events: auto;
 }
 
@@ -56,7 +57,7 @@ body:has(.landing) {
   align-items: center;
 }
 
-.landing-nav a {
+.landing-nav > a {
   color: #fff;
   text-decoration: none;
   text-transform: lowercase;
@@ -64,16 +65,54 @@ body:has(.landing) {
   font-weight: 500;
 }
 
+.landing-nav-profile-menu {
+  position: relative;
+  margin-left: 4px;
+}
+
 .landing-nav-profile {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--landing-green);
-  margin-left: 4px;
+  color: #fff;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
 }
 
 .landing-nav-profile svg {
   display: block;
+}
+
+.landing-nav-profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 50;
+  min-width: 190px;
+  padding: 6px 0;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+.landing-nav .landing-nav-profile-dropdown-link {
+  display: block;
+  padding: 10px 16px;
+  color: var(--landing-dark);
+  text-decoration: none;
+  text-transform: lowercase;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.landing-nav .landing-nav-profile-dropdown-link:hover {
+  background: rgb(108 49 46 / 0.08);
+  color: var(--landing-dark);
 }
 
 .landing-hero {
@@ -154,7 +193,7 @@ body:has(.landing) {
     padding: 16px 20px;
   }
 
-  .landing-nav a,
+  .landing-nav > a,
   .landing-nav-profile {
     color: #fff;
   }

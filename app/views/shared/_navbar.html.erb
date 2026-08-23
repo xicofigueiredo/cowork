@@ -1,8 +1,26 @@
-<header class="landing-top landing-top--shared<%= " landing-top--transparent" if local_assigns[:transparent] %>">
+<header
+  class="landing-top landing-top--shared<%= " landing-top--transparent" if local_assigns[:transparent] %>"
+  data-controller="mobile-nav"
+>
   <%= link_to root_path, class: "landing-brand-link" do %>
     <%= image_tag "landing/mezzanine-wordmark-branco-nb.png", alt: "Mezzanine", class: "landing-brand" %>
   <% end %>
-  <nav class="landing-nav" aria-label="Primary">
+
+  <button
+    type="button"
+    class="landing-nav-toggle"
+    data-mobile-nav-target="toggle"
+    data-action="mobile-nav#toggle"
+    aria-label="Menu"
+    aria-expanded="false"
+    aria-controls="landing-nav"
+  >
+    <span class="landing-nav-toggle-bar" aria-hidden="true"></span>
+    <span class="landing-nav-toggle-bar" aria-hidden="true"></span>
+    <span class="landing-nav-toggle-bar" aria-hidden="true"></span>
+  </button>
+
+  <nav id="landing-nav" class="landing-nav" aria-label="Primary">
     <%= link_to "Our Space", our_space_path %>
     <%= link_to "Pricing", pricing_path %>
     <%= link_to "Location", location_path %>

@@ -25,7 +25,12 @@
         <span class="location-line location-line--email" aria-hidden="true"></span>
         <span class="location-line location-line--message" aria-hidden="true"></span>
 
-        <p class="location-privacy">I declare that I have read and accept the Privacy Policy</p>
+        <label class="location-privacy">
+          <input type="checkbox" id="location-privacy-accepted" name="privacy_accepted" class="location-privacy-checkbox" required value="1">
+          <span>I declare that I have read and accept the <%= link_to "Privacy Policy", privacy_policy_path, class: "location-privacy-link", target: "_blank", rel: "noopener" %>*</span>
+        </label>
+
+        <button type="submit" class="location-submit">Send</button>
       </form>
     </div>
   </section>
@@ -33,11 +38,13 @@
   <section class="location-map">
     <div class="location-map-embed">
       <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6000!2d-8.691271823268368!3d41.18253087132666!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd246f3a12497d49%3A0xdd9697361659ca3c!2sR.%20Brito%20e%20Cunha%2027%2C%204450-081%20Matosinhos!5e0!3m2!1spt-PT!2spt!4v1779300766318!5m2!1spt-PT!2spt"
+        data-requires-consent
+        data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6000!2d-8.691271823268368!3d41.18253087132666!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd246f3a12497d49%3A0xdd9697361659ca3c!2sR.%20Brito%20e%20Cunha%2027%2C%204450-081%20Matosinhos!5e0!3m2!1spt-PT!2spt!4v1779300766318!5m2!1spt-PT!2spt"
         title="Mezzanine Cowork location on Google Maps"
         allowfullscreen=""
         loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"></iframe>
+        referrerpolicy="no-referrer-when-downgrade"
+        hidden></iframe>
     </div>
     <div class="location-map-side" aria-hidden="true"></div>
   </section>

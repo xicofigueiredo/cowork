@@ -1,0 +1,30 @@
+<% content_for :title, "Log in - Mezzanine" %>
+
+<%= render layout: "devise/shared/auth_card", locals: { title: "Log in" } do %>
+  <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "auth-form" }) do |f| %>
+    <div class="auth-field">
+      <%= f.label :email %>
+      <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true %>
+    </div>
+
+    <div class="auth-field">
+      <%= f.label :password %>
+      <%= f.password_field :password, autocomplete: "current-password", required: true %>
+    </div>
+
+    <% if devise_mapping.rememberable? %>
+      <div class="auth-field auth-field--checkbox">
+        <%= f.check_box :remember_me %>
+        <%= f.label :remember_me %>
+      </div>
+    <% end %>
+
+    <div class="auth-actions">
+      <%= f.submit "Log in", class: "auth-button" %>
+    </div>
+  <% end %>
+
+  <nav class="auth-links" aria-label="Authentication links">
+    <%= render "devise/shared/links" %>
+  </nav>
+<% end %>

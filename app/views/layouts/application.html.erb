@@ -24,6 +24,16 @@
   </head>
 
   <body>
+    <% if notice.present? || alert.present? %>
+      <div class="flash-messages" role="status" aria-live="polite">
+        <% if notice.present? %>
+          <p class="flash flash-notice"><%= notice %></p>
+        <% end %>
+        <% if alert.present? %>
+          <p class="flash flash-alert"><%= alert %></p>
+        <% end %>
+      </div>
+    <% end %>
     <% unless controller_name == "home" && action_name == "index" %>
       <%= render "shared/navbar" %>
     <% end %>
@@ -31,5 +41,6 @@
     <% unless controller_name == "home" && action_name == "index" %>
       <%= render "shared/footer" %>
     <% end %>
+    <%= render "shared/cookie_consent" %>
   </body>
 </html>

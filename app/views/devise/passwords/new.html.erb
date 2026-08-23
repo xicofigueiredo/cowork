@@ -1,0 +1,22 @@
+<% content_for :title, "Reset password - Mezzanine" %>
+
+<%= render layout: "devise/shared/auth_card", locals: { title: "Forgot your password?" } do %>
+  <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: "auth-form" }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <p class="auth-lead">Enter your email and we will send reset instructions.</p>
+
+    <div class="auth-field">
+      <%= f.label :email %>
+      <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true %>
+    </div>
+
+    <div class="auth-actions">
+      <%= f.submit "Send reset instructions", class: "auth-button" %>
+    </div>
+  <% end %>
+
+  <nav class="auth-links" aria-label="Authentication links">
+    <%= render "devise/shared/links" %>
+  </nav>
+<% end %>

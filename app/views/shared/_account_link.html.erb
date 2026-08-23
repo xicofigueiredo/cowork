@@ -1,0 +1,15 @@
+<% if user_signed_in? %>
+  <%= link_to edit_user_registration_path, class: "landing-nav-profile", "aria-label": "Account settings" do %>
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="9" r="3.5" fill="none" stroke="currentColor" stroke-width="1.75" />
+      <path d="M5 20.5c1.6-4 12.4-4 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+    </svg>
+  <% end %>
+<% else %>
+  <%= link_to new_user_session_path, class: "landing-nav-profile", "aria-label": "Log in" do %>
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="9" r="3.5" fill="none" stroke="currentColor" stroke-width="1.75" />
+      <path d="M5 20.5c1.6-4 12.4-4 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+    </svg>
+  <% end %>
+<% end %>

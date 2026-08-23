@@ -1,0 +1,45 @@
+<% content_for :title, "Account settings - Mezzanine" %>
+
+<%= render layout: "devise/shared/auth_card", locals: { title: "Account settings" } do %>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "auth-form" }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div class="auth-field">
+      <%= f.label :email %>
+      <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true %>
+    </div>
+
+    <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+      <p class="auth-hint">Currently waiting confirmation for: <%= resource.unconfirmed_email %></p>
+    <% end %>
+
+    <div class="auth-field">
+      <%= f.label :password, "New password" %>
+      <span class="auth-hint">Leave blank if you do not want to change it</span>
+      <%= f.password_field :password, autocomplete: "new-password" %>
+      <% if @minimum_password_length %>
+        <span class="auth-hint"><%= @minimum_password_length %> characters minimum</span>
+      <% end %>
+    </div>
+
+    <div class="auth-field">
+      <%= f.label :password_confirmation, "Confirm new password" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+    </div>
+
+    <div class="auth-field">
+      <%= f.label :current_password %>
+      <span class="auth-hint">Required to save changes</span>
+      <%= f.password_field :current_password, autocomplete: "current-password", required: true %>
+    </div>
+
+    <div class="auth-actions">
+      <%= f.submit "Update account", class: "auth-button" %>
+    </div>
+  <% end %>
+
+  <div class="auth-links auth-links--stacked">
+    <%= link_to "Sign out", destroy_user_session_path, data: { turbo_method: :delete }, class: "landing-nav-auth-link" %>
+
+  </div>
+<% end %>

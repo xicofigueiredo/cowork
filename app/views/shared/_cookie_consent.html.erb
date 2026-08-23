@@ -1,0 +1,17 @@
+<div class="cookie-consent" data-controller="cookie-consent" hidden role="dialog" aria-labelledby="cookie-consent-title" aria-live="polite">
+  <div class="cookie-consent-inner">
+    <p id="cookie-consent-title" class="cookie-consent-text">
+      We use cookies and similar technologies to improve your experience.
+      Non-essential cookies (such as embedded maps) are only loaded with your consent.
+      Read our <%= link_to "Privacy Policy", privacy_policy_path, class: "cookie-consent-link" %>.
+    </p>
+    <div class="cookie-consent-actions">
+      <button type="button" class="cookie-consent-btn cookie-consent-btn--reject" data-action="cookie-consent#reject">
+        Reject
+      </button>
+      <button type="button" class="cookie-consent-btn cookie-consent-btn--accept" data-action="cookie-consent#accept">
+        Accept
+      </button>
+    </div>
+  </div>
+</div>

@@ -9,12 +9,7 @@
       <%= link_to "Our Space", our_space_path %>
       <%= link_to "Pricing", pricing_path %>
       <%= link_to "Location", location_path %>
-      <%= link_to "#", class: "landing-nav-profile", "aria-label": "Account" do %>
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="9" r="3.5" fill="none" stroke="currentColor" stroke-width="1.75" />
-          <path d="M5 20.5c1.6-4 12.4-4 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
-        </svg>
-      <% end %>
+      <%= render "shared/account_link" %>
     </nav>
   </header>
 
@@ -35,5 +30,6 @@
   <footer class="landing-footer">
     <%= link_to "Send us an email", "mailto:hello@mezzaninecowork.com" %>
     <%= link_to "Follow us on instagram", "https://www.instagram.com/mezzanine.cowork/", target: "_blank", rel: "noreferrer" %>
+    <%= link_to "Privacy Policy", privacy_policy_path %>
   </footer>
 </main>

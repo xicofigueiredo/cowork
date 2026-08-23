@@ -40,7 +40,6 @@
         <div class="pricing-plan">
           <h4 class="pricing-plan-title">Daily pass</h4>
           <p class="pricing-plan-price">13,00 €</p>
-          <%= link_to "Book now", "#", class: "pricing-plan-button" %>
         </div>
       </div>
     </div>
@@ -65,30 +64,30 @@ function initializePricing() {
     daily: {
       title: 'Daily pass',
       plans: [
-        { title: 'Daily pass', price: '13,00 €', cta: 'Book now' }
+        { title: 'Daily pass', price: '13,00 €' }
       ]
     },
     packs: {
       title: 'Packs',
       plans: [
-        { title: '5-day pack', price: '55,00 €', cta: 'Book now' },
-        { title: '10-day pack', price: '100,00 €', cta: 'Book now' },
-        { title: 'Monthly', price: '140,00 €', cta: 'Book now' },
-        { title: '6+ months', price: 'Contact us', cta: 'Contact us' }
+        { title: '5-day pack', price: '55,00 €' },
+        { title: '10-day pack', price: '100,00 €' },
+        { title: 'Monthly', price: '140,00 €' },
+        { title: '6+ months', price: 'Contact us' }
       ]
     },
     virtual: {
       title: 'Virtual office',
       plans: [
-        { title: 'Virtual office', price: 'Coming soon', cta: null }
+        { title: 'Virtual office', price: 'Coming soon' }
       ]
     },
     meeting: {
       title: 'Meeting room',
       plans: [
-        { title: 'Hourly booking', price: '15 €', cta: 'Book now' },
-        { title: 'Daily booking', price: '65 €', cta: 'Book now' },
-        { title: 'Hour pack', price: 'Contact us', cta: 'Contact us' }
+        { title: 'Hourly booking', price: '15 €' },
+        { title: 'Daily booking', price: '65 €' },
+        { title: 'Hour pack', price: 'Contact us' }
       ]
     }
   };
@@ -101,17 +100,10 @@ function initializePricing() {
     data.plans.forEach(plan => {
       const planElement = document.createElement('div');
       planElement.className = 'pricing-plan';
-
-      const ctaHTML = plan.cta
-        ? `<a href="#" class="pricing-plan-button">${plan.cta}</a>`
-        : '';
-
       planElement.innerHTML = `
         <h4 class="pricing-plan-title">${plan.title}</h4>
         <p class="pricing-plan-price">${plan.price}</p>
-        ${ctaHTML}
       `;
-
       plansGrid.appendChild(planElement);
     });
   }

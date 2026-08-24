@@ -9,16 +9,16 @@
         <p class="location-contact-subtitle">Follow the next steps</p>
       </div>
 
-      <form class="location-contact-form" action="#" method="post">
-        <label class="location-label location-label--first-name" for="location-first-name">First Name*</label>
-        <label class="location-label location-label--last-name" for="location-last-name">Last Name*</label>
-        <label class="location-label location-label--email" for="location-email">Email*</label>
-        <label class="location-label location-label--message" for="location-message">Message</label>
+      <%= form_with model: @lead, url: location_path, class: "location-contact-form" do |f| %>
+        <%= f.label :first_name, "First Name*", class: "location-label location-label--first-name", for: "location-first-name" %>
+        <%= f.label :last_name, "Last Name*", class: "location-label location-label--last-name", for: "location-last-name" %>
+        <%= f.label :email, "Email*", class: "location-label location-label--email", for: "location-email" %>
+        <%= f.label :message, "Message", class: "location-label location-label--message", for: "location-message" %>
 
-        <input type="text" id="location-first-name" name="first_name" class="location-input location-input--first-name" required autocomplete="given-name">
-        <input type="text" id="location-last-name" name="last_name" class="location-input location-input--last-name" required autocomplete="family-name">
-        <input type="email" id="location-email" name="email" class="location-input location-input--email" required autocomplete="email">
-        <textarea id="location-message" name="message" class="location-input location-input--message" rows="1"></textarea>
+        <%= f.text_field :first_name, id: "location-first-name", class: "location-input location-input--first-name", required: true, autocomplete: "given-name" %>
+        <%= f.text_field :last_name, id: "location-last-name", class: "location-input location-input--last-name", required: true, autocomplete: "family-name" %>
+        <%= f.email_field :email, id: "location-email", class: "location-input location-input--email", required: true, autocomplete: "email" %>
+        <%= f.text_area :message, id: "location-message", class: "location-input location-input--message", rows: 1 %>
 
         <span class="location-line location-line--first-name" aria-hidden="true"></span>
         <span class="location-line location-line--last-name" aria-hidden="true"></span>
@@ -26,12 +26,12 @@
         <span class="location-line location-line--message" aria-hidden="true"></span>
 
         <label class="location-privacy">
-          <input type="checkbox" id="location-privacy-accepted" name="privacy_accepted" class="location-privacy-checkbox" required value="1">
+          <%= f.check_box :privacy_accepted, { class: "location-privacy-checkbox", required: true, id: "location-privacy-accepted" }, "1", "0" %>
           <span>I declare that I have read and accept the <%= link_to "Privacy Policy", privacy_policy_path, class: "location-privacy-link", target: "_blank", rel: "noopener" %>*</span>
         </label>
 
-        <button type="submit" class="location-submit">Send</button>
-      </form>
+        <%= f.button "Send", type: :submit, class: "location-submit" %>
+      <% end %>
     </div>
   </section>
 

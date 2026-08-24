@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   get "pricing" => "pricing#index"
   get "our-space" => "our_space#index", as: :our_space
   get "location" => "location#index"
+  post "location" => "location#create"
   get "privacy-policy" => "legal#privacy_policy", as: :privacy_policy
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)

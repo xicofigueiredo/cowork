@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:14.2-alpine
+    container_name: cowork-db
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    command: "postgres -c 'max_connections=500'"
+    env_file:
+      - .env.production
+    ports:
+      - "5432:5432"
+  server:
+    build:
+      context: .
+      args:
+        RUBY_VERSION: 4.0.2
+    command: "./bin/rails server -e production -b 0.0.0.0"
+    env_file:
+      - .env.production
+    volumes:
+      - app-storage:/rails/storage
+    depends_on:
+      - db
+    ports:
+      - "80:3000"
+
+volumes:
+  app-storage: {}

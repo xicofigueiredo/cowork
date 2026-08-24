@@ -90,6 +90,7 @@ production:
     database: cowork_production
     username: cowork
     password: <%= ENV["COWORK_DATABASE_PASSWORD"] %>
+    host: <%= ENV.fetch("DB_HOST", "db") %>
   cache:
     <<: *primary_production
     database: cowork_production_cache

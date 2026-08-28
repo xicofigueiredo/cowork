@@ -216,13 +216,15 @@
   border-radius: 16px;
   padding: 32px;
   color: #fff;
+  display: flex;
+  flex-direction: column;
 }
 
 .pricing-plan-title {
   font-size: 24px;
   font-weight: 600;
   margin: 0 0 16px;
-  color: #fff;
+  color: #6C312E;
 }
 
 .pricing-plan-prices {
@@ -263,6 +265,28 @@
 
 .pricing-plan-features li:last-child {
   margin-bottom: 0;
+}
+
+.pricing-details .pricing-plan > :nth-last-child(2) {
+  margin-bottom: 16px;
+}
+
+.pricing-details .pricing-plan-button {
+  margin-top: auto;
+  align-self: center;
+  background: #fff;
+  color: var(--landing-dark);
+  padding: 12px 28px;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.pricing-details .pricing-plan-button:hover {
+  background: var(--landing-soft);
+  color: var(--landing-dark);
 }
 
 @media (max-width: 768px) {

@@ -34,7 +34,7 @@
 
   <section class="pricing-details">
     <div class="pricing-details-content">
-      <h3 class="pricing-details-title">Daily pass</h3>
+      <h3 class="pricing-details-title">Daily</h3>
 
       <div class="pricing-plans-grid">
         <div class="pricing-plan">
@@ -48,6 +48,7 @@
             <li>High speed internet</li>
             <li>Free access to the phone booth</li>
           </ul>
+          <a href="<%= location_path %>" class="pricing-plan-button">Book now</a>
         </div>
       </div>
     </div>
@@ -64,6 +65,8 @@ function initializePricing() {
   const pricingCards = document.querySelectorAll('.pricing-card');
   const detailsTitle = document.querySelector('.pricing-details-title');
   const plansGrid = document.querySelector('.pricing-plans-grid');
+
+  const bookNowUrl = '<%= location_path %>';
 
   const pricingData = {
     daily: {
@@ -111,7 +114,6 @@ function initializePricing() {
             'Dedicated desk',
             '5h access to the meeting room',
             'Free access to the phone booth',
-            'High speed internet',
             'No minimum commitment'
           ]
         }
@@ -166,6 +168,7 @@ function initializePricing() {
         <p class="pricing-plan-price">${plan.price}</p>
       </div>
       ${featuresHtml}
+      <a href="${bookNowUrl}" class="pricing-plan-button">Book now</a>
     `;
   }
 

@@ -34,12 +34,20 @@
 
   <section class="pricing-details">
     <div class="pricing-details-content">
-      <h3 class="pricing-details-title">Daily </h3>
+      <h3 class="pricing-details-title">Daily pass</h3>
 
       <div class="pricing-plans-grid">
         <div class="pricing-plan">
           <h4 class="pricing-plan-title">Daily pass</h4>
-          <p class="pricing-plan-price">13,00 €</p>
+          <div class="pricing-plan-prices">
+            <span class="pricing-plan-original-price">15,00 €</span>
+            <p class="pricing-plan-price">13,00 €</p>
+          </div>
+          <ul class="pricing-plan-features">
+            <li>Hotdesk (choose your seat)</li>
+            <li>High speed internet</li>
+            <li>Free access to the phone booth</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -53,27 +61,60 @@
 
 <script>
 function initializePricing() {
-  console.log('Pricing JS loaded');
   const pricingCards = document.querySelectorAll('.pricing-card');
   const detailsTitle = document.querySelector('.pricing-details-title');
   const plansGrid = document.querySelector('.pricing-plans-grid');
-
-  console.log('Found cards:', pricingCards.length);
 
   const pricingData = {
     daily: {
       title: 'Daily pass',
       plans: [
-        { title: 'Daily pass', price: '13,00 €' }
+        {
+          title: 'Daily pass',
+          originalPrice: '15,00 €',
+          price: '13,00 €',
+          features: [
+            'Hotdesk (choose your seat)',
+            'High speed internet',
+            'Free access to the phone booth'
+          ]
+        }
       ]
     },
     packs: {
-      title: 'Monthly',
+      title: 'Packs & Monthly',
       plans: [
-        { title: '5-day pack', price: '55,00 €' },
-        { title: '10-day pack', price: '100,00 €' },
-        { title: 'Monthly', price: '140,00 €' },
-        { title: '6+ months', price: 'Contact us' }
+        {
+          title: '5-day pack',
+          originalPrice: '60,00 €',
+          price: '55,00 €',
+          features: [
+            '8% discount',
+            'Same as daily pass',
+            'Prior booking needed',
+            'Valid for 3 months'
+          ]
+        },
+        {
+          title: '10-day pack',
+          originalPrice: '100,00 €',
+          price: '100,00 €',
+          features: [
+            'Same as 5-day pack'
+          ]
+        },
+        {
+          title: 'Monthly',
+          originalPrice: '150,00 €',
+          price: '140,00 €',
+          features: [
+            'Dedicated desk',
+            '5h access to the meeting room',
+            'Free access to the phone booth',
+            'High speed internet',
+            'No minimum commitment'
+          ]
+        }
       ]
     },
     virtual: {
@@ -92,6 +133,22 @@ function initializePricing() {
     }
   };
 
+  function renderPlan(plan) {
+    const showOriginalPrice = plan.originalPrice && plan.originalPrice !== plan.price;
+    const featuresHtml = plan.features?.length
+      ? `<ul class="pricing-plan-features">${plan.features.map(feature => `<li>${feature}</li>`).join('')}</ul>`
+      : '';
+
+    return `
+      <h4 class="pricing-plan-title">${plan.title}</h4>
+      <div class="pricing-plan-prices">
+        ${showOriginalPrice ? `<span class="pricing-plan-original-price">${plan.originalPrice}</span>` : ''}
+        <p class="pricing-plan-price">${plan.price}</p>
+      </div>
+      ${featuresHtml}
+    `;
+  }
+
   function updateContent(category) {
     const data = pricingData[category];
     detailsTitle.textContent = data.title;
@@ -100,10 +157,7 @@ function initializePricing() {
     data.plans.forEach(plan => {
       const planElement = document.createElement('div');
       planElement.className = 'pricing-plan';
-      planElement.innerHTML = `
-        <h4 class="pricing-plan-title">${plan.title}</h4>
-        <p class="pricing-plan-price">${plan.price}</p>
-      `;
+      planElement.innerHTML = renderPlan(plan);
       plansGrid.appendChild(planElement);
     });
   }

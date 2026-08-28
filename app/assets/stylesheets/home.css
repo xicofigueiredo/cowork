@@ -107,64 +107,24 @@ body:has(.landing) {
   color: var(--landing-dark);
 }
 
-.landing-hero-image {
-  display: block;
-  /* flex-basis 0 + height 0: let the row shrink below the image's intrinsic size */
-  flex: 1 1 0;
-  width: 100%;
-  min-height: 0;
-  height: 0;
-  object-fit: cover;
-  object-position: center center;
-}
-
 .landing-hero {
   height: calc(100vh - 78px);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .landing-panel {
-  position: relative;
   overflow: hidden;
   min-width: 0;
+  min-height: 0;
 }
 
-.landing-panel-side {
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.landing-panel-center {
-  background: #fff;
-}
-
-/* Side logos */
-.landing-triptych-image-left {
+.landing-panel-image {
   display: block;
-  width: 450%;
-  height: 450%;
-  transform: translateX(27%) translateY(3%);
-}
-
-.landing-triptych-image-right {
-  display: block;
-  width: 450%;
-  height: 450%;
-  transform: translateX(-27%) translateY(1%);
-
-}
-
-.landing-triptych-image--center {
   width: 100%;
   height: 100%;
-  max-height: none;
   object-fit: cover;
-  object-position: center 50%;
-  transform: scale(1.08) translateY(-3.5%);
-  transform-origin: center center;
+  object-position: center center;
 }
 
 .landing-footer {
@@ -186,10 +146,6 @@ body:has(.landing) {
 }
 
 @media (max-width: 1024px) {
-  .landing-hero-image {
-    object-position: center 40%;
-  }
-
   .landing-nav > a,
   .landing-nav-profile {
     color: #fff;

@@ -1,11 +1,22 @@
 <% content_for :title, "Mezzanine" %>
 
 <main class="landing">
-  <%= image_tag "landing/landing-page.png", alt: "Bright coworking space", class: "landing-hero-image" %>
+  <section class="landing-hero">
+    <article class="landing-panel">
+      <%= image_tag "landing/left.png", alt: "", class: "landing-panel-image", "aria-hidden": "true" %>
+    </article>
+
+    <article class="landing-panel">
+      <%= image_tag "landing/home.jpg", alt: "Bright coworking space", class: "landing-panel-image" %>
+    </article>
+
+    <article class="landing-panel">
+      <%= image_tag "landing/right.png", alt: "", class: "landing-panel-image", "aria-hidden": "true" %>
+    </article>
+  </section>
 
   <footer class="landing-footer">
     <%= link_to "Send us an email", "mailto:hello@mezzaninecowork.com" %>
     <%= link_to "Follow us on instagram", "https://www.instagram.com/mezzanine.cowork/", target: "_blank", rel: "noreferrer" %>
-    <%= link_to "Privacy Policy", privacy_policy_path %>
   </footer>
 </main>

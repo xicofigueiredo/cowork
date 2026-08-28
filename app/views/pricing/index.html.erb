@@ -118,17 +118,37 @@ function initializePricing() {
       ]
     },
     virtual: {
-      title: 'Virtual office',
+      title: 'Virtual office (Coming soon)',
       plans: [
-        { title: 'Virtual office', price: 'Coming soon' }
+        { title: 'Office address + email notification', price: '20,00 €' },
+        { title: '+20 pages scan', price: '35,00 €' },
+        { title: '+4 hours in the meeting room', price: '50,00 €' }
       ]
     },
     meeting: {
       title: 'Meeting room',
       plans: [
-        { title: 'Hourly booking', price: '15 €' },
-        { title: 'Daily booking', price: '65 €' },
-        { title: 'Hour pack', price: 'Contact us' }
+        {
+          title: 'Hourly booking',
+          price: '15,00 €',
+          features: [
+            'Private room',
+            'Booking 24h in advance',
+            'Up to 10 persons',
+            'Mounted TV'
+          ]
+        },
+        {
+          title: 'Daily booking',
+          price: '65,00 €',
+          features: [
+            'Same as hourly booking'
+          ]
+        },
+        {
+          title: 'Hour pack',
+          price: 'Contact us'
+        }
       ]
     }
   };

@@ -153,12 +153,18 @@ body:has(.landing) {
 
   .landing-hero {
     grid-template-columns: 1fr;
-    height: auto;
+    grid-template-rows: minmax(0, 1fr);
     flex: 1;
+    min-height: 0;
+  }
+
+  .landing-panel:first-child,
+  .landing-panel:last-child {
+    display: none;
   }
 
   .landing-panel {
-    min-height: 28vh;
+    min-height: 0;
   }
 
   .landing-footer {

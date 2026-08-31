@@ -36,21 +36,7 @@
     <div class="pricing-details-content">
       <h3 class="pricing-details-title">Daily</h3>
 
-      <div class="pricing-plans-grid">
-        <div class="pricing-plan">
-          <h4 class="pricing-plan-title">Daily pass</h4>
-          <div class="pricing-plan-prices">
-            <span class="pricing-plan-original-price">15,00 €</span>
-            <p class="pricing-plan-price">13,00 €</p>
-          </div>
-          <ul class="pricing-plan-features">
-            <li>Hotdesk (choose your seat)</li>
-            <li>High speed internet</li>
-            <li>Free access to the phone booth</li>
-          </ul>
-          <a href="<%= location_path %>" class="pricing-plan-button">Book now</a>
-        </div>
-      </div>
+      <div class="pricing-plans-grid"></div>
     </div>
   </section>
 
@@ -70,29 +56,25 @@ function initializePricing() {
 
   const pricingData = {
     daily: {
-      title: 'Daily pass',
+      title: 'Daily',
       plans: [
         {
           title: 'Daily pass',
           originalPrice: '15,00 €',
           price: '13,00 €',
           features: [
+            '13% discount',
             'Hotdesk (choose your seat)',
             'High speed internet',
             'Free access to the phone booth'
           ]
-        }
-      ]
-    },
-    packs: {
-      title: 'Monthly',
-      plans: [
+        },
         {
           title: '5-day pack',
-          originalPrice: '60,00 €',
+          originalPrice: '65,00 €',
           price: '55,00 €',
           features: [
-            '8% discount',
+            '15% discount',
             'Same as daily pass',
             'Prior booking needed',
             'Valid for 3 months'
@@ -100,12 +82,20 @@ function initializePricing() {
         },
         {
           title: '10-day pack',
-          originalPrice: '100,00 €',
+          originalPrice: '130,00 €',
           price: '100,00 €',
           features: [
-            'Same as 5-day pack'
+            '23% discount',
+            'Same as daily pass',
+            'Prior booking needed',
+            'Valid for 3 months'
           ]
-        },
+        }
+      ]
+    },
+    packs: {
+      title: 'Monthly',
+      plans: [
         {
           title: 'Monthly',
           originalPrice: '150,00 €',
@@ -122,9 +112,10 @@ function initializePricing() {
     virtual: {
       title: 'Virtual office (Coming soon)',
       plans: [
-        { title: 'Address + email', price: '20,00 €' },
-        { title: '+20 pages scan', price: '35,00 €' },
-        { title: '+4h in the meeting room', price: '50,00 €' }
+        { title: 'Virtual office', price: 'Coming soon' },
+        // { title: 'Address + email', price: '20,00 €' },
+        // { title: '+20 pages scan', price: '35,00 €' },
+        // { title: '+4h in the meeting room', price: '50,00 €' }
       ]
     },
     meeting: {
@@ -137,14 +128,17 @@ function initializePricing() {
             'Private room',
             'Booking 24h in advance',
             'Up to 10 persons',
-            'Mounted TV'
+            'TV'
           ]
         },
         {
           title: 'Daily booking',
           price: '65,00 €',
           features: [
-            'Same as hourly booking'
+            'Private room',
+            'Booking 24h in advance',
+            'Up to 10 persons',
+            'TV'
           ]
         },
         {
@@ -218,6 +212,8 @@ function initializePricing() {
   document.removeEventListener('click', window.__pricingCardClick);
   window.__pricingCardClick = handleCardClick;
   document.addEventListener('click', handleCardClick);
+
+  updateContent('daily');
 }
 
 document.addEventListener('turbo:load', initializePricing);

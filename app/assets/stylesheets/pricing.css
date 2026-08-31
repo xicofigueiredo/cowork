@@ -45,9 +45,13 @@
   margin: 0;
   color: #fff;
   position: absolute;
-  top: clamp(20px, 3.5vw, 44px);
-  left: clamp(20px, 3.5vw, 44px);
+  top: 0;
+  left: clamp(16px, 3.5vw, 44px);
+  height: 40%;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  transform: translateY(-4px);
   text-align: left;
   line-height: 1.2;
 }
@@ -299,6 +303,13 @@
     grid-template-rows: repeat(4, minmax(140px, 1fr));
     gap: clamp(16px, 4vw, 24px);
     min-height: auto;
+  }
+
+  .pricing-card-title {
+    height: 44%;
+    left: clamp(16px, 5vw, 32px);
+    font-size: clamp(20px, 5vw, 28px);
+    transform: translateY(-8px);
   }
 
   .pricing-plans-grid {

@@ -5,10 +5,18 @@ body:has(.landing) {
   overflow: hidden;
 }
 
+body:has(.landing) main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .landing {
   max-width: 100%;
   flex: 1;
   min-height: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -108,7 +116,8 @@ body:has(.landing) {
 }
 
 .landing-hero {
-  height: calc(100vh - 78px);
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -134,6 +143,7 @@ body:has(.landing) {
   align-items: center;
   justify-content: space-between;
   padding: 0 34px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
   letter-spacing: 0.03em;
   flex-shrink: 0;
 }
@@ -154,8 +164,6 @@ body:has(.landing) {
   .landing-hero {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(0, 1fr);
-    flex: 1;
-    min-height: 0;
   }
 
   .landing-panel:first-child,
@@ -168,11 +176,12 @@ body:has(.landing) {
   }
 
   .landing-footer {
-    min-height: 68px;
-    padding: 0 20px;
+    min-height: 80px;
+    padding: 0 24px;
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
   .landing-footer a {
-    font-size: 14px;
+    font-size: 15px;
   }
 }

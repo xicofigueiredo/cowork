@@ -68,22 +68,22 @@
     <div class="ourspace-floorplan-inner">
       <div class="ourspace-floorplan-columns">
         <div class="ourspace-floorplan-column">
-          <button type="button" class="ourspace-floorplan-tab active" data-floor="main">Main floor</button>
+          <p class="ourspace-floorplan-tab">Main floor</p>
           <div class="ourspace-floorplan-diagram" data-floor-panel="main">
-            <%= raw Rails.root.join("app/assets/images/ourspace/floor-main.svg").read %>
+            <%= raw Rails.root.join("app/assets/images/ourspace/main.svg").read %>
           </div>
         </div>
 
         <div class="ourspace-floorplan-column">
-          <button type="button" class="ourspace-floorplan-tab" data-floor="mezzanine">Mezzanine</button>
+          <p class="ourspace-floorplan-tab">Mezzanine</p>
           <div class="ourspace-floorplan-diagram" data-floor-panel="mezzanine">
-            <%= raw Rails.root.join("app/assets/images/ourspace/floor-mezzanine.svg").read %>
+            <%= raw Rails.root.join("app/assets/images/ourspace/mezzanine.svg").read %>
           </div>
         </div>
       </div>
 
       <div class="ourspace-floorplan-info">
-        <p class="ourspace-floorplan-desk" data-ourspace-desk-label>Desk 008</p>
+        <p class="ourspace-floorplan-desk" data-ourspace-desk-label>Select a desk</p>
       </div>
     </div>
   </section>
@@ -96,30 +96,19 @@ function initializeOurSpace() {
   if (!root || root.dataset.ourspaceReady === 'true') return;
   root.dataset.ourspaceReady = 'true';
 
-  const tabs = root.querySelectorAll('.ourspace-floorplan-tab');
   const seats = root.querySelectorAll('.ourspace-seat');
   const deskLabel = root.querySelector('[data-ourspace-desk-label]');
   const availabilityLabel = root.querySelector('[data-ourspace-availability]');
-
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-    });
-  });
 
   function updateInfo(seat) {
     if (!seat) return;
 
     const desk = seat.dataset.desk;
-    const floor = seat.dataset.floor === 'mezzanine' ? 'Mezzanine' : 'Main floor';
 
     deskLabel.textContent = `Desk ${desk}`;
-    availabilityLabel.textContent = seat.classList.contains('unavailable') ? 'Unavailable' : 'Available';
-
-    tabs.forEach(tab => {
-      tab.classList.toggle('active', tab.dataset.floor === seat.dataset.floor);
-    });
+    if (availabilityLabel) {
+      availabilityLabel.textContent = seat.classList.contains('unavailable') ? 'Unavailable' : 'Available';
+    }
   }
 
   seats.forEach(seat => {
@@ -132,7 +121,7 @@ function initializeOurSpace() {
     });
   });
 
-  const initialSeat = root.querySelector('.ourspace-seat.selected') || root.querySelector('.ourspace-seat:not(.unavailable)');
+  const initialSeat = root.querySelector('.ourspace-seat.selected');
   if (initialSeat) updateInfo(initialSeat);
 }
 

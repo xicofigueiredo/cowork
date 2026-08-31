@@ -49,28 +49,31 @@
 
 .ourspace-benefits {
   background: #f7f5f2;
-  padding: clamp(48px, 6vw, 80px) clamp(24px, 4vw, 56px);
+  padding: clamp(48px, 6vw, 80px) clamp(32px, 4vw, 56px);
 }
 
 .ourspace-benefits-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: minmax(180px, 0.9fr) minmax(0, 2fr);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: clamp(32px, 5vw, 64px);
-  align-items: start;
+  min-width: 0;
 }
 
 .ourspace-benefits-title {
   margin: 0;
+  flex: 0 0 auto;
   color: var(--landing-dark);
-  font-size: clamp(28px, 3.2vw, 40px);
+  font-size: clamp(24px, 2.8vw, 34px); 
   font-weight: 700;
   line-height: 1.15;
-  max-width: 12ch;
+  max-width: 20ch;
 }
 
 .ourspace-benefits-grid {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(28px, 3vw, 40px) clamp(20px, 2.5vw, 36px);
@@ -80,6 +83,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
   color: var(--landing-dark);
   font-size: clamp(15px, 1.4vw, 18px);
   font-weight: 500;
@@ -95,24 +99,29 @@
 
 .ourspace-floorplan {
   background: var(--landing-dark);
-  padding: clamp(40px, 5vw, 64px) clamp(24px, 4vw, 48px);
+  padding: clamp(40px, 5vw, 64px) clamp(32px, 4vw, 56px);
 }
 
 .ourspace-floorplan-inner {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .ourspace-floorplan-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: clamp(24px, 4vw, 48px);
+  align-items: stretch;
+}
+
+.ourspace-floorplan-column {
+  display: flex;
+  flex-direction: column;
 }
 
 .ourspace-floorplan-tab {
   display: block;
   width: 100%;
-  margin-bottom: 24px;
+  margin: 0 0 24px;
   padding: 16px 24px;
   background: #fff;
   border: none;
@@ -122,27 +131,22 @@
   font-size: clamp(18px, 2vw, 24px);
   font-weight: 600;
   text-align: center;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-.ourspace-floorplan-tab:hover,
-.ourspace-floorplan-tab.active {
-  opacity: 1;
-}
-
-.ourspace-floorplan-tab:not(.active) {
-  opacity: 0.85;
 }
 
 .ourspace-floorplan-diagram {
-  min-height: 280px;
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: calc(325 / 798 * 100%);
+  overflow: hidden;
 }
 
-.ourspace-floorplan-svg {
+.ourspace-floorplan-diagram .ourspace-floorplan-svg {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
 }
 
 .ourspace-seat {
@@ -182,13 +186,24 @@
   opacity: 0.9;
 }
 
+@media (max-width: 1024px) {
+  .ourspace-benefits-inner {
+    flex-direction: column;
+    gap: clamp(28px, 5vw, 40px);
+  }
+
+  .ourspace-benefits-grid {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
   .ourspace-hero-mark {
     width: 48%;
   }
 
   .ourspace-benefits-inner {
-    grid-template-columns: 1fr;
     gap: clamp(28px, 6vw, 40px);
   }
 

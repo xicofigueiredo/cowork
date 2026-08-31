@@ -12,20 +12,24 @@
 
 .ourspace-hero-photo {
   position: absolute;
+  top: 0;
   right: 0;
   left: 0;
   display: block;
   width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: 65% center;
 }
 
 .ourspace-hero-mark {
   position: absolute;
-  left: -65%;
   top: 0;
+  left: 0;
   height: 100%;
-  width: 100%;
+  width: 35%;
+  object-fit: cover;
+  object-position: right center;
   z-index: 1;
   pointer-events: none;
 }

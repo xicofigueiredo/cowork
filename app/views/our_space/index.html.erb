@@ -84,6 +84,7 @@
 
       <div class="ourspace-floorplan-info">
         <p class="ourspace-floorplan-desk" data-ourspace-desk-label>Select a desk</p>
+        <p class="ourspace-floorplan-label" data-ourspace-availability>Availability shown for today</p>
       </div>
     </div>
   </section>
@@ -111,7 +112,13 @@ function initializeOurSpace() {
     }
   }
 
+  const unavailableDesks = <%= raw @unavailable_desks.to_json %>;
+
   seats.forEach(seat => {
+    if (unavailableDesks.includes(seat.dataset.desk)) {
+      seat.classList.add('unavailable');
+    }
+
     seat.addEventListener('click', () => {
       if (seat.classList.contains('unavailable')) return;
 

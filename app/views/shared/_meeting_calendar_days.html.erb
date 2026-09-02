@@ -1,0 +1,19 @@
+<%# locals: days:, selected_date:, plan_type: nil, booking: nil %>
+<% calendar_plan_type = local_assigns[:plan_type] %>
+<% calendar_booking = local_assigns[:booking] %>
+<div class="meeting-calendar-days">
+  <% days.each do |day| %>
+    <% active = day[:date] == selected_date %>
+    <%= link_to meeting_calendar_day_path(day[:date], plan_type: calendar_plan_type, booking: calendar_booking),
+          class: [
+            "meeting-calendar-day",
+            ("meeting-calendar-day--active" if active),
+            ("meeting-calendar-day--available" if day[:available]),
+            ("meeting-calendar-day--full" unless day[:available])
+          ].compact.join(" ") do %>
+      <span class="meeting-calendar-day-name"><%= day[:date].strftime("%a") %></span>
+      <span class="meeting-calendar-day-date"><%= day[:date].strftime("%-d") %></span>
+      <span class="meeting-calendar-day-meta"><%= day[:meta] %></span>
+    <% end %>
+  <% end %>
+</div>

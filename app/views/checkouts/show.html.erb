@@ -1,0 +1,75 @@
+<% content_for :title, "Payment - Mezzanine" %>
+
+<main class="booking-page">
+  <div class="booking-container booking-container--narrow">
+    <h1 class="booking-title">Payment</h1>
+    <p class="booking-lead">Review your order before completing payment.</p>
+
+    <div class="booking-summary-card">
+      <p class="booking-summary-row">
+        <span>Plan</span>
+        <strong><%= @order.plan_label %></strong>
+      </p>
+
+      <% if @order.seat %>
+        <p class="booking-summary-row">
+          <span><%= @order.seat.meeting_room? ? "Room" : "Desk" %></span>
+          <strong><%= @order.seat.label %></strong>
+        </p>
+      <% end %>
+
+      <% if @order.booking_date %>
+        <p class="booking-summary-row">
+          <span>Date</span>
+          <strong><%= @order.booking_date.strftime("%-d %B %Y") %></strong>
+        </p>
+      <% end %>
+
+      <% if @order.starts_at %>
+        <p class="booking-summary-row">
+          <span>Time</span>
+          <strong><%= @order.starts_at.strftime("%-d %B %Y, %H:%M") %> – <%= @order.meeting_ends_at.strftime("%H:%M") %></strong>
+        </p>
+      <% end %>
+
+      <% if @order.plan_type == "monthly" %>
+        <p class="booking-summary-row">
+          <span>Period</span>
+          <strong><%= @monthly_period[:starts_on].strftime("%-d %b %Y") %> – <%= @monthly_period[:ends_on].strftime("%-d %b %Y") %></strong>
+        </p>
+        <p class="booking-summary-row">
+          <span>Meeting room</span>
+          <strong>5 hours included</strong>
+        </p>
+      <% end %>
+
+      <% if @order.credit_pack? %>
+        <p class="booking-summary-row">
+          <span>Credits</span>
+          <strong><%= Order.plan_config(@order.plan_type)[:credits] %> days</strong>
+        </p>
+      <% end %>
+
+      <p class="booking-summary-row booking-summary-row--total">
+        <span>Total</span>
+        <strong><%= @order.amount_euros %></strong>
+      </p>
+    </div>
+
+    <div class="booking-payment-mock">
+      <p class="booking-payment-note">Stripe integration coming soon. Use the buttons below to simulate payment.</p>
+
+      <%= button_to "Simulate successful payment",
+            pay_checkout_path(@order, success: true),
+            method: :post,
+            class: "booking-btn booking-btn--primary booking-btn--full" %>
+
+      <%= button_to "Simulate failed payment",
+            pay_checkout_path(@order, success: false),
+            method: :post,
+            class: "booking-btn booking-btn--danger booking-btn--full" %>
+    </div>
+
+    <%= link_to "Cancel", pricing_path, class: "booking-link-back" %>
+  </div>
+</main>

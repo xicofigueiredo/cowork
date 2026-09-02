@@ -1,0 +1,193 @@
+<% content_for :title, "Checkout - Mezzanine" %>
+<% meeting_checkout = Order::MEETING_PLAN_TYPES.include?(@plan_type) %>
+<% selected_meeting_day = @calendar_days&.find { |day| day[:date] == @booking_date } if meeting_checkout %>
+<% hourly_slots_available = @hour_grid&.any? { |slot| slot[:available] } %>
+<% checkout_submit_disabled = meeting_checkout && (
+     (@plan_type == "meeting_daily" && !selected_meeting_day&.dig(:available)) ||
+     (@plan_type == "meeting_hourly" && !hourly_slots_available)
+   ) %>
+
+<main class="booking-page">
+  <div class="booking-container <%= "booking-container--meeting" if meeting_checkout %>">
+    <% if meeting_checkout %><div class="booking-card"><% end %>
+
+    <h1 class="booking-title <%= "booking-title--centered" if meeting_checkout %>"><%= Order.plan_config(@plan_type)[:label] %></h1>
+    <p class="booking-lead <%= "booking-lead--centered" if meeting_checkout %>"><%= checkout_plan_description(@plan_type) %></p>
+
+    <%= form_with model: @order, url: checkouts_path, class: "booking-form #{"booking-form--centered" if meeting_checkout}" do |f| %>
+      <%= f.hidden_field :plan_type, value: @plan_type %>
+
+      <% if @plan_type == "daily" %>
+        <div class="booking-field">
+          <%= f.label :booking_date, "Date", class: "booking-label" %>
+          <%= f.date_field :booking_date,
+                value: @order.booking_date || Date.current,
+                min: Date.current,
+                class: "booking-input",
+                required: true,
+                onchange: "window.location = '#{new_checkout_path(plan: @plan_type)}&date=' + this.value" %>
+        </div>
+
+        <div class="booking-field">
+          <span class="booking-label">Select your desk</span>
+          <%= render "shared/floor_plan_picker",
+                unavailable_desks: @unavailable_desks,
+                seat_map: @seats.index_by(&:code).transform_values(&:id),
+                input_name: "order[seat_id]",
+                selected_seat_id: @order.seat_id %>
+        </div>
+
+      <% elsif @plan_type == "monthly" %>
+        <div class="booking-field">
+          <p class="booking-note">
+            Your dedicated desk will be reserved from
+            <strong><%= @monthly_period[:starts_on].strftime("%-d %B %Y") %></strong>
+            to
+            <strong><%= @monthly_period[:ends_on].strftime("%-d %B %Y") %></strong>.
+            You'll receive 5 hours of meeting room access for that period.
+          </p>
+          <span class="booking-label">Select your desk</span>
+          <%= render "shared/floor_plan_picker",
+                unavailable_desks: @unavailable_desks,
+                seat_map: @seats.index_by(&:code).transform_values(&:id),
+                input_name: "order[seat_id]",
+                selected_seat_id: @order.seat_id %>
+        </div>
+
+      <% elsif @plan_type == "meeting_daily" %>
+        <%= f.hidden_field :booking_date, value: @booking_date %>
+
+        <div class="booking-field booking-field--wide">
+          <span class="booking-label">Choose a day</span>
+          <%= render "shared/meeting_calendar_days",
+                days: @calendar_days,
+                selected_date: @booking_date,
+                plan_type: @plan_type %>
+        </div>
+
+        <div class="booking-field booking-field--wide">
+          <div class="booking-summary-card">
+            <p class="booking-summary-row">
+              <span>Date</span>
+              <strong><%= @booking_date.strftime("%-d %B %Y") %></strong>
+            </p>
+            <p class="booking-summary-row">
+              <span>Room</span>
+              <strong>Meeting room</strong>
+            </p>
+            <p class="booking-summary-row">
+              <span>Duration</span>
+              <strong>Full day (8:00 – 20:00)</strong>
+            </p>
+          </div>
+
+          <div class="booking-price-row">
+            <span>Total</span>
+            <strong><%= format("%.2f €", @order.amount_cents / 100.0) %></strong>
+          </div>
+        </div>
+
+        <% unless selected_meeting_day&.dig(:available) %>
+          <p class="booking-note booking-note--error">This day is not available. Choose another day above.</p>
+        <% end %>
+
+      <% elsif @plan_type == "meeting_hourly" %>
+        <div class="booking-field booking-field--wide">
+          <span class="booking-label">Choose a day</span>
+          <%= render "shared/meeting_calendar_days",
+                days: @calendar_days,
+                selected_date: @booking_date,
+                plan_type: @plan_type %>
+        </div>
+
+        <div class="booking-field booking-field--wide">
+          <span class="booking-label">Available slots · <%= @booking_date.strftime("%-d %B %Y") %></span>
+          <div class="meeting-slot-grid">
+            <% selected_value = @order.starts_at&.iso8601 %>
+            <% @hour_grid.each do |slot| %>
+              <% if slot[:available] %>
+                <label class="meeting-slot meeting-slot--available">
+                  <%= f.radio_button :starts_at,
+                        slot[:starts_at].iso8601,
+                        checked: selected_value == slot[:starts_at].iso8601,
+                        required: hourly_slots_available %>
+                  <span class="meeting-slot-time"><%= slot[:label] %></span>
+                  <span class="meeting-slot-range"><%= slot[:label] %> – <%= slot[:ends_at].strftime("%H:%M") %></span>
+                </label>
+              <% else %>
+                <div class="meeting-slot meeting-slot--unavailable" aria-hidden="true">
+                  <span class="meeting-slot-time"><%= slot[:label] %></span>
+                  <span class="meeting-slot-range">Taken</span>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+          <% unless hourly_slots_available %>
+            <p class="booking-note">No available slots on this date. Pick another day above.</p>
+          <% end %>
+        </div>
+
+        <div class="booking-field booking-field--wide">
+          <div class="booking-summary-card">
+            <p class="booking-summary-row">
+              <span>Date</span>
+              <strong><%= @booking_date.strftime("%-d %B %Y") %></strong>
+            </p>
+            <p class="booking-summary-row">
+              <span>Room</span>
+              <strong>Meeting room</strong>
+            </p>
+            <% if @order.starts_at.present? %>
+              <p class="booking-summary-row">
+                <span>Time</span>
+                <strong><%= @order.starts_at.strftime("%H:%M") %> – <%= @order.meeting_ends_at.strftime("%H:%M") %></strong>
+              </p>
+            <% end %>
+            <p class="booking-summary-row">
+              <span>Duration</span>
+              <strong>1 hour</strong>
+            </p>
+          </div>
+
+          <div class="booking-price-row">
+            <span>Total</span>
+            <strong><%= format("%.2f €", @order.amount_cents / 100.0) %></strong>
+          </div>
+        </div>
+
+      <% else %>
+        <div class="booking-summary-card">
+          <p class="booking-summary-row">
+            <span>Plan</span>
+            <strong><%= Order.plan_config(@plan_type)[:label] %></strong>
+          </p>
+          <p class="booking-summary-row">
+            <span>Credits</span>
+            <strong><%= Order.plan_config(@plan_type)[:credits] %> days</strong>
+          </p>
+          <p class="booking-summary-row">
+            <span>Valid for</span>
+            <strong>3 months</strong>
+          </p>
+          <p class="booking-summary-note">After payment, use your credits to book any available desk on the days you choose.</p>
+        </div>
+      <% end %>
+
+      <% unless meeting_checkout %>
+        <div class="booking-price-row">
+          <span>Total</span>
+          <strong><%= format("%.2f €", @order.amount_cents / 100.0) %></strong>
+        </div>
+      <% end %>
+
+      <div class="booking-actions <%= "booking-actions--centered" if meeting_checkout %>">
+        <%= f.submit "Continue to payment",
+              class: "booking-btn booking-btn--primary",
+              disabled: checkout_submit_disabled %>
+        <%= link_to "Back to pricing", pricing_path, class: "booking-btn booking-btn--secondary" %>
+      </div>
+    <% end %>
+
+    <% if meeting_checkout %></div><% end %>
+  </div>
+</main>

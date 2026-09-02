@@ -1,0 +1,81 @@
+<%#
+  locals:
+    unavailable_desks: array of desk codes (strings)
+    seat_map: hash of desk code => seat id
+    input_name: name for the hidden seat_id field
+    selected_seat_id: optional pre-selected seat id
+%>
+<div class="booking-floorplan" data-controller="floor-plan"
+     data-floor-plan-seat-map-value="<%= seat_map.to_json %>"
+     data-floor-plan-unavailable-value="<%= unavailable_desks.to_json %>"
+     data-floor-plan-input-name-value="<%= input_name %>"
+     data-floor-plan-selected-value="<%= selected_seat_id %>">
+
+  <input type="hidden" name="<%= input_name %>" value="<%= selected_seat_id %>" data-floor-plan-target="input" required>
+
+  <div class="booking-floorplan-columns">
+    <div class="booking-floorplan-column">
+      <p class="booking-floorplan-tab">Main floor</p>
+      <div class="booking-floorplan-diagram" data-floor-panel="main">
+        <%= raw Rails.root.join("app/assets/images/ourspace/main.svg").read %>
+      </div>
+    </div>
+
+    <div class="booking-floorplan-column">
+      <p class="booking-floorplan-tab">Mezzanine</p>
+      <div class="booking-floorplan-diagram" data-floor-panel="mezzanine">
+        <%= raw Rails.root.join("app/assets/images/ourspace/mezzanine.svg").read %>
+      </div>
+    </div>
+  </div>
+
+  <p class="booking-floorplan-selection" data-floor-plan-target="label">Select a desk</p>
+</div>
+
+<script>
+function initializeFloorPlan() {
+  document.querySelectorAll('[data-controller="floor-plan"]').forEach(root => {
+    if (root.dataset.floorPlanReady === 'true') return;
+    root.dataset.floorPlanReady = 'true';
+
+    const seatMap = JSON.parse(root.dataset.floorPlanSeatMapValue || '{}');
+    const unavailable = new Set(JSON.parse(root.dataset.floorPlanUnavailableValue || '[]'));
+    const input = root.querySelector('[data-floor-plan-target="input"]');
+    const label = root.querySelector('[data-floor-plan-target="label"]');
+    const seats = root.querySelectorAll('.ourspace-seat');
+
+    seats.forEach(seat => {
+      const desk = seat.dataset.desk;
+      if (unavailable.has(desk)) seat.classList.add('unavailable');
+
+      seat.addEventListener('click', () => {
+        if (seat.classList.contains('unavailable')) return;
+
+        seats.forEach(s => s.classList.remove('selected'));
+        seat.classList.add('selected');
+        input.value = seatMap[desk] || '';
+        label.textContent = `Desk ${desk} selected`;
+      });
+    });
+
+    const selectedId = root.dataset.floorPlanSelectedValue;
+    if (selectedId) {
+      seats.forEach(seat => {
+        if (seatMap[seat.dataset.desk] == selectedId) {
+          seat.classList.add('selected');
+          label.textContent = `Desk ${seat.dataset.desk} selected`;
+        }
+      });
+    }
+  });
+}
+
+document.addEventListener('turbo:before-cache', () => {
+  document.querySelectorAll('[data-controller="floor-plan"]').forEach(root => {
+    delete root.dataset.floorPlanReady;
+  });
+});
+
+document.addEventListener('DOMContentLoaded', initializeFloorPlan);
+document.addEventListener('turbo:load', initializeFloorPlan);
+</script>

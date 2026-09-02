@@ -1,0 +1,36 @@
+<% content_for :title, "Book with credits - Mezzanine" %>
+
+<main class="booking-page">
+  <div class="booking-container">
+    <h1 class="booking-title">Book a day</h1>
+    <p class="booking-lead">You have <%= @available_credits %> <%= "credit".pluralize(@available_credits) %> available.</p>
+
+    <%= form_with url: bookings_path, method: :post, class: "booking-form" do %>
+      <div class="booking-field">
+        <label for="date" class="booking-label">Date</label>
+        <input type="date"
+               id="date"
+               name="date"
+               value="<%= @booking_date %>"
+               min="<%= Date.current %>"
+               class="booking-input"
+               required
+               onchange="window.location = '<%= new_booking_path %>?date=' + this.value">
+      </div>
+
+      <div class="booking-field">
+        <span class="booking-label">Select your desk</span>
+        <%= render "shared/floor_plan_picker",
+              unavailable_desks: @unavailable_desks,
+              seat_map: @seats.index_by(&:code).transform_values(&:id),
+              input_name: "seat_id",
+              selected_seat_id: nil %>
+      </div>
+
+      <div class="booking-actions">
+        <button type="submit" class="booking-btn booking-btn--primary">Confirm booking</button>
+        <%= link_to "Back to my bookings", bookings_path, class: "booking-btn booking-btn--secondary" %>
+      </div>
+    <% end %>
+  </div>
+</main>

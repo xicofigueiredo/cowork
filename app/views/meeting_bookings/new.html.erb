@@ -1,0 +1,113 @@
+<% content_for :title, "Book meeting room - Mezzanine" %>
+
+<main class="booking-page">
+  <div class="booking-container booking-container--meeting">
+    <div class="booking-card">
+      <h1 class="booking-title booking-title--centered">Book meeting room</h1>
+      <p class="booking-lead booking-lead--centered">
+        You have <%= @available_meeting_hours %> meeting room <%= "hour".pluralize(@available_meeting_hours) %> available (1 hour = 1 credit).
+        Book at least 24 hours in advance on weekdays. Room hours: 8:00–20:00.
+      </p>
+
+      <%= form_with url: meeting_booking_path, method: :post,
+            class: "booking-form booking-form--centered",
+            id: "meeting-booking-form",
+            data: { max_hours: @available_meeting_hours } do %>
+        <input type="hidden" name="date" value="<%= @booking_date %>">
+
+        <div class="booking-field booking-field--wide">
+          <span class="booking-label">Choose a day</span>
+          <%= render "shared/meeting_calendar_days",
+                days: @calendar_days,
+                selected_date: @booking_date %>
+        </div>
+
+        <div class="booking-field booking-field--wide">
+          <span class="booking-label">Available slots · <%= @booking_date.strftime("%-d %B %Y") %></span>
+          <p class="booking-note" id="selection-summary">Tap slots to select. Each slot uses 1 credit.</p>
+          <div class="meeting-slot-grid" data-meeting-slot-grid>
+            <% selected_values = @selected_slots.map(&:iso8601) %>
+            <% @hour_grid.each do |slot| %>
+              <% if slot[:available] %>
+                <label class="meeting-slot meeting-slot--available">
+                  <input type="checkbox"
+                         name="starts_at[]"
+                         value="<%= slot[:starts_at].iso8601 %>"
+                         data-slot-label="<%= slot[:label] %>"
+                         <%= "checked" if selected_values.include?(slot[:starts_at].iso8601) %>>
+                  <span class="meeting-slot-time"><%= slot[:label] %></span>
+                  <span class="meeting-slot-range"><%= slot[:label] %> – <%= slot[:ends_at].strftime("%H:%M") %></span>
+                </label>
+              <% else %>
+                <div class="meeting-slot meeting-slot--unavailable" aria-hidden="true">
+                  <span class="meeting-slot-time"><%= slot[:label] %></span>
+                  <span class="meeting-slot-range">Taken</span>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+          <% if @hour_grid.none? { |slot| slot[:available] } %>
+            <p class="booking-note">No available slots on this date. Pick another day above.</p>
+          <% end %>
+        </div>
+
+        <div class="booking-actions booking-actions--centered">
+          <button type="submit" class="booking-btn booking-btn--primary" id="meeting-submit" <%= @hour_grid.none? { |slot| slot[:available] } ? "disabled" : "" %>>
+            Confirm booking
+          </button>
+          <%= link_to "Back to my bookings", bookings_path, class: "booking-btn booking-btn--secondary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</main>
+
+<script>
+function initializeMeetingBookingForm() {
+  const form = document.getElementById("meeting-booking-form");
+  if (!form || form.dataset.ready === "true") return;
+  form.dataset.ready = "true";
+
+  const maxHours = parseInt(form.dataset.maxHours, 10);
+  const summary = document.getElementById("selection-summary");
+  const submitButton = document.getElementById("meeting-submit");
+  const slotInputs = form.querySelectorAll('input[name="starts_at[]"]');
+
+  function updateSelection() {
+    const selected = Array.from(slotInputs).filter((input) => input.checked);
+    const count = selected.length;
+
+    if (count === 0) {
+      summary.textContent = "Tap slots to select. Each slot uses 1 credit.";
+      submitButton.disabled = true;
+      return;
+    }
+
+    const labels = selected.map((input) => input.dataset.slotLabel).join(", ");
+    summary.textContent = `${count} ${count === 1 ? "hour" : "hours"} selected (${labels}).`;
+    submitButton.disabled = false;
+  }
+
+  slotInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      const selectedCount = form.querySelectorAll('input[name="starts_at[]"]:checked').length;
+      if (selectedCount > maxHours) {
+        input.checked = false;
+        summary.textContent = `You only have ${maxHours} credits available.`;
+        return;
+      }
+      updateSelection();
+    });
+  });
+
+  updateSelection();
+}
+
+document.addEventListener("turbo:before-cache", () => {
+  const form = document.getElementById("meeting-booking-form");
+  if (form) delete form.dataset.ready;
+});
+
+document.addEventListener("DOMContentLoaded", initializeMeetingBookingForm);
+document.addEventListener("turbo:load", initializeMeetingBookingForm);
+</script>

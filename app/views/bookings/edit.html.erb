@@ -1,0 +1,204 @@
+<% content_for :title, "Edit booking - Mezzanine" %>
+<% meeting_edit = @booking.meeting_booking? %>
+<% selected_meeting_day = @calendar_days&.find { |day| day[:date] == @booking_date } if meeting_edit %>
+<% hourly_slots_available = @hour_grid&.any? { |slot| slot[:available] } %>
+<% selected_slot_value = @booking.starts_at.iso8601 if @booking.meeting_hourly? && @booking_date == @booking.starts_at.to_date %>
+<% save_disabled = meeting_edit && (
+     (@booking.meeting_daily? && !selected_meeting_day&.dig(:available)) ||
+     (@booking.meeting_hourly? && !hourly_slots_available)
+   ) %>
+
+<main class="booking-page">
+  <div class="booking-container <%= "booking-container--meeting" if meeting_edit %>">
+    <% if meeting_edit %><div class="booking-card"><% end %>
+
+    <h1 class="booking-title <%= "booking-title--centered" if meeting_edit %>">Edit booking</h1>
+
+    <% if @booking.meeting_hourly? %>
+      <p class="booking-lead booking-lead--centered">
+        Currently booked for <%= @booking.starts_at.strftime("%-d %B %Y, %H:%M") %>.
+        Pick a new day and time slot below.
+      </p>
+
+      <%= form_with url: booking_path(@booking), method: :patch, class: "booking-form booking-form--centered" do %>
+        <div class="booking-field booking-field--wide">
+          <span class="booking-label">Choose a day</span>
+          <%= render "shared/meeting_calendar_days",
+                days: @calendar_days,
+                selected_date: @booking_date,
+                booking: @booking %>
+        </div>
+
+        <div class="booking-field booking-field--wide">
+          <span class="booking-label">Available slots · <%= @booking_date.strftime("%-d %B %Y") %></span>
+          <div class="meeting-slot-grid">
+            <% @hour_grid.each do |slot| %>
+              <% if slot[:available] %>
+                <label class="meeting-slot meeting-slot--available">
+                  <input type="radio"
+                         name="starts_at"
+                         value="<%= slot[:starts_at].iso8601 %>"
+                         <%= "checked" if selected_slot_value == slot[:starts_at].iso8601 %>
+                         <%= "required" if hourly_slots_available %>>
+                  <span class="meeting-slot-time"><%= slot[:label] %></span>
+                  <span class="meeting-slot-range"><%= slot[:label] %> – <%= slot[:ends_at].strftime("%H:%M") %></span>
+                </label>
+              <% else %>
+                <div class="meeting-slot meeting-slot--unavailable" aria-hidden="true">
+                  <span class="meeting-slot-time"><%= slot[:label] %></span>
+                  <span class="meeting-slot-range">Taken</span>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+          <% unless hourly_slots_available %>
+            <p class="booking-note">No available slots on this date. Pick another day above.</p>
+          <% end %>
+        </div>
+
+        <div class="booking-field booking-field--wide">
+          <div class="booking-summary-card">
+            <p class="booking-summary-row">
+              <span>Room</span>
+              <strong>Meeting room</strong>
+            </p>
+            <p class="booking-summary-row">
+              <span>Duration</span>
+              <strong>1 hour</strong>
+            </p>
+          </div>
+        </div>
+
+        <% if @booking.errors.any? %>
+          <p class="booking-note booking-note--error"><%= @booking.errors.full_messages.to_sentence %></p>
+        <% end %>
+
+        <div class="booking-actions booking-actions--centered">
+          <button type="submit" class="booking-btn booking-btn--primary" <%= "disabled" if save_disabled %>>Save changes</button>
+          <%= link_to "Back to my bookings", bookings_path, class: "booking-btn booking-btn--secondary" %>
+        </div>
+      <% end %>
+
+    <% elsif @booking.meeting_daily? %>
+      <p class="booking-lead booking-lead--centered">
+        Currently booked for <%= @booking.date.strftime("%-d %B %Y") %> (full day).
+        Pick a new day below.
+      </p>
+
+      <%= form_with url: booking_path(@booking), method: :patch, class: "booking-form booking-form--centered" do %>
+        <input type="hidden" name="date" value="<%= @booking_date %>">
+
+        <div class="booking-field booking-field--wide">
+          <span class="booking-label">Choose a day</span>
+          <%= render "shared/meeting_calendar_days",
+                days: @calendar_days,
+                selected_date: @booking_date,
+                booking: @booking %>
+        </div>
+
+        <div class="booking-field booking-field--wide">
+          <div class="booking-summary-card">
+            <p class="booking-summary-row">
+              <span>Date</span>
+              <strong><%= @booking_date.strftime("%-d %B %Y") %></strong>
+            </p>
+            <p class="booking-summary-row">
+              <span>Room</span>
+              <strong>Meeting room</strong>
+            </p>
+            <p class="booking-summary-row">
+              <span>Duration</span>
+              <strong>Full day (8:00 – 20:00)</strong>
+            </p>
+          </div>
+        </div>
+
+        <% unless selected_meeting_day&.dig(:available) %>
+          <p class="booking-note booking-note--error">This day is not available. Choose another day above.</p>
+        <% end %>
+
+        <% if @booking.errors.any? %>
+          <p class="booking-note booking-note--error"><%= @booking.errors.full_messages.to_sentence %></p>
+        <% end %>
+
+        <div class="booking-actions booking-actions--centered">
+          <button type="submit" class="booking-btn booking-btn--primary" <%= "disabled" if save_disabled %>>Save changes</button>
+          <%= link_to "Back to my bookings", bookings_path, class: "booking-btn booking-btn--secondary" %>
+        </div>
+      <% end %>
+
+    <% elsif @booking.daily? %>
+      <p class="booking-lead">
+        Currently <%= @booking.seat.label %> on <%= @booking.date.strftime("%-d %B %Y") %>.
+        Pick a new date and desk below.
+      </p>
+
+      <%= form_with url: booking_path(@booking), method: :patch, class: "booking-form" do %>
+        <div class="booking-field">
+          <label for="date" class="booking-label">Date</label>
+          <input type="date"
+                 id="date"
+                 name="date"
+                 value="<%= @booking_date %>"
+                 min="<%= Date.current %>"
+                 class="booking-input"
+                 required
+                 onchange="window.location = '<%= edit_booking_path(@booking) %>?date=' + this.value">
+        </div>
+
+        <div class="booking-field">
+          <span class="booking-label">Select your desk</span>
+          <%= render "shared/floor_plan_picker",
+                unavailable_desks: @unavailable_desks,
+                seat_map: @seats.index_by(&:code).transform_values(&:id),
+                input_name: "seat_id",
+                selected_seat_id: @booking.seat_id %>
+        </div>
+
+        <% if @booking.errors.any? %>
+          <p class="booking-note booking-note--error"><%= @booking.errors.full_messages.to_sentence %></p>
+        <% end %>
+
+        <div class="booking-actions">
+          <button type="submit" class="booking-btn booking-btn--primary">Save changes</button>
+          <%= link_to "Back to my bookings", bookings_path, class: "booking-btn booking-btn--secondary" %>
+        </div>
+      <% end %>
+
+    <% else %>
+      <p class="booking-lead">
+        Currently <%= @booking.seat.label %> for <%= @booking.period_label %>.
+        Pick a new desk below — your period stays the same.
+      </p>
+
+      <%= form_with url: booking_path(@booking), method: :patch, class: "booking-form" do %>
+        <div class="booking-summary-card">
+          <p class="booking-summary-row">
+            <span>Period</span>
+            <strong><%= @booking.period_label %></strong>
+          </p>
+        </div>
+
+        <div class="booking-field">
+          <span class="booking-label">Select your desk</span>
+          <%= render "shared/floor_plan_picker",
+                unavailable_desks: @unavailable_desks,
+                seat_map: @seats.index_by(&:code).transform_values(&:id),
+                input_name: "seat_id",
+                selected_seat_id: @booking.seat_id %>
+        </div>
+
+        <% if @booking.errors.any? %>
+          <p class="booking-note booking-note--error"><%= @booking.errors.full_messages.to_sentence %></p>
+        <% end %>
+
+        <div class="booking-actions">
+          <button type="submit" class="booking-btn booking-btn--primary">Save changes</button>
+          <%= link_to "Back to my bookings", bookings_path, class: "booking-btn booking-btn--secondary" %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <% if meeting_edit %></div><% end %>
+  </div>
+</main>

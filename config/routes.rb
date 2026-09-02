@@ -13,6 +13,15 @@ Rails.application.routes.draw do
   post "location" => "location#create"
   get "privacy-policy" => "legal#privacy_policy", as: :privacy_policy
 
+  resources :checkouts, only: [ :new, :create, :show ] do
+    member do
+      post :pay
+    end
+  end
+
+  resources :bookings, only: [ :index, :new, :create, :edit, :update ]
+  resource :meeting_booking, only: [ :new, :create ]
+
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker

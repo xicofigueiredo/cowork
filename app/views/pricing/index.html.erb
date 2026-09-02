@@ -52,7 +52,16 @@ function initializePricing() {
   const detailsTitle = document.querySelector('.pricing-details-title');
   const plansGrid = document.querySelector('.pricing-plans-grid');
 
-  const bookNowUrl = '<%= location_path %>';
+  const checkoutBase = '<%= new_checkout_path %>';
+
+  const planTypeMap = {
+    'Daily pass': 'daily',
+    '5-day pack': 'pack_5',
+    '10-day pack': 'pack_10',
+    'Monthly': 'monthly',
+    'Hourly booking': 'meeting_hourly',
+    'Daily booking': 'meeting_daily'
+  };
 
   const pricingData = {
     daily: {
@@ -63,7 +72,7 @@ function initializePricing() {
           originalPrice: '15,00 €',
           price: '13,00 €',
           features: [
-            '13% discount',
+            'Early bird discount',
             'Hotdesk (choose your seat)',
             'High speed internet',
             'Free access to the phone booth'
@@ -75,7 +84,7 @@ function initializePricing() {
           price: '55,00 €',
           features: [
             '15% discount',
-            'Same as daily pass',
+            'Same perks as daily pass',
             'Prior booking needed',
             'Valid for 3 months'
           ]
@@ -86,7 +95,7 @@ function initializePricing() {
           price: '100,00 €',
           features: [
             '23% discount',
-            'Same as daily pass',
+            'Same perks as daily pass',
             'Prior booking needed',
             'Valid for 3 months'
           ]
@@ -103,6 +112,16 @@ function initializePricing() {
           features: [
             'Dedicated desk',
             '5h access to the meeting room',
+            'Free access to the phone booth',
+            'No minimum commitment'
+          ]
+        },
+        {
+          title: 'Long term desk',
+          price: 'Customized',
+          features: [
+            'Dedicated desk',
+            '5h access to the meeting room per month',
             'Free access to the phone booth',
             'No minimum commitment'
           ]
@@ -155,6 +174,10 @@ function initializePricing() {
       ? `<ul class="pricing-plan-features">${plan.features.map(feature => `<li>${feature}</li>`).join('')}</ul>`
       : '';
 
+    const planType = planTypeMap[plan.title];
+    const bookUrl = planType ? `${checkoutBase}?plan=${planType}` : '<%= location_path %>';
+    const bookLabel = planType ? 'Book now' : 'Contact us';
+
     return `
       <h4 class="pricing-plan-title">${plan.title}</h4>
       <div class="pricing-plan-prices">
@@ -162,7 +185,7 @@ function initializePricing() {
         <p class="pricing-plan-price">${plan.price}</p>
       </div>
       ${featuresHtml}
-      <a href="${bookNowUrl}" class="pricing-plan-button">Book now</a>
+      <a href="${bookUrl}" class="pricing-plan-button">${bookLabel}</a>
     `;
   }
 

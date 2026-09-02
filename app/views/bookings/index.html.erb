@@ -1,0 +1,126 @@
+<% content_for :title, "My Bookings - Mezzanine" %>
+
+<main class="booking-page">
+  <div class="booking-container">
+    <h1 class="booking-title">My bookings</h1>
+
+    <% if @available_credits.positive? %>
+      <div class="booking-credits-banner">
+        <p>You have <strong><%= @available_credits %></strong> day <%= "credit".pluralize(@available_credits) %> available.</p>
+        <%= link_to "Book a day with credits", new_booking_path, class: "booking-btn booking-btn--primary booking-btn--small" %>
+      </div>
+    <% end %>
+
+    <% if @available_meeting_hours.positive? %>
+      <div class="booking-credits-banner booking-credits-banner--meeting">
+        <p>You have <strong><%= @available_meeting_hours %></strong> meeting room <%= "hour".pluralize(@available_meeting_hours) %> available.</p>
+        <%= link_to "Book meeting room", new_meeting_booking_path, class: "booking-btn booking-btn--primary booking-btn--small" %>
+      </div>
+    <% end %>
+
+    <section class="booking-section">
+      <h2 class="booking-section-title">Upcoming</h2>
+
+      <% if @bookings.any? %>
+        <ul class="booking-list">
+          <% @bookings.each do |booking| %>
+            <li class="booking-list-item">
+              <div>
+                <strong><%= booking.seat.label %></strong>
+                <span class="booking-list-meta"><%= booking.period_label %></span>
+              </div>
+              <div class="booking-list-actions">
+                <% if booking.editable? %>
+                  <%= link_to "Edit", edit_booking_path(booking), class: "booking-btn booking-btn--secondary booking-btn--small" %>
+                <% end %>
+                <span class="booking-badge booking-badge--<%= booking.meeting_booking? ? 'meeting' : booking.booking_type %>">
+                  <%= booking.meeting_booking? ? "Meeting" : booking.booking_type.capitalize %>
+                </span>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="booking-empty">No upcoming bookings.</p>
+      <% end %>
+    </section>
+
+    <% if @past_bookings.any? %>
+      <section class="booking-section">
+        <h2 class="booking-section-title">Past bookings</h2>
+        <ul class="booking-list booking-list--muted">
+          <% @past_bookings.each do |booking| %>
+            <li class="booking-list-item">
+              <div>
+                <strong><%= booking.seat.label %></strong>
+                <span class="booking-list-meta"><%= booking.period_label %></span>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+
+    <% if @day_credit_packs.any? %>
+      <section class="booking-section">
+        <h2 class="booking-section-title">Day credits</h2>
+        <ul class="booking-list">
+          <% @day_credit_packs.each do |pack| %>
+            <li class="booking-list-item">
+              <div>
+                <strong><%= pack.remaining_credits %> / <%= pack.total_credits %> credits</strong>
+                <span class="booking-list-meta">
+                  <% if pack.expired? %>
+                    Expired <%= pack.expires_at.strftime("%-d %b %Y") %>
+                  <% else %>
+                    Expires <%= pack.expires_at.strftime("%-d %b %Y") %>
+                  <% end %>
+                </span>
+              </div>
+              <% if pack.usable? %>
+                <span class="booking-badge booking-badge--active">Active</span>
+              <% else %>
+                <span class="booking-badge booking-badge--expired">Used up</span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+
+    <% if @meeting_credit_packs.any? %>
+      <section class="booking-section">
+        <h2 class="booking-section-title">Meeting room hours</h2>
+        <ul class="booking-list">
+          <% @meeting_credit_packs.each do |pack| %>
+            <li class="booking-list-item">
+              <div>
+                <strong><%= pack.remaining_credits %> / <%= pack.total_credits %> hours</strong>
+                <span class="booking-list-meta">
+                  <% if pack.upcoming? %>
+                    Available from <%= pack.order.booking.starts_on.strftime("%-d %b %Y") %>
+                  <% elsif pack.expired? %>
+                    Expired <%= pack.expires_at.strftime("%-d %b %Y") %>
+                  <% else %>
+                    Expires <%= pack.expires_at.strftime("%-d %b %Y") %>
+                  <% end %>
+                </span>
+              </div>
+              <% if pack.usable? %>
+                <span class="booking-badge booking-badge--active">Active</span>
+              <% elsif pack.upcoming? %>
+                <span class="booking-badge booking-badge--upcoming">Starts <%= pack.order.booking.starts_on.strftime("%-d %b") %></span>
+              <% else %>
+                <span class="booking-badge booking-badge--expired">Used up</span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+
+    <div class="booking-actions">
+      <%= link_to "Get more credits", pricing_path, class: "booking-btn booking-btn--secondary" %>
+    </div>
+  </div>
+</main>

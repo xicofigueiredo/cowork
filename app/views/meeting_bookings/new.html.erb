@@ -1,64 +1,62 @@
 <% content_for :title, "Book meeting room - Mezzanine" %>
 
 <main class="booking-page">
-  <div class="booking-container booking-container--meeting">
-    <div class="booking-card">
-      <h1 class="booking-title booking-title--centered">Book meeting room</h1>
-      <p class="booking-lead booking-lead--centered">
-        You have <%= @available_meeting_hours %> meeting room <%= "hour".pluralize(@available_meeting_hours) %> available (1 hour = 1 credit).
-        Book at least 24 hours in advance on weekdays. Room hours: 8:00–20:00.
-      </p>
+  <div class="booking-container">
+    <h1 class="booking-title">Book meeting room</h1>
+    <p class="booking-lead">
+      You have <%= @available_meeting_hours %> meeting room <%= "hour".pluralize(@available_meeting_hours) %> available (1 hour = 1 credit).
+      Book at least 24 hours in advance on weekdays. Room hours: 8:00–20:00.
+    </p>
 
-      <%= form_with url: meeting_booking_path, method: :post,
-            class: "booking-form booking-form--centered",
-            id: "meeting-booking-form",
-            data: { max_hours: @available_meeting_hours } do %>
-        <input type="hidden" name="date" value="<%= @booking_date %>">
+    <%= form_with url: meeting_booking_path, method: :post,
+          class: "booking-form",
+          id: "meeting-booking-form",
+          data: { max_hours: @available_meeting_hours } do %>
+      <input type="hidden" name="date" value="<%= @booking_date %>">
 
-        <div class="booking-field booking-field--wide">
-          <span class="booking-label">Choose a day</span>
-          <%= render "shared/meeting_calendar_days",
-                days: @calendar_days,
-                selected_date: @booking_date %>
-        </div>
+      <div class="booking-field">
+        <span class="booking-label">Choose a day</span>
+        <%= render "shared/meeting_calendar_days",
+              days: @calendar_days,
+              selected_date: @booking_date %>
+      </div>
 
-        <div class="booking-field booking-field--wide">
-          <span class="booking-label">Available slots · <%= @booking_date.strftime("%-d %B %Y") %></span>
-          <p class="booking-note" id="selection-summary">Tap slots to select. Each slot uses 1 credit.</p>
-          <div class="meeting-slot-grid" data-meeting-slot-grid>
-            <% selected_values = @selected_slots.map(&:iso8601) %>
-            <% @hour_grid.each do |slot| %>
-              <% if slot[:available] %>
-                <label class="meeting-slot meeting-slot--available">
-                  <input type="checkbox"
-                         name="starts_at[]"
-                         value="<%= slot[:starts_at].iso8601 %>"
-                         data-slot-label="<%= slot[:label] %>"
-                         <%= "checked" if selected_values.include?(slot[:starts_at].iso8601) %>>
-                  <span class="meeting-slot-time"><%= slot[:label] %></span>
-                  <span class="meeting-slot-range"><%= slot[:label] %> – <%= slot[:ends_at].strftime("%H:%M") %></span>
-                </label>
-              <% else %>
-                <div class="meeting-slot meeting-slot--unavailable" aria-hidden="true">
-                  <span class="meeting-slot-time"><%= slot[:label] %></span>
-                  <span class="meeting-slot-range">Taken</span>
-                </div>
-              <% end %>
+      <div class="booking-field">
+        <span class="booking-label">Available slots · <%= @booking_date.strftime("%-d %B %Y") %></span>
+        <p class="booking-note" id="selection-summary">Tap slots to select. Each slot uses 1 credit.</p>
+        <div class="meeting-slot-grid" data-meeting-slot-grid>
+          <% selected_values = @selected_slots.map(&:iso8601) %>
+          <% @hour_grid.each do |slot| %>
+            <% if slot[:available] %>
+              <label class="meeting-slot meeting-slot--available">
+                <input type="checkbox"
+                       name="starts_at[]"
+                       value="<%= slot[:starts_at].iso8601 %>"
+                       data-slot-label="<%= slot[:label] %>"
+                       <%= "checked" if selected_values.include?(slot[:starts_at].iso8601) %>>
+                <span class="meeting-slot-time"><%= slot[:label] %></span>
+                <span class="meeting-slot-range"><%= slot[:label] %> – <%= slot[:ends_at].strftime("%H:%M") %></span>
+              </label>
+            <% else %>
+              <div class="meeting-slot meeting-slot--unavailable" aria-hidden="true">
+                <span class="meeting-slot-time"><%= slot[:label] %></span>
+                <span class="meeting-slot-range">Taken</span>
+              </div>
             <% end %>
-          </div>
-          <% if @hour_grid.none? { |slot| slot[:available] } %>
-            <p class="booking-note">No available slots on this date. Pick another day above.</p>
           <% end %>
         </div>
+        <% if @hour_grid.none? { |slot| slot[:available] } %>
+          <p class="booking-note">No available slots on this date. Pick another day above.</p>
+        <% end %>
+      </div>
 
-        <div class="booking-actions booking-actions--centered">
-          <button type="submit" class="booking-btn booking-btn--primary" id="meeting-submit" <%= @hour_grid.none? { |slot| slot[:available] } ? "disabled" : "" %>>
-            Confirm booking
-          </button>
-          <%= link_to "Back to my bookings", bookings_path, class: "booking-btn booking-btn--secondary" %>
-        </div>
-      <% end %>
-    </div>
+      <div class="booking-actions">
+        <button type="submit" class="booking-btn booking-btn--primary" id="meeting-submit" <%= @hour_grid.none? { |slot| slot[:available] } ? "disabled" : "" %>>
+          Confirm booking
+        </button>
+        <%= link_to "Back to my bookings", bookings_path, class: "booking-btn booking-btn--secondary" %>
+      </div>
+    <% end %>
   </div>
 </main>
 

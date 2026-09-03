@@ -1,0 +1,15 @@
+<%# locals: amount_cents: %>
+<div class="booking-price-breakdown">
+  <div class="booking-price-row booking-price-row--subtotal">
+    <span>Subtotal</span>
+    <strong><%= Order.format_euros(amount_cents) %></strong>
+  </div>
+  <div class="booking-price-row booking-price-row--iva">
+    <span>IVA (23%)</span>
+    <strong><%= Order.format_euros(Order.iva_cents_for(amount_cents)) %></strong>
+  </div>
+  <div class="booking-price-row booking-price-row--total">
+    <span>Total</span>
+    <strong><%= Order.format_euros(Order.total_with_iva_cents_for(amount_cents)) %></strong>
+  </div>
+</div>

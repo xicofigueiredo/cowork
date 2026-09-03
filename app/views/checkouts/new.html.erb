@@ -12,13 +12,11 @@
    ) %>
 
 <main class="booking-page">
-  <div class="booking-container <%= "booking-container--meeting" if meeting_checkout %>">
-    <% if meeting_checkout %><div class="booking-card"><% end %>
+  <div class="booking-container">
+    <h1 class="booking-title"><%= Order.plan_config(@plan_type)[:label] %></h1>
+    <p class="booking-lead"><%= checkout_plan_description(@plan_type) %></p>
 
-    <h1 class="booking-title <%= "booking-title--centered" if meeting_checkout %>"><%= Order.plan_config(@plan_type)[:label] %></h1>
-    <p class="booking-lead <%= "booking-lead--centered" if meeting_checkout %>"><%= checkout_plan_description(@plan_type) %></p>
-
-    <%= form_with model: @order, url: checkouts_path, class: "booking-form #{"booking-form--centered" if meeting_checkout}" do |f| %>
+    <%= form_with model: @order, url: checkouts_path, class: "booking-form" do |f| %>
       <%= f.hidden_field :plan_type, value: @plan_type %>
 
       <% if @plan_type == "daily" %>
@@ -57,7 +55,7 @@
       <% elsif @plan_type == "meeting_daily" %>
         <%= f.hidden_field :booking_date, value: @booking_date %>
 
-        <div class="booking-field booking-field--wide">
+        <div class="booking-field">
           <span class="booking-label">Choose a day</span>
           <%= render "shared/meeting_calendar_days",
                 days: @calendar_days,
@@ -65,7 +63,7 @@
                 plan_type: @plan_type %>
         </div>
 
-        <div class="booking-field booking-field--wide">
+        <div class="booking-field">
           <div class="booking-summary-card">
             <p class="booking-summary-row">
               <span>Date</span>
@@ -81,10 +79,7 @@
             </p>
           </div>
 
-          <div class="booking-price-row">
-            <span>Total</span>
-            <strong><%= format("%.2f €", @order.amount_cents / 100.0) %></strong>
-          </div>
+          <%= render "shared/checkout_total", amount_cents: @order.amount_cents %>
         </div>
 
         <% unless selected_calendar_day&.dig(:available) %>
@@ -92,7 +87,7 @@
         <% end %>
 
       <% elsif @plan_type == "meeting_hourly" %>
-        <div class="booking-field booking-field--wide">
+        <div class="booking-field">
           <span class="booking-label">Choose a day</span>
           <%= render "shared/meeting_calendar_days",
                 days: @calendar_days,
@@ -100,7 +95,7 @@
                 plan_type: @plan_type %>
         </div>
 
-        <div class="booking-field booking-field--wide">
+        <div class="booking-field">
           <span class="booking-label">Available slots · <%= @booking_date.strftime("%-d %B %Y") %></span>
           <div class="meeting-slot-grid">
             <% selected_value = @order.starts_at&.iso8601 %>
@@ -127,7 +122,7 @@
           <% end %>
         </div>
 
-        <div class="booking-field booking-field--wide">
+        <div class="booking-field">
           <div class="booking-summary-card">
             <p class="booking-summary-row">
               <span>Date</span>
@@ -149,10 +144,7 @@
             </p>
           </div>
 
-          <div class="booking-price-row">
-            <span>Total</span>
-            <strong><%= format("%.2f €", @order.amount_cents / 100.0) %></strong>
-          </div>
+          <%= render "shared/checkout_total", amount_cents: @order.amount_cents %>
         </div>
 
       <% else %>
@@ -174,20 +166,15 @@
       <% end %>
 
       <% unless meeting_checkout %>
-        <div class="booking-price-row">
-          <span>Total</span>
-          <strong><%= format("%.2f €", @order.amount_cents / 100.0) %></strong>
-        </div>
+        <%= render "shared/checkout_total", amount_cents: @order.amount_cents %>
       <% end %>
 
-      <div class="booking-actions <%= "booking-actions--centered" if meeting_checkout %>">
+      <div class="booking-actions">
         <%= f.submit "Continue to payment",
               class: "booking-btn booking-btn--primary",
               disabled: checkout_submit_disabled %>
         <%= link_to "Back to pricing", pricing_path, class: "booking-btn booking-btn--secondary" %>
       </div>
     <% end %>
-
-    <% if meeting_checkout %></div><% end %>
   </div>
 </main>

@@ -189,6 +189,30 @@
   font-size: 22px;
 }
 
+.booking-price-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.booking-price-row--subtotal,
+.booking-price-row--iva {
+  padding: 14px 24px;
+  font-size: 15px;
+  box-shadow: none;
+  background: #fafafa;
+}
+
+.booking-price-row--subtotal strong,
+.booking-price-row--iva strong {
+  font-size: 16px;
+  color: var(--landing-dark);
+}
+
+.booking-price-row--total {
+  margin-top: 4px;
+}
+
 .booking-actions {
   display: flex;
   flex-wrap: wrap;
@@ -376,7 +400,7 @@
 /* Meeting room calendar */
 .meeting-calendar-days {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
   gap: 8px;
 }
 
@@ -427,7 +451,7 @@
 
 .meeting-slot-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 8px;
 }
 

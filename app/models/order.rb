@@ -1,4 +1,6 @@
 class Order < ApplicationRecord
+  IVA_RATE = BigDecimal("0.23")
+
   PLAN_TYPES = {
     "daily" => { amount_cents: 1300, label: "Daily pass", credits: nil },
     "pack_5" => { amount_cents: 5500, label: "5-day pack", credits: 5 },
@@ -62,6 +64,34 @@ class Order < ApplicationRecord
 
   def amount_euros
     format("%.2f €", amount_cents / 100.0)
+  end
+
+  def iva_cents
+    self.class.iva_cents_for(amount_cents)
+  end
+
+  def total_with_iva_cents
+    self.class.total_with_iva_cents_for(amount_cents)
+  end
+
+  def iva_euros
+    self.class.format_euros(iva_cents)
+  end
+
+  def total_with_iva_euros
+    self.class.format_euros(total_with_iva_cents)
+  end
+
+  def self.iva_cents_for(amount_cents)
+    (amount_cents * IVA_RATE).round
+  end
+
+  def self.total_with_iva_cents_for(amount_cents)
+    amount_cents + iva_cents_for(amount_cents)
+  end
+
+  def self.format_euros(cents)
+    format("%.2f €", cents / 100.0)
   end
 
   def meeting_ends_at

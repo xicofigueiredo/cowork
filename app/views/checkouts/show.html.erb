@@ -50,10 +50,7 @@
         </p>
       <% end %>
 
-      <p class="booking-summary-row booking-summary-row--total">
-        <span>Total</span>
-        <strong><%= @order.amount_euros %></strong>
-      </p>
+      <%= render "shared/checkout_total", amount_cents: @order.amount_cents %>
     </div>
 
     <div class="booking-payment-mock">

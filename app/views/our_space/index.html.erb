@@ -64,6 +64,36 @@
     </div>
   </section>
 
+  <section class="ourspace-carousel" aria-label="Space photos">
+    <div class="ourspace-carousel-inner">
+      <div class="ourspace-carousel-viewport">
+        <div class="ourspace-carousel-track" data-ourspace-carousel-track>
+          <% @carousel_images.each_with_index do |image, index| %>
+            <figure class="ourspace-carousel-slide" data-ourspace-carousel-slide>
+              <%= image_tag image, alt: "Mezzanine cowork space photo #{index + 1}", class: "ourspace-carousel-image" %>
+            </figure>
+          <% end %>
+        </div>
+
+        <button type="button" class="ourspace-carousel-control ourspace-carousel-control--prev" data-ourspace-carousel-prev aria-label="Previous photo">
+          ‹
+        </button>
+        <button type="button" class="ourspace-carousel-control ourspace-carousel-control--next" data-ourspace-carousel-next aria-label="Next photo">
+          ›
+        </button>
+      </div>
+
+      <div class="ourspace-carousel-dots" data-ourspace-carousel-dots hidden>
+        <% @carousel_images.each_with_index do |_, index| %>
+          <button type="button"
+                  class="ourspace-carousel-dot"
+                  data-ourspace-carousel-dot="<%= index %>"
+                  aria-label="Show photo <%= index + 1 %>"></button>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
   <section class="ourspace-floorplan">
     <div class="ourspace-floorplan-inner">
       <div class="ourspace-floorplan-columns">
@@ -92,6 +122,170 @@
 </main>
 
 <script>
+function initializeOurSpaceCarousel() {
+  const root = document.querySelector(".ourspace-carousel");
+  if (!root || root.dataset.carouselReady === "true") return;
+  root.dataset.carouselReady = "true";
+
+  const viewport = root.querySelector(".ourspace-carousel-viewport");
+  const track = root.querySelector("[data-ourspace-carousel-track]");
+  const dotsContainer = root.querySelector("[data-ourspace-carousel-dots]");
+  const prevButton = root.querySelector("[data-ourspace-carousel-prev]");
+  const nextButton = root.querySelector("[data-ourspace-carousel-next]");
+
+  let slides = [];
+  let originalCount = 0;
+  let offset = 0;
+  let activeIndex = 0;
+  let isAnimating = false;
+
+  function visibleCount() {
+    const value = getComputedStyle(viewport).getPropertyValue("--slides-visible").trim();
+    return Number(value) || 3;
+  }
+
+  function maxLogicalIndex() {
+    return Math.max(0, originalCount - visibleCount());
+  }
+
+  function logicalIndex() {
+    return Math.max(0, Math.min(activeIndex - offset, maxLogicalIndex()));
+  }
+
+  function stepSize() {
+    if (!slides[0]) return 0;
+    const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 0;
+    return slides[0].getBoundingClientRect().width + gap;
+  }
+
+  function clearClones() {
+    track.querySelectorAll("[data-carousel-clone]").forEach((node) => node.remove());
+  }
+
+  function buildTrack() {
+    clearClones();
+    const originals = Array.from(track.querySelectorAll("[data-ourspace-carousel-slide]:not([data-carousel-clone])"));
+    originalCount = originals.length;
+    offset = visibleCount();
+
+    originals.slice(-offset).forEach((slide) => {
+      const clone = slide.cloneNode(true);
+      clone.dataset.carouselClone = "true";
+      track.insertBefore(clone, track.firstChild);
+    });
+
+    originals.slice(0, offset).forEach((slide) => {
+      const clone = slide.cloneNode(true);
+      clone.dataset.carouselClone = "true";
+      track.appendChild(clone);
+    });
+
+    slides = Array.from(track.querySelectorAll("[data-ourspace-carousel-slide]"));
+    activeIndex = offset;
+  }
+
+  function setTransform(index, animate) {
+    track.style.transition = animate ? "" : "none";
+    track.style.transform = `translateX(-${index * stepSize()}px)`;
+    if (!animate) {
+      track.offsetHeight;
+      track.style.transition = "";
+    }
+  }
+
+  function updateSlideStyles() {
+    const visible = visibleCount();
+    slides.forEach((slide, index) => {
+      slide.classList.remove("is-side", "is-center");
+
+      if (visible === 3 && index >= activeIndex && index < activeIndex + visible) {
+        if (index === activeIndex + 1) slide.classList.add("is-center");
+        else slide.classList.add("is-side");
+      }
+    });
+  }
+
+  function updateDots() {
+    if (!dotsContainer) return;
+
+    dotsContainer.querySelectorAll("[data-ourspace-carousel-dot]").forEach((dot) => {
+      dot.classList.toggle("is-active", Number(dot.dataset.ourspaceCarouselDot) === logicalIndex());
+    });
+  }
+
+  function renderDots() {
+    if (!dotsContainer) return;
+
+    dotsContainer.innerHTML = "";
+    const pages = maxLogicalIndex() + 1;
+    dotsContainer.hidden = pages <= 1;
+
+    for (let index = 0; index < pages; index += 1) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "ourspace-carousel-dot";
+      dot.dataset.ourspaceCarouselDot = String(index);
+      dot.setAttribute("aria-label", `Show photo set ${index + 1}`);
+      dot.addEventListener("click", () => goToLogical(index));
+      dotsContainer.appendChild(dot);
+    }
+  }
+
+  function goToLogical(index) {
+    if (isAnimating) return;
+    activeIndex = offset + index;
+    isAnimating = true;
+    setTransform(activeIndex, true);
+    updateSlideStyles();
+    updateDots();
+  }
+
+  function snapIfNeeded() {
+    if (activeIndex >= offset + originalCount) {
+      activeIndex = offset;
+      setTransform(activeIndex, false);
+    } else if (activeIndex < offset) {
+      activeIndex = offset + maxLogicalIndex();
+      setTransform(activeIndex, false);
+    }
+
+    updateSlideStyles();
+    updateDots();
+    isAnimating = false;
+  }
+
+  function handleTransitionEnd(event) {
+    if (event.target !== track || event.propertyName !== "transform") return;
+    snapIfNeeded();
+  }
+
+  function step(direction) {
+    if (isAnimating || originalCount === 0) return;
+
+    isAnimating = true;
+    activeIndex += direction;
+    setTransform(activeIndex, true);
+    updateSlideStyles();
+    updateDots();
+  }
+
+  function rebuild() {
+    buildTrack();
+    renderDots();
+    setTransform(activeIndex, false);
+    updateSlideStyles();
+    updateDots();
+    isAnimating = false;
+  }
+
+  track.addEventListener("transitionend", handleTransitionEnd);
+  prevButton?.addEventListener("click", () => step(-1));
+  nextButton?.addEventListener("click", () => step(1));
+  window.addEventListener("resize", rebuild);
+
+  rebuild();
+}
+
 function initializeOurSpace() {
   const root = document.querySelector('.ourspace-floorplan');
   if (!root || root.dataset.ourspaceReady === 'true') return;
@@ -132,11 +326,23 @@ function initializeOurSpace() {
   if (initialSeat) updateInfo(initialSeat);
 }
 
-document.addEventListener('turbo:before-cache', () => {
-  const root = document.querySelector('.ourspace-floorplan');
+document.addEventListener("turbo:before-cache", () => {
+  const root = document.querySelector(".ourspace-floorplan");
   if (root) delete root.dataset.ourspaceReady;
+
+  const carousel = document.querySelector(".ourspace-carousel");
+  if (carousel) {
+    delete carousel.dataset.carouselReady;
+    carousel.querySelectorAll("[data-carousel-clone]").forEach((node) => node.remove());
+  }
 });
 
-document.addEventListener('DOMContentLoaded', initializeOurSpace);
-document.addEventListener('turbo:load', initializeOurSpace);
+document.addEventListener("DOMContentLoaded", () => {
+  initializeOurSpaceCarousel();
+  initializeOurSpace();
+});
+document.addEventListener("turbo:load", () => {
+  initializeOurSpaceCarousel();
+  initializeOurSpace();
+});
 </script>

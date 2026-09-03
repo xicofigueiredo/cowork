@@ -185,3 +185,13 @@ body:has(.landing) main {
     font-size: 15px;
   }
 }
+
+@media (max-width: 768px) {
+  body:has(.landing) {
+    padding-bottom: calc(var(--mobile-footbar-height) + env(safe-area-inset-bottom, 0px));
+  }
+
+  body:has(.landing) .landing-footer {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  }
+}

@@ -1,0 +1,58 @@
+<nav class="mobile-footbar" aria-label="Mobile navigation">
+  <%= link_to our_space_path, class: "mobile-footbar-item#{' mobile-footbar-item--active' if current_page?(our_space_path)}", aria: { current: current_page?(our_space_path) ? "page" : nil } do %>
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" />
+    </svg>
+    <span>our space</span>
+  <% end %>
+
+  <%= link_to pricing_path, class: "mobile-footbar-item#{' mobile-footbar-item--active' if current_page?(pricing_path)}", aria: { current: current_page?(pricing_path) ? "page" : nil } do %>
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 7.5h10M7 12h10M7 16.5h6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+      <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.75" />
+    </svg>
+    <span>pricing</span>
+  <% end %>
+
+  <%= link_to location_path, class: "mobile-footbar-item#{' mobile-footbar-item--active' if current_page?(location_path)}", aria: { current: current_page?(location_path) ? "page" : nil } do %>
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10Z" fill="none" stroke="currentColor" stroke-width="1.75" />
+      <circle cx="12" cy="11" r="2.25" fill="none" stroke="currentColor" stroke-width="1.75" />
+    </svg>
+    <span>contacts</span>
+  <% end %>
+
+  <% if user_signed_in? %>
+    <%= link_to bookings_path, class: "mobile-footbar-item#{' mobile-footbar-item--active' if controller_name == 'bookings'}", aria: { current: controller_name == "bookings" ? "page" : nil } do %>
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.75" />
+        <path d="M8 3v4M16 3v4M4 10h16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+      </svg>
+      <span>bookings</span>
+    <% end %>
+
+    <%= link_to edit_user_registration_path, class: "mobile-footbar-item#{' mobile-footbar-item--active' if controller_name == 'registrations'}", aria: { current: controller_name == "registrations" ? "page" : nil } do %>
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="9" r="3.5" fill="none" stroke="currentColor" stroke-width="1.75" />
+        <path d="M5 20.5c1.6-4 12.4-4 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+      </svg>
+      <span>account</span>
+    <% end %>
+
+    <%= link_to destroy_user_session_path, data: { turbo_method: :delete }, class: "mobile-footbar-item mobile-footbar-item--sign-out", aria: { label: "Sign out" } do %>
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 7V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+        <path d="M14 12H4m0 0 3-3m-3 3 3 3" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span>sign out</span>
+    <% end %>
+  <% else %>
+    <%= link_to new_user_session_path, class: "mobile-footbar-item#{' mobile-footbar-item--active' if controller_name == 'sessions'}", aria: { current: controller_name == "sessions" ? "page" : nil, label: "Log in" } do %>
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="9" r="3.5" fill="none" stroke="currentColor" stroke-width="1.75" />
+        <path d="M5 20.5c1.6-4 12.4-4 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+      </svg>
+      <span>log in</span>
+    <% end %>
+  <% end %>
+</nav>

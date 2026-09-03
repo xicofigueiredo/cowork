@@ -1,0 +1,26 @@
+<%#
+  locals:
+    calendar_days:, booking_date:, unavailable_desks:, seats:,
+    input_name:, selected_seat_id: nil,
+    plan_type: nil, credit_booking: false, booking: nil
+%>
+<% picker_plan_type = local_assigns[:plan_type] %>
+<% picker_credit_booking = local_assigns[:credit_booking] %>
+<% picker_booking = local_assigns[:booking] %>
+<% picker_selected_seat_id = local_assigns[:selected_seat_id] %>
+<div class="booking-field">
+  <span class="booking-label">Choose a day</span>
+  <%= render "shared/meeting_calendar_days",
+        days: calendar_days,
+        selected_date: booking_date,
+        plan_type: picker_plan_type,
+        credit_booking: picker_credit_booking,
+        booking: picker_booking %>
+
+  <span class="booking-label">Select your desk</span>
+  <%= render "shared/floor_plan_picker",
+        unavailable_desks: unavailable_desks,
+        seat_map: seats.index_by(&:code).transform_values(&:id),
+        input_name: input_name,
+        selected_seat_id: picker_selected_seat_id %>
+</div>

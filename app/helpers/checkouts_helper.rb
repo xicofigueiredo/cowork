@@ -2,7 +2,7 @@ module CheckoutsHelper
   def checkout_plan_description(plan_type)
     case plan_type
     when "daily"
-      "Choose a date and desk for your day pass."
+      "Choose a weekday and desk for your day pass."
     when "monthly"
       if current_user.next_monthly_starts_on > Date.current
         "Choose your dedicated desk. Your plan starts #{current_user.next_monthly_starts_on.strftime('%-d %B %Y')} after your current one ends. Includes 5 hours of meeting room access."

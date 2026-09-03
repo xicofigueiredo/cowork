@@ -32,6 +32,8 @@ class BookingsController < ApplicationController
       redirect_to new_booking_path, alert: "You can't book a date in the past."
       return
     end
+    @calendar_start = SeatAvailability.earliest_bookable_date
+    @calendar_days = SeatAvailability.calendar_days(@calendar_start)
     @seats = Seat.desks.ordered
     @unavailable_desks = SeatAvailability.unavailable_desk_codes(@booking_date)
     @available_credits = current_user.available_credits
@@ -84,6 +86,8 @@ class BookingsController < ApplicationController
 
   def load_daily_edit_data(validate_date: true)
     @seats = Seat.desks.ordered
+    @calendar_start = Date.current
+    @calendar_days = SeatAvailability.calendar_days(@calendar_start, except_booking: @booking)
     @booking_date = params[:date].present? ? parsed_edit_date : @booking.date
     if validate_date && @booking_date < Date.current
       redirect_to edit_booking_path(@booking), alert: "You can't book a date in the past."
@@ -157,9 +161,9 @@ class BookingsController < ApplicationController
   end
 
   def parsed_edit_date
-    return @booking.date if params[:date].blank?
+    return SeatAvailability.ensure_weekday(@booking.date) if params[:date].blank?
 
-    Date.parse(params[:date])
+    SeatAvailability.ensure_weekday(Date.parse(params[:date]))
   end
 
   def set_booking
@@ -189,8 +193,10 @@ class BookingsController < ApplicationController
   end
 
   def parsed_booking_date
-    return Date.current if params[:date].blank?
+    return SeatAvailability.earliest_bookable_date if params[:date].blank?
 
-    Date.parse(params[:date])
+    SeatAvailability.ensure_weekday(Date.parse(params[:date]))
+  rescue ArgumentError
+    SeatAvailability.earliest_bookable_date
   end
 end

@@ -128,39 +128,36 @@
       <% end %>
 
     <% elsif @booking.daily? %>
+      <% selected_day = @calendar_days.find { |day| day[:date] == @booking_date } %>
+      <% day_available = selected_day&.dig(:available) %>
+
       <p class="booking-lead">
         Currently <%= @booking.seat.label %> on <%= @booking.date.strftime("%-d %B %Y") %>.
         Pick a new date and desk below.
       </p>
 
       <%= form_with url: booking_path(@booking), method: :patch, class: "booking-form" do %>
-        <div class="booking-field">
-          <label for="date" class="booking-label">Date</label>
-          <input type="date"
-                 id="date"
-                 name="date"
-                 value="<%= @booking_date %>"
-                 min="<%= Date.current %>"
-                 class="booking-input"
-                 required
-                 onchange="window.location = '<%= edit_booking_path(@booking) %>?date=' + this.value">
-        </div>
+        <input type="hidden" name="date" value="<%= @booking_date %>">
 
-        <div class="booking-field">
-          <span class="booking-label">Select your desk</span>
-          <%= render "shared/floor_plan_picker",
-                unavailable_desks: @unavailable_desks,
-                seat_map: @seats.index_by(&:code).transform_values(&:id),
-                input_name: "seat_id",
-                selected_seat_id: @booking.seat_id %>
-        </div>
+        <%= render "shared/desk_day_picker",
+              calendar_days: @calendar_days,
+              booking_date: @booking_date,
+              unavailable_desks: @unavailable_desks,
+              seats: @seats,
+              input_name: "seat_id",
+              selected_seat_id: @booking.seat_id,
+              booking: @booking %>
+
+        <% unless day_available %>
+          <p class="booking-note booking-note--error">No desks available on this day. Choose another day above.</p>
+        <% end %>
 
         <% if @booking.errors.any? %>
           <p class="booking-note booking-note--error"><%= @booking.errors.full_messages.to_sentence %></p>
         <% end %>
 
         <div class="booking-actions">
-          <button type="submit" class="booking-btn booking-btn--primary">Save changes</button>
+          <button type="submit" class="booking-btn booking-btn--primary" <%= "disabled" unless day_available %>>Save changes</button>
           <%= link_to "Back to my bookings", bookings_path, class: "booking-btn booking-btn--secondary" %>
         </div>
       <% end %>

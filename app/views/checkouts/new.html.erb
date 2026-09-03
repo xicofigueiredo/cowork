@@ -1,10 +1,14 @@
 <% content_for :title, "Checkout - Mezzanine" %>
 <% meeting_checkout = Order::MEETING_PLAN_TYPES.include?(@plan_type) %>
-<% selected_meeting_day = @calendar_days&.find { |day| day[:date] == @booking_date } if meeting_checkout %>
+<% desk_checkout = @plan_type == "daily" %>
+<% selected_calendar_day = @calendar_days&.find { |day| day[:date] == @booking_date } if desk_checkout || meeting_checkout %>
 <% hourly_slots_available = @hour_grid&.any? { |slot| slot[:available] } %>
-<% checkout_submit_disabled = meeting_checkout && (
-     (@plan_type == "meeting_daily" && !selected_meeting_day&.dig(:available)) ||
-     (@plan_type == "meeting_hourly" && !hourly_slots_available)
+<% checkout_submit_disabled = (
+     (desk_checkout && !selected_calendar_day&.dig(:available)) ||
+     (meeting_checkout && (
+       (@plan_type == "meeting_daily" && !selected_calendar_day&.dig(:available)) ||
+       (@plan_type == "meeting_hourly" && !hourly_slots_available)
+     ))
    ) %>
 
 <main class="booking-page">
@@ -18,24 +22,20 @@
       <%= f.hidden_field :plan_type, value: @plan_type %>
 
       <% if @plan_type == "daily" %>
-        <div class="booking-field">
-          <%= f.label :booking_date, "Date", class: "booking-label" %>
-          <%= f.date_field :booking_date,
-                value: @order.booking_date || Date.current,
-                min: Date.current,
-                class: "booking-input",
-                required: true,
-                onchange: "window.location = '#{new_checkout_path(plan: @plan_type)}&date=' + this.value" %>
-        </div>
+        <%= f.hidden_field :booking_date, value: @booking_date %>
 
-        <div class="booking-field">
-          <span class="booking-label">Select your desk</span>
-          <%= render "shared/floor_plan_picker",
-                unavailable_desks: @unavailable_desks,
-                seat_map: @seats.index_by(&:code).transform_values(&:id),
-                input_name: "order[seat_id]",
-                selected_seat_id: @order.seat_id %>
-        </div>
+        <%= render "shared/desk_day_picker",
+              calendar_days: @calendar_days,
+              booking_date: @booking_date,
+              unavailable_desks: @unavailable_desks,
+              seats: @seats,
+              input_name: "order[seat_id]",
+              selected_seat_id: @order.seat_id,
+              plan_type: @plan_type %>
+
+        <% unless selected_calendar_day&.dig(:available) %>
+          <p class="booking-note booking-note--error">No desks available on this day. Choose another day above.</p>
+        <% end %>
 
       <% elsif @plan_type == "monthly" %>
         <div class="booking-field">
@@ -87,7 +87,7 @@
           </div>
         </div>
 
-        <% unless selected_meeting_day&.dig(:available) %>
+        <% unless selected_calendar_day&.dig(:available) %>
           <p class="booking-note booking-note--error">This day is not available. Choose another day above.</p>
         <% end %>
 

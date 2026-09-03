@@ -1,10 +1,11 @@
-<%# locals: days:, selected_date:, plan_type: nil, booking: nil %>
+<%# locals: days:, selected_date:, plan_type: nil, booking: nil, credit_booking: false %>
 <% calendar_plan_type = local_assigns[:plan_type] %>
 <% calendar_booking = local_assigns[:booking] %>
+<% calendar_credit_booking = local_assigns[:credit_booking] %>
 <div class="meeting-calendar-days">
   <% days.each do |day| %>
     <% active = day[:date] == selected_date %>
-    <%= link_to meeting_calendar_day_path(day[:date], plan_type: calendar_plan_type, booking: calendar_booking),
+    <%= link_to meeting_calendar_day_path(day[:date], plan_type: calendar_plan_type, booking: calendar_booking, credit_booking: calendar_credit_booking),
           class: [
             "meeting-calendar-day",
             ("meeting-calendar-day--active" if active),

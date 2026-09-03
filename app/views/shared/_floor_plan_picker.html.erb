@@ -8,7 +8,6 @@
 <div class="booking-floorplan" data-controller="floor-plan"
      data-floor-plan-seat-map-value="<%= seat_map.to_json %>"
      data-floor-plan-unavailable-value="<%= unavailable_desks.to_json %>"
-     data-floor-plan-input-name-value="<%= input_name %>"
      data-floor-plan-selected-value="<%= selected_seat_id %>">
 
   <input type="hidden" name="<%= input_name %>" value="<%= selected_seat_id %>" data-floor-plan-target="input" required>
@@ -16,20 +15,27 @@
   <div class="booking-floorplan-columns">
     <div class="booking-floorplan-column">
       <p class="booking-floorplan-tab">Main floor</p>
-      <div class="booking-floorplan-diagram" data-floor-panel="main">
+      <div class="booking-floorplan-diagram">
         <%= raw Rails.root.join("app/assets/images/ourspace/main.svg").read %>
       </div>
     </div>
 
     <div class="booking-floorplan-column">
       <p class="booking-floorplan-tab">Mezzanine</p>
-      <div class="booking-floorplan-diagram" data-floor-panel="mezzanine">
+      <div class="booking-floorplan-diagram">
         <%= raw Rails.root.join("app/assets/images/ourspace/mezzanine.svg").read %>
       </div>
     </div>
   </div>
 
-  <p class="booking-floorplan-selection" data-floor-plan-target="label">Select a desk</p>
+  <div class="booking-floorplan-footer">
+    <p class="booking-floorplan-selection" data-floor-plan-target="label">Select a desk</p>
+    <ul class="booking-floorplan-legend" aria-hidden="true">
+      <li><span class="booking-floorplan-swatch booking-floorplan-swatch--available"></span> Available</li>
+      <li><span class="booking-floorplan-swatch booking-floorplan-swatch--selected"></span> Selected</li>
+      <li><span class="booking-floorplan-swatch booking-floorplan-swatch--unavailable"></span> Unavailable</li>
+    </ul>
+  </div>
 </div>
 
 <script>

@@ -1,5 +1,8 @@
 class SeatAvailability
+  CALENDAR_WEEKDAYS = 14
+
   def self.available_on?(seat, date, except_booking: nil)
+    return false unless weekday?(date)
     return false if date < Date.current
 
     !daily_booking_exists?(seat, date, except_booking: except_booking) &&
@@ -27,6 +30,40 @@ class SeatAvailability
     Seat.desks.ordered.filter_map do |seat|
       seat.code unless available_for_monthly?(seat, starts_on, ends_on, except_booking: except_booking, from_date: from_date)
     end
+  end
+
+  def self.any_desk_available?(date, except_booking: nil)
+    return false unless weekday?(date)
+    return false if date < Date.current
+
+    Seat.desks.any? { |seat| available_on?(seat, date, except_booking: except_booking) }
+  end
+
+  def self.calendar_days(from_date, days: CALENDAR_WEEKDAYS, except_booking: nil)
+    weekday_dates(from: from_date, count: days).map do |date|
+      available = any_desk_available?(date, except_booking: except_booking)
+      {
+        date: date,
+        available: available,
+        meta: available ? "Available" : "Full"
+      }
+    end
+  end
+
+  def self.earliest_bookable_date
+    ensure_weekday(Date.current)
+  end
+
+  def self.weekday?(date)
+    MeetingRoomAvailability.weekday?(date)
+  end
+
+  def self.ensure_weekday(date)
+    MeetingRoomAvailability.ensure_weekday(date)
+  end
+
+  def self.weekday_dates(from:, count: CALENDAR_WEEKDAYS)
+    MeetingRoomAvailability.weekday_dates(from: from, count: count)
   end
 
   def self.daily_booking_exists?(seat, date, except_booking: nil)

@@ -1,9 +1,11 @@
 module ApplicationHelper
-  def meeting_calendar_day_path(date, plan_type: nil, booking: nil)
+  def meeting_calendar_day_path(date, plan_type: nil, booking: nil, credit_booking: false)
     if booking
       edit_booking_path(booking, date: date)
     elsif plan_type.present?
       new_checkout_path(plan: plan_type, date: date)
+    elsif credit_booking
+      new_booking_path(date: date)
     else
       new_meeting_booking_path(date: date)
     end

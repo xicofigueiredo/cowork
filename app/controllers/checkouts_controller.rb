@@ -70,7 +70,8 @@ class CheckoutsController < ApplicationController
   def load_plan_defaults
     case @plan_type
     when "daily"
-      @order.booking_date = parsed_booking_date
+      load_daily_checkout_calendar
+      @order.booking_date = @booking_date
     when "meeting_daily"
       load_meeting_daily_calendar
       @order.booking_date = @booking_date
@@ -82,7 +83,7 @@ class CheckoutsController < ApplicationController
 
   def load_unavailable_desks
     if @plan_type == "daily"
-      date = @order.booking_date || parsed_booking_date
+      date = @booking_date || @order.booking_date || parsed_booking_date
       @unavailable_desks = SeatAvailability.unavailable_desk_codes(date)
     elsif @plan_type == "monthly"
       period = current_user.next_monthly_period
@@ -93,11 +94,17 @@ class CheckoutsController < ApplicationController
   end
 
   def parsed_booking_date
-    return Date.current if params[:date].blank?
+    return SeatAvailability.earliest_bookable_date if params[:date].blank?
 
-    Date.parse(params[:date])
+    SeatAvailability.ensure_weekday(Date.parse(params[:date]))
   rescue ArgumentError
-    Date.current
+    SeatAvailability.earliest_bookable_date
+  end
+
+  def load_daily_checkout_calendar
+    @calendar_start = SeatAvailability.earliest_bookable_date
+    @calendar_days = SeatAvailability.calendar_days(@calendar_start)
+    @booking_date = parsed_booking_date
   end
 
   def parsed_meeting_daily_date

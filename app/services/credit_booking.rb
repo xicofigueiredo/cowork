@@ -13,6 +13,7 @@ class CreditBooking
 
   def call
     raise Error, "Date cannot be in the past" if @date < Date.current
+    raise Error, "Desks are not available on weekends" unless SeatAvailability.weekday?(@date)
     raise Error, "Seat is not available on this date" unless SeatAvailability.available_on?(@seat, @date)
 
     credit_pack = @user.credit_packs.day_credits.usable.first

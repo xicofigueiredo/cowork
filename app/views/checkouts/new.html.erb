@@ -79,7 +79,7 @@
             </p>
           </div>
 
-          <%= render "shared/checkout_total", amount_cents: @order.amount_cents %>
+          <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
         </div>
 
         <% unless selected_calendar_day&.dig(:available) %>
@@ -144,7 +144,7 @@
             </p>
           </div>
 
-          <%= render "shared/checkout_total", amount_cents: @order.amount_cents %>
+          <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
         </div>
 
       <% else %>
@@ -166,7 +166,7 @@
       <% end %>
 
       <% unless meeting_checkout %>
-        <%= render "shared/checkout_total", amount_cents: @order.amount_cents %>
+        <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
       <% end %>
 
       <div class="booking-actions">

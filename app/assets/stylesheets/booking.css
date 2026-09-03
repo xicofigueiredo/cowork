@@ -209,6 +209,25 @@
   color: var(--landing-dark);
 }
 
+.booking-price-values {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.booking-price-original {
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: line-through;
+  opacity: 0.65;
+  color: var(--landing-dark);
+}
+
+.booking-price-row--total .booking-price-original {
+  font-size: 18px;
+}
+
 .booking-price-row--total {
   margin-top: 4px;
 }

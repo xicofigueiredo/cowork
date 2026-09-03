@@ -50,7 +50,7 @@
         </p>
       <% end %>
 
-      <%= render "shared/checkout_total", amount_cents: @order.amount_cents %>
+      <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
     </div>
 
     <div class="booking-payment-mock">

@@ -1,8 +1,17 @@
-<%# locals: amount_cents: %>
+<%# locals: amount_cents:, plan_type: nil, original_amount_cents: nil %>
+<% checkout_plan_type = local_assigns[:plan_type] %>
+<% checkout_original_amount_cents = local_assigns[:original_amount_cents] %>
+<% original_cents = checkout_original_amount_cents || (checkout_plan_type && Order.original_amount_cents_for(checkout_plan_type)) %>
+<% show_original = original_cents.present? && original_cents > amount_cents %>
 <div class="booking-price-breakdown">
   <div class="booking-price-row booking-price-row--subtotal">
     <span>Subtotal</span>
-    <strong><%= Order.format_euros(amount_cents) %></strong>
+    <div class="booking-price-values">
+      <% if show_original %>
+        <span class="booking-price-original"><%= Order.format_euros(original_cents) %></span>
+      <% end %>
+      <strong><%= Order.format_euros(amount_cents) %></strong>
+    </div>
   </div>
   <div class="booking-price-row booking-price-row--iva">
     <span>IVA (23%)</span>
@@ -10,6 +19,11 @@
   </div>
   <div class="booking-price-row booking-price-row--total">
     <span>Total</span>
-    <strong><%= Order.format_euros(Order.total_with_iva_cents_for(amount_cents)) %></strong>
+    <div class="booking-price-values">
+      <% if show_original %>
+        <span class="booking-price-original"><%= Order.format_euros(Order.total_with_iva_cents_for(original_cents)) %></span>
+      <% end %>
+      <strong><%= Order.format_euros(Order.total_with_iva_cents_for(amount_cents)) %></strong>
+    </div>
   </div>
 </div>

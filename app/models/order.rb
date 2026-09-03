@@ -2,10 +2,10 @@ class Order < ApplicationRecord
   IVA_RATE = BigDecimal("0.23")
 
   PLAN_TYPES = {
-    "daily" => { amount_cents: 1300, label: "Daily pass", credits: nil },
-    "pack_5" => { amount_cents: 5500, label: "5-day pack", credits: 5 },
-    "pack_10" => { amount_cents: 10_000, label: "10-day pack", credits: 10 },
-    "monthly" => { amount_cents: 14_000, label: "Monthly", credits: nil, meeting_hours: 5 },
+    "daily" => { amount_cents: 1300, original_amount_cents: 1500, label: "Daily pass", credits: nil },
+    "pack_5" => { amount_cents: 5500, original_amount_cents: 6500, label: "5-day pack", credits: 5 },
+    "pack_10" => { amount_cents: 10_000, original_amount_cents: 13_000, label: "10-day pack", credits: 10 },
+    "monthly" => { amount_cents: 14_000, original_amount_cents: 15_000, label: "Monthly", credits: nil, meeting_hours: 5 },
     "meeting_hourly" => { amount_cents: 1500, label: "Hourly booking", credits: nil },
     "meeting_daily" => { amount_cents: 6500, label: "Daily booking", credits: nil }
   }.freeze
@@ -36,6 +36,18 @@ class Order < ApplicationRecord
 
   def self.plan_config(plan_type)
     PLAN_TYPES.fetch(plan_type)
+  end
+
+  def self.original_amount_cents_for(plan_type)
+    plan_config(plan_type)[:original_amount_cents]
+  end
+
+  def original_amount_cents
+    self.class.original_amount_cents_for(plan_type)
+  end
+
+  def discounted?
+    original_amount_cents.present? && original_amount_cents > amount_cents
   end
 
   def pending?

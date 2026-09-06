@@ -24,7 +24,7 @@
   <% end %>
 
   <nav class="auth-links auth-links--stacked" aria-label="Authentication links">
-    <%= link_to "Resend confirmation code", new_confirmation_path(resource_name, email: resource.email.presence || params[:email]) %>
+    <%= link_to "Resend confirmation code", new_user_confirmation_path(email: resource.email.presence || params[:email]) %>
     <%= render "devise/shared/links" %>
   </nav>
 <% end %>

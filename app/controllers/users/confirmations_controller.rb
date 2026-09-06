@@ -3,10 +3,12 @@ class Users::ConfirmationsController < Devise::ConfirmationsController
     if params[:confirmation_token].present?
       super
     else
-      self.resource = resource_class.new
-      resource.email = params[:email] if params[:email].present?
-      render :show
+      render_confirm_code_form
     end
+  end
+
+  def confirm_code_form
+    render_confirm_code_form
   end
 
   def confirm_code
@@ -24,14 +26,15 @@ class Users::ConfirmationsController < Devise::ConfirmationsController
 
     if resource.confirmed?
       set_flash_message!(:notice, :already_confirmed)
-      redirect_to new_session_path(resource_name)
+      redirect_to new_user_session_path
       return
     end
 
     if resource.confirmation_token == code && resource.confirm
+      session.delete(:pending_confirmation_email)
       set_flash_message!(:notice, :confirmed)
       sign_in(resource_name, resource)
-      respond_with_navigational(resource) { redirect_to after_confirmation_path_for(resource_name, resource) }
+      redirect_to after_confirmation_path_for(resource_name, resource), status: :see_other
     else
       resource.errors.add(:confirmation_token, "is invalid")
       render :show, status: :unprocessable_entity
@@ -41,6 +44,14 @@ class Users::ConfirmationsController < Devise::ConfirmationsController
   protected
 
   def after_resending_confirmation_instructions_path_for(_resource_name)
-    user_confirmation_path(email: resource.email)
+    user_confirm_code_path(email: resource.email)
+  end
+
+  private
+
+  def render_confirm_code_form
+    self.resource = resource_class.new
+    resource.email = params[:email].presence || session[:pending_confirmation_email]
+    render :show
   end
 end

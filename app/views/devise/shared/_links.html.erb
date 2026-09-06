@@ -11,5 +11,5 @@
 <% end %>
 
 <%- if devise_mapping.confirmable? && controller_name != "confirmations" %>
-  <%= link_to "Didn't receive confirmation code?", new_confirmation_path(resource_name) %>
+  <%= link_to "Didn't receive confirmation code?", new_user_confirmation_path %>
 <% end %>

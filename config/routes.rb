@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   }
 
   devise_scope :user do
+    get "users/confirm-code", to: "users/confirmations#confirm_code_form", as: :user_confirm_code
     post "users/confirmation/verify", to: "users/confirmations#confirm_code", as: :user_confirmation_verify
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

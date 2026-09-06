@@ -42,6 +42,10 @@ body {
   min-height: 100%;
 }
 
+html {
+  background-color: var(--landing-accent);
+}
+
 body {
   font-family: "Host Grotesk", "Avenir Next", "Segoe UI", sans-serif;
   background: #fff;
@@ -62,10 +66,10 @@ main {
   z-index: 10;
   pointer-events: auto;
   align-items: center;
-  padding: 0 clamp(20px, 2.5vw, 40px);
+  padding: env(safe-area-inset-top, 0px) clamp(20px, 2.5vw, 40px) 0;
   background-color: var(--landing-accent);
   overflow: visible;
-  height: clamp(72px, 9vw, 100px);
+  height: calc(clamp(72px, 9vw, 100px) + env(safe-area-inset-top, 0px));
 }
 
 .landing-top.landing-top--shared.landing-top--transparent {
@@ -74,6 +78,12 @@ main {
   left: 0;
   right: 0;
   background-color: transparent;
+  background-image: linear-gradient(
+    to bottom,
+    var(--landing-accent) 0,
+    var(--landing-accent) env(safe-area-inset-top, 0px),
+    transparent env(safe-area-inset-top, 0px)
+  );
 }
 
 .landing-top--shared .landing-brand-link {

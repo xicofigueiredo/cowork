@@ -5,7 +5,7 @@
   <section class="location-contact">
     <div class="location-contact-inner">
       <div class="location-contact-intro">
-        <h1 class="location-contact-title">Would you like to receive more informations?</h1>
+        <h1 class="location-contact-title">Want to know more? Fill in the form and we'll get back to you as soon as we can!</h1>
         <p class="location-contact-subtitle">Follow the next steps</p>
       </div>
 
@@ -13,7 +13,7 @@
         <%= f.label :first_name, "First Name*", class: "location-label location-label--first-name", for: "location-first-name" %>
         <%= f.label :last_name, "Last Name*", class: "location-label location-label--last-name", for: "location-last-name" %>
         <%= f.label :email, "Email*", class: "location-label location-label--email", for: "location-email" %>
-        <%= f.label :message, "Message", class: "location-label location-label--message", for: "location-message" %>
+        <%= f.label :message, "Tell us what you're looking for...", class: "location-label location-label--message", for: "location-message" %>
 
         <%= f.text_field :first_name, id: "location-first-name", class: "location-input location-input--first-name", required: true, autocomplete: "given-name" %>
         <%= f.text_field :last_name, id: "location-last-name", class: "location-input location-input--last-name", required: true, autocomplete: "family-name" %>
@@ -22,7 +22,7 @@
 
         <label class="location-privacy">
           <%= f.check_box :privacy_accepted, { class: "location-privacy-checkbox", required: true, id: "location-privacy-accepted" }, "1", "0" %>
-          <span>I declare that I have read and accept the <%= link_to "Privacy Policy", privacy_policy_path, class: "location-privacy-link", target: "_blank", rel: "noopener" %>*</span>
+          <span>I agree to the <%= link_to "Privacy Policy", privacy_policy_path, class: "location-privacy-link", target: "_blank", rel: "noopener" %>*</span>
         </label>
 
         <%= f.button "Send", type: :submit, class: "location-submit" %>

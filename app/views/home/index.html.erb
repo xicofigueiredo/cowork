@@ -16,7 +16,14 @@
   </section>
 
   <footer class="landing-footer">
-    <%= link_to "Send us an email", "mailto:hello@mezzaninecowork.com" %>
-    <%= link_to "Follow us on instagram", "https://www.instagram.com/mezzanine.cowork/", target: "_blank", rel: "noreferrer" %>
+    <%= link_to "Let's talk", "mailto:hello@mezzaninecowork.com" %>
+    <%= link_to "https://www.instagram.com/mezzanine.cowork/", target: "_blank", rel: "noreferrer", class: "landing-footer-instagram", "aria-label": "Follow us on Instagram" do %>
+      <span>Follow us on</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75">
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    <% end %>
   </footer>
 </main>

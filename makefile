@@ -9,3 +9,6 @@ sync: ## Sync the application to the server
 
 connect: ## Connect to the server
 	ssh root@204.168.181.4
+
+pass: ## Open rails console in the production container
+	docker compose exec server ./bin/rails console

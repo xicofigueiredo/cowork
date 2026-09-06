@@ -10,6 +10,8 @@ class User < ApplicationRecord
 
   validates :first_name, :last_name, presence: true
 
+  after_create_commit :send_welcome_email
+
   def available_credits
     credit_packs.day_credits.usable.sum(:remaining_credits)
   end
@@ -26,5 +28,11 @@ class User < ApplicationRecord
   def next_monthly_period
     starts_on = next_monthly_starts_on
     { starts_on: starts_on, ends_on: starts_on + 1.month }
+  end
+
+  private
+
+  def send_welcome_email
+    UserMailer.welcome(self).deliver_now
   end
 end

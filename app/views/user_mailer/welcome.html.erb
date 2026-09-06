@@ -1,0 +1,24 @@
+<p>Dear <%= @user.first_name %>,</p>
+
+<p>
+  Welcome to Mezzanine — we’re glad you’re here.
+</p>
+
+<p>
+  Your account is ready. You can now browse our plans, book a desk or meeting room, and manage everything from your account.
+</p>
+
+<p>
+  If you have any questions, reply to this email or write to us at
+  <%= mail_to "hello@mezzaninecowork.com" %>.
+</p>
+
+<p>We look forward to seeing you at the space.</p>
+
+<p>
+  Kind regards,<br>
+  The Mezzanine team<br>
+  Rua Brito e Cunha, 27 · Matosinhos<br>
+  <%= mail_to "hello@mezzaninecowork.com" %><br>
+  Follow us on <%= link_to "Instagram", "https://www.instagram.com/mezzanine.cowork/" %>
+</p>

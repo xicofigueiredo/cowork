@@ -1,8 +1,27 @@
-<p>Hi <%= @lead.first_name %>,</p>
-
-<p>Thanks for getting in touch. We’ve received your message and will reply soon.</p>
+<p>Dear <%= @lead.first_name %>,</p>
 
 <p>
-  Mezzanine<br>
+  Thank you for contacting Mezzanine. We have received your enquiry and our team will get back to you shortly.
+</p>
+
+<% if @lead.message.present? %>
+  <p>For your records, here is a copy of your message:</p>
+  <blockquote style="margin: 0; padding: 12px 16px; border-left: 3px solid #6C312E; color: #444;">
+    <%= simple_format(@lead.message) %>
+  </blockquote>
+<% end %>
+
+<p>
+  If you have anything further to add in the meantime, simply reply to this email or write to us at
+  <%= mail_to "hello@mezzaninecowork.com" %>.
+</p>
+
+<p>We look forward to speaking with you.</p>
+
+<p>
+  Kind regards,<br>
+  The Mezzanine team<br>
+  Rua Brito e Cunha, 27 · Matosinhos<br>
   <%= mail_to "hello@mezzaninecowork.com" %>
+  follow us on <%= link_to "Instagram", "https://www.instagram.com/mezzaninecowork/" %>
 </p>

@@ -7,6 +7,7 @@ class LocationController < ApplicationController
     @lead = Lead.new(lead_params)
 
     if @lead.save
+      LeadMailer.received(@lead).deliver_later
       redirect_to location_path, notice: "Thanks, we'll get back to you soon."
     else
       flash.now[:alert] = "Please fill in the required fields."

@@ -3,15 +3,17 @@ require "test_helper"
 class LocationControllerTest < ActionDispatch::IntegrationTest
   test "create stores a lead" do
     assert_difference -> { Lead.count }, 1 do
-      post location_path, params: {
-        lead: {
-          first_name: "Ada",
-          last_name: "Lovelace",
-          email: "ada@example.com",
-          message: "I'd like a tour",
-          privacy_accepted: "1"
+      assert_enqueued_emails 1 do
+        post location_path, params: {
+          lead: {
+            first_name: "Ada",
+            last_name: "Lovelace",
+            email: "ada@example.com",
+            message: "I'd like a tour",
+            privacy_accepted: "1"
+          }
         }
-      }
+      end
     end
 
     assert_redirected_to location_path

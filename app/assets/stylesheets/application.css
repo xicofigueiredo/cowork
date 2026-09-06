@@ -362,6 +362,10 @@ main {
   position: static;
 }
 
+.location-field {
+  position: static;
+}
+
 .location-label,
 .location-privacy {
   position: absolute;
@@ -547,17 +551,18 @@ main {
 @media (max-width: 768px) {
   .location-contact {
     height: auto;
-    min-height: 520px;
-    padding: 32px 24px;
+    min-height: 0;
+    padding: 32px 24px 40px;
   }
 
   .location-contact-inner {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 28px;
   }
 
   .location-contact-intro,
+  .location-field,
   .location-label,
   .location-input,
   .location-privacy,
@@ -572,23 +577,52 @@ main {
   }
 
   .location-contact-intro {
-    font-size: clamp(28px, 6vw, 40px);
+    font-size: clamp(28px, 6vw, 36px);
     line-height: 1.25;
+  }
+
+  .location-contact-subtitle {
+    font-size: 18px;
   }
 
   .location-contact-form {
     display: flex;
     flex-direction: column;
+    gap: 20px;
+  }
+
+  .location-field {
+    display: flex;
+    flex-direction: column;
     gap: 8px;
   }
 
+  .location-label {
+    font-size: 18px;
+    white-space: normal;
+  }
+
   .location-input {
-    min-height: 40px;
-    margin-bottom: 12px;
+    min-height: 44px;
+    font-size: 18px;
+    padding: 8px 0;
   }
 
   .location-input--message {
-    min-height: 120px;
+    min-height: 96px;
+  }
+
+  .location-privacy {
+    font-size: 16px;
+    margin-top: 4px;
+  }
+
+  .location-submit {
+    align-self: flex-start;
+    margin-top: 4px;
+    min-height: 48px;
+    padding: 12px 28px;
+    font-size: 18px;
   }
 
   .location-map {

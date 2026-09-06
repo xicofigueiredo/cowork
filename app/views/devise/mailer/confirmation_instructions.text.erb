@@ -1,0 +1,11 @@
+Dear <%= @resource.first_name.presence || "there" %>,
+
+Thanks for signing up to Mezzanine. Use this code to confirm your email address:
+
+<%= @token %>
+
+This code expires in 2 days. If you didn’t create an account, you can ignore this email.
+
+Kind regards,
+The Mezzanine team
+hello@mezzaninecowork.com

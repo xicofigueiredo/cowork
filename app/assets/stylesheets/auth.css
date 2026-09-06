@@ -113,6 +113,13 @@
   border-color: var(--landing-accent);
 }
 
+.auth-code-input {
+  letter-spacing: 0.35em;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
 .auth-field--checkbox {
   grid-template-columns: auto 1fr;
   align-items: center;

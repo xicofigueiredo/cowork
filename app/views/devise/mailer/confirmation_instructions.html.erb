@@ -1,5 +1,19 @@
-<p>Welcome <%= @email %>!</p>
+<p>Dear <%= @resource.first_name.presence || "there" %>,</p>
 
-<p>You can confirm your account email through the link below:</p>
+<p>
+  Thanks for signing up to Mezzanine. Use this code to confirm your email address:
+</p>
 
-<p><%= link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token) %></p>
+<p style="font-size: 28px; font-weight: 700; letter-spacing: 0.2em; margin: 24px 0;">
+  <%= @token %>
+</p>
+
+<p>
+  This code expires in 2 days. If you didn’t create an account, you can ignore this email.
+</p>
+
+<p>
+  Kind regards,<br>
+  The Mezzanine team<br>
+  <%= mail_to "hello@mezzaninecowork.com" %>
+</p>

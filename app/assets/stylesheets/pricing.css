@@ -297,6 +297,16 @@
   color: var(--landing-dark);
 }
 
+.pricing-plan-button--disabled,
+.pricing-details .pricing-plan-button--disabled,
+.pricing-details .pricing-plan-button--disabled:hover {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #fff;
+  color: var(--landing-dark);
+}
+
 @media (max-width: 768px) {
   .pricing-grid {
     grid-template-columns: 1fr;

@@ -1,5 +1,12 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: {
+    registrations: "users/registrations",
+    confirmations: "users/confirmations"
+  }
+
+  devise_scope :user do
+    post "users/confirmation/verify", to: "users/confirmations#confirm_code", as: :user_confirmation_verify
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

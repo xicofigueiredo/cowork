@@ -172,6 +172,9 @@ function initializePricing() {
     const planType = planTypeMap[plan.title];
     const bookUrl = planType ? `${checkoutBase}?plan=${planType}` : '<%= location_path %>';
     const bookLabel = planType ? 'Book now' : 'Contact us';
+    const bookButton = planType
+      ? `<span class="pricing-plan-button pricing-plan-button--disabled" aria-disabled="true">${bookLabel}</span>`
+      : `<a href="${bookUrl}" class="pricing-plan-button">${bookLabel}</a>`;
 
     return `
       <h4 class="pricing-plan-title">${plan.title}</h4>
@@ -180,7 +183,7 @@ function initializePricing() {
         <p class="pricing-plan-price">${plan.price}</p>
       </div>
       ${featuresHtml}
-      <a href="${bookUrl}" class="pricing-plan-button">${bookLabel}</a>
+      ${bookButton}
     `;
   }
 

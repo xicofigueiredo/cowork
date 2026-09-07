@@ -34,8 +34,8 @@ class LeadMailerTest < ActionMailer::TestCase
     assert_equal [ "ada@example.com" ], email.to
     assert_equal [ "hello@mezzaninecowork.com" ], email.from
     assert_equal "Mezzanine is opening in Matosinhos — space for your team", email.subject
-    assert_match "Dear Ada", email.body.encoded
-    assert_match "opening Mezzanine mid-September", email.body.encoded
+    assert_match "Hi Ada,", email.body.encoded
+    assert_match "excited to introduce Mezzanine", email.body.encoded
     assert_match "group rates", email.body.encoded
     assert email.attachments["flyer.jpeg"].present?
     assert email.attachments["flyer.jpeg"].inline?
@@ -49,7 +49,6 @@ class LeadMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [ "ada@example.com" ], email.to
-    assert_match "Hello,", email.body.encoded
-    assert_no_match "Dear ", email.body.encoded
+    assert_match "Hi there,", email.body.encoded
   end
 end

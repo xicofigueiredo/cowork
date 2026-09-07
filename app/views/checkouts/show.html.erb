@@ -50,6 +50,13 @@
         </p>
       <% end %>
 
+      <% if @order.vat_number.present? %>
+        <p class="booking-summary-row">
+          <span>NIF / VAT</span>
+          <strong><%= @order.vat_number %></strong>
+        </p>
+      <% end %>
+
       <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
     </div>
 

@@ -13,7 +13,8 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       amount_cents: 1300,
       status: "pending",
       seat: @seat,
-      booking_date: Date.current + 1.day
+      booking_date: Date.current + 1.day,
+      vat_number: "123456789"
     )
 
     assert OrderFulfillment.call(order)
@@ -30,7 +31,8 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       plan_type: "monthly",
       amount_cents: 14_000,
       status: "pending",
-      seat: @seat
+      seat: @seat,
+      vat_number: "123456789"
     )
     assert OrderFulfillment.call(first_order)
 
@@ -40,7 +42,8 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       plan_type: "monthly",
       amount_cents: 14_000,
       status: "pending",
-      seat: @seat
+      seat: @seat,
+      vat_number: "123456789"
     )
 
     assert OrderFulfillment.call(second_order)
@@ -55,7 +58,8 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       user: @user,
       plan_type: "pack_5",
       amount_cents: 5500,
-      status: "pending"
+      status: "pending",
+      vat_number: "123456789"
     )
 
     assert OrderFulfillment.call(order)

@@ -1,0 +1,32 @@
+Dear <%= @user.first_name %>,
+
+Thank you for your payment. Your <%= @order.plan_label %> is confirmed.
+
+BOOKING DETAILS
+<% @order.fulfillment_details.each do |label, value| %>
+<%= label %>: <%= value %>
+<% end %>
+<% if @order.vat_number.present? %>
+NIF / VAT: <%= @order.vat_number %>
+<% end %>
+
+INVOICE <%= @invoice_number %>
+Paid on <%= @paid_at.in_time_zone.strftime("%-d %B %Y at %H:%M") %>
+<% if @order.vat_number.present? %>
+NIF / VAT: <%= @order.vat_number %>
+<% end %>
+
+<%= @order.plan_label %>: <%= @order.amount_euros %>
+IVA (23%): <%= @order.iva_euros %>
+Total: <%= @order.total_with_iva_euros %>
+
+A copy of this invoice is attached to this email.
+You can also view your bookings anytime in your account.
+
+If you have any questions, reply to this email or write to us at hello@mezzaninecowork.com.
+
+Kind regards,
+The Mezzanine team
+Rua Brito e Cunha, 27 · Matosinhos
+hello@mezzaninecowork.com
+Follow us on Instagram: https://www.instagram.com/mezzanine.cowork/

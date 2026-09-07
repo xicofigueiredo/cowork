@@ -175,6 +175,18 @@
         <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
       <% end %>
 
+      <div class="booking-field">
+        <%= f.label :vat_number, "NIF / VAT number (optional)", class: "booking-label" %>
+        <%= f.text_field :vat_number,
+              class: "booking-input booking-input--full",
+              autocomplete: "off",
+              inputmode: "numeric",
+              maxlength: 12,
+              placeholder: "123456789",
+              value: @order.vat_number %>
+        <p class="booking-note">Optional — add it if you need NIF on your invoice. Portuguese NIF (9 digits) or PT + NIF.</p>
+      </div>
+
       <div class="booking-actions">
         <%= f.submit "Continue to payment",
               class: "booking-btn booking-btn--primary",

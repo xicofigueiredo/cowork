@@ -27,6 +27,13 @@ class OrderFulfillment
       end
     end
 
+    @order.reload
+    begin
+      OrderMailer.payment_confirmation(@order).deliver_now
+    rescue StandardError => e
+      Rails.logger.error("Payment confirmation email failed for order #{@order.id}: #{e.class}: #{e.message}")
+    end
+
     true
   end
 

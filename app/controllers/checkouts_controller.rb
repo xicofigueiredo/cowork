@@ -120,7 +120,7 @@ class CheckoutsController < ApplicationController
   end
 
   def order_params
-    params.require(:order).permit(:plan_type, :seat_id, :booking_date, :starts_at)
+    params.require(:order).permit(:plan_type, :seat_id, :booking_date, :starts_at, :vat_number)
   end
 
   def load_plan_defaults

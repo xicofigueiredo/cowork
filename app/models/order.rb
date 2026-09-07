@@ -23,12 +23,14 @@ class Order < ApplicationRecord
   validates :plan_type, presence: true, inclusion: { in: PLAN_TYPES.keys }
   validates :amount_cents, presence: true, numericality: { greater_than: 0 }
   validates :status, presence: true, inclusion: { in: STATUSES }
+  validate :vat_number_format
   validates :seat, presence: true, if: :requires_desk?
   validates :booking_date, presence: true, if: -> { plan_type == "daily" || plan_type == "meeting_daily" }
   validates :starts_at, presence: true, if: -> { plan_type == "meeting_hourly" }
   validate :seat_available, if: -> { pending? && requires_desk? && seat.present? }
   validate :meeting_booking_valid, if: -> { pending? && meeting_plan? }
 
+  before_validation :normalize_vat_number
   before_validation :assign_meeting_room_seat, if: -> { meeting_plan? && seat.blank? }
 
   scope :pending, -> { where(status: "pending") }
@@ -110,7 +112,66 @@ class Order < ApplicationRecord
     starts_at + 1.hour if starts_at.present?
   end
 
+  def invoice_number
+    date = paid_at&.in_time_zone || created_at
+    "MZ-#{date.strftime('%Y%m%d')}-#{id.to_s.rjust(5, '0')}"
+  end
+
+  def customer_name
+    [ user.first_name, user.last_name ].compact_blank.join(" ").presence || user.email
+  end
+
+  def fulfillment_details
+    details = []
+
+    if credit_pack?
+      pack = credit_pack
+      details << [ "Credits", "#{pack&.total_credits || plan_config_credits} day credits" ]
+      details << [ "Valid until", pack&.expires_at&.strftime("%-d %B %Y") ] if pack&.expires_at
+    elsif booking.present?
+      details << [ booking.seat.meeting_room? ? "Room" : "Desk", booking.seat.label ]
+      details << [ "When", booking.period_label ]
+      if plan_type == "monthly" && credit_pack.present?
+        details << [ "Meeting hours", "#{credit_pack.total_credits} hours included" ]
+      end
+    else
+      details << [ "Plan", plan_label ]
+    end
+
+    details
+  end
+
   private
+
+  def normalize_vat_number
+    if vat_number.blank?
+      self.vat_number = nil
+      return
+    end
+
+    self.vat_number = vat_number.to_s.upcase.gsub(/[\s.\-]/, "")
+  end
+
+  def vat_number_format
+    return if vat_number.blank?
+
+    digits = vat_number.delete_prefix("PT")
+    unless digits.match?(/\A\d{9}\z/) && valid_portuguese_nif_checksum?(digits)
+      errors.add(:vat_number, "must be a valid Portuguese NIF (9 digits) or PT + NIF")
+    end
+  end
+
+  def valid_portuguese_nif_checksum?(nif)
+    weights = [ 9, 8, 7, 6, 5, 4, 3, 2 ]
+    total = nif.chars.first(8).each_with_index.sum { |digit, index| digit.to_i * weights[index] }
+    check = 11 - (total % 11)
+    check = 0 if check >= 10
+    check == nif[8].to_i
+  end
+
+  def plan_config_credits
+    self.class.plan_config(plan_type)[:credits]
+  end
 
   def assign_meeting_room_seat
     self.seat = Seat.meeting_room

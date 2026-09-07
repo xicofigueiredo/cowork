@@ -1,0 +1,66 @@
+<p>Dear <%= @user.first_name %>,</p>
+
+<p>
+  Thank you for your payment. Your <%= @order.plan_label %> is confirmed.
+</p>
+
+<h3 style="margin: 24px 0 8px; font-size: 16px;">Booking details</h3>
+<table cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 480px;">
+  <% @order.fulfillment_details.each do |label, value| %>
+    <tr>
+      <td style="padding: 6px 12px 6px 0; color: #666; vertical-align: top;"><%= label %></td>
+      <td style="padding: 6px 0; font-weight: 600;"><%= value %></td>
+    </tr>
+  <% end %>
+  <% if @order.vat_number.present? %>
+    <tr>
+      <td style="padding: 6px 12px 6px 0; color: #666; vertical-align: top;">NIF / VAT</td>
+      <td style="padding: 6px 0; font-weight: 600;"><%= @order.vat_number %></td>
+    </tr>
+  <% end %>
+</table>
+
+<h3 style="margin: 28px 0 8px; font-size: 16px;">Invoice <%= @invoice_number %></h3>
+<p style="margin: 0 0 12px; color: #666; font-size: 14px;">
+  Paid on <%= @paid_at.in_time_zone.strftime("%-d %B %Y at %H:%M") %><br>
+  <% if @order.vat_number.present? %>
+    NIF / VAT: <%= @order.vat_number %>
+  <% end %>
+</p>
+
+<table cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 480px; border: 1px solid #e5e5e5;">
+  <tr style="background: #fafafa;">
+    <td style="padding: 10px 12px; border-bottom: 1px solid #e5e5e5;">Description</td>
+    <td style="padding: 10px 12px; border-bottom: 1px solid #e5e5e5; text-align: right;">Amount</td>
+  </tr>
+  <tr>
+    <td style="padding: 10px 12px; border-bottom: 1px solid #e5e5e5;"><%= @order.plan_label %></td>
+    <td style="padding: 10px 12px; border-bottom: 1px solid #e5e5e5; text-align: right;"><%= @order.amount_euros %></td>
+  </tr>
+  <tr>
+    <td style="padding: 10px 12px; border-bottom: 1px solid #e5e5e5;">IVA (23%)</td>
+    <td style="padding: 10px 12px; border-bottom: 1px solid #e5e5e5; text-align: right;"><%= @order.iva_euros %></td>
+  </tr>
+  <tr>
+    <td style="padding: 10px 12px; font-weight: 700;">Total</td>
+    <td style="padding: 10px 12px; font-weight: 700; text-align: right;"><%= @order.total_with_iva_euros %></td>
+  </tr>
+</table>
+
+<p style="margin-top: 20px; color: #666; font-size: 14px;">
+  A copy of this invoice is attached to this email.
+  You can also view your bookings anytime in your account.
+</p>
+
+<p>
+  If you have any questions, reply to this email or write to us at
+  <%= mail_to "hello@mezzaninecowork.com" %>.
+</p>
+
+<p>
+  Kind regards,<br>
+  The Mezzanine team<br>
+  Rua Brito e Cunha, 27 · Matosinhos<br>
+  <%= mail_to "hello@mezzaninecowork.com" %>
+  Follow us on <%= link_to "Instagram", "https://www.instagram.com/mezzanine.cowork/" %>
+</p>

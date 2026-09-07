@@ -16,7 +16,7 @@ class LeadMailer < ApplicationMailer
 
     mail(
       to: email,
-      subject: "Mezzanine is opening in Matosinhos — space for your team"
+      subject: "Mezzanine - Your new workspace in Matosinhos"
     )
   end
 end

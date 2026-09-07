@@ -33,7 +33,7 @@ class LeadMailerTest < ActionMailer::TestCase
 
     assert_equal [ "ada@example.com" ], email.to
     assert_equal [ "hello@mezzaninecowork.com" ], email.from
-    assert_equal "Mezzanine is opening in Matosinhos — space for your team", email.subject
+    assert_equal "Mezzanine - Your new workspace in Matosinhos", email.subject
     assert_match "Hi Ada,", email.body.encoded
     assert_match "excited to introduce Mezzanine", email.body.encoded
     assert_match "group rates", email.body.encoded

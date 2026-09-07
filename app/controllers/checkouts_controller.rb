@@ -52,14 +52,14 @@ class CheckoutsController < ApplicationController
 
     session = StripeCheckout.create_session!(
       order: @order,
-      success_url: success_checkout_url(@order),
-      cancel_url: cancel_checkout_url(@order)
+      success_url: stripe_return_url(:success),
+      cancel_url: stripe_return_url(:cancel)
     )
 
     redirect_to session.url, allow_other_host: true
   rescue StripeCheckout::ConfigurationError, Stripe::StripeError => e
-    Rails.logger.error("Stripe checkout failed for order #{@order.id}: #{e.message}")
-    redirect_to checkout_path(@order), alert: "Unable to start payment. Please try again."
+    Rails.logger.error("Stripe checkout failed for order #{@order.id}: #{e.class}: #{e.message}")
+    redirect_to checkout_path(@order), alert: stripe_checkout_error_message(e)
   end
 
   def success
@@ -92,6 +92,31 @@ class CheckoutsController < ApplicationController
 
   def set_order
     @order = current_user.orders.find(params[:id])
+  end
+
+  def stripe_return_url(action)
+    opts = { host: request.host, protocol: stripe_return_protocol }
+    case action
+    when :success then success_checkout_url(@order, **opts)
+    when :cancel then cancel_checkout_url(@order, **opts)
+    end
+  end
+
+  def stripe_return_protocol
+    return "https" if Rails.env.production?
+
+    request.ssl? || request.headers["X-Forwarded-Proto"] == "https" ? "https" : request.protocol.delete_suffix("://")
+  end
+
+  def stripe_checkout_error_message(error)
+    message = error.message.to_s
+    if message.match?(/https|http|url|ssl/i)
+      "Stripe requires HTTPS return URLs in live mode. Check the site is served over https."
+    elsif message.match?(/api.?key|invalid|No such/i)
+      "Stripe API key rejected. Confirm live keys are from the same Stripe account and the server was restarted."
+    else
+      "Unable to start payment: #{message.truncate(140)}"
+    end
   end
 
   def order_params

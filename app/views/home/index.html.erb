@@ -2,17 +2,26 @@
 
 <main class="landing">
   <section class="landing-hero">
-    <article class="landing-panel">
+    <article class="landing-panel landing-panel--left">
       <%= image_tag "landing/left.png", alt: "", class: "landing-panel-image", "aria-hidden": "true" %>
     </article>
 
-    <article class="landing-panel">
+    <article class="landing-panel landing-panel--center">
       <%= image_tag "landing/home.jpg", alt: "Bright coworking space", class: "landing-panel-image" %>
     </article>
 
-    <article class="landing-panel">
+    <article class="landing-panel landing-panel--right">
       <%= image_tag "landing/right.png", alt: "", class: "landing-panel-image", "aria-hidden": "true" %>
     </article>
+
+    <aside class="landing-postit" aria-label="Opening announcement">
+      <p class="landing-postit-note">
+        opening<br>
+        sept<br>
+        <span class="landing-postit-day">14</span>
+      </p>
+      <%= link_to "@mezzanine.cowork", "https://www.instagram.com/mezzanine.cowork/", target: "_blank", rel: "noreferrer", class: "landing-postit-tag" %>
+    </aside>
   </section>
 
   <footer class="landing-footer">

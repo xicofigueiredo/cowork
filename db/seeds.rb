@@ -3,17 +3,17 @@ seats = (1..18).map { |n| { code: format("%03d", n), floor: "main" } } +
         (19..25).map { |n| { code: format("%03d", n), floor: "mezzanine" } }
 
 seats.each do |attrs|
-  Seat.find_or_create_by!(code: attrs[:code]) do |seat|
-    seat.floor = attrs[:floor]
-    seat.kind = "desk"
-  end
+  seat = Seat.find_or_initialize_by(code: attrs[:code])
+  seat.floor = attrs[:floor]
+  seat.kind = "desk"
+  seat.save!
 end
 
-Seat.find_or_create_by!(code: "meeting") do |seat|
-  seat.floor = "meeting"
-  seat.kind = "meeting_room"
-end
+meeting = Seat.find_or_initialize_by(code: "meeting")
+meeting.floor = "meeting"
+meeting.kind = "meeting_room"
+meeting.save!
 
-MonthlyMeetingCreditsBackfill.call
+MonthlyMeetingCreditsBackfill.call if defined?(MonthlyMeetingCreditsBackfill)
 
 puts "Seeded #{Seat.count} seats (#{Seat.desks.count} desks + meeting room)"

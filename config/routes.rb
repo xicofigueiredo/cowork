@@ -1,7 +1,8 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: {
     registrations: "users/registrations",
-    confirmations: "users/confirmations"
+    confirmations: "users/confirmations",
+    sessions: "users/sessions"
   }
 
   devise_scope :user do
@@ -24,11 +25,18 @@ Rails.application.routes.draw do
   resources :checkouts, only: [ :new, :create, :show ] do
     member do
       post :pay
+      get :success
+      get :cancel
     end
+  end
+
+  namespace :webhooks do
+    post :stripe, to: "stripe#create"
   end
 
   resources :bookings, only: [ :index, :new, :create, :edit, :update ]
   resource :meeting_booking, only: [ :new, :create ]
+
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

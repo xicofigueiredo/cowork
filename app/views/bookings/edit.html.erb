@@ -126,8 +126,7 @@
       <% end %>
 
     <% elsif @booking.daily? %>
-      <% selected_day = @calendar_days.find { |day| day[:date] == @booking_date } %>
-      <% day_available = selected_day&.dig(:available) %>
+      <% day_available = @seats.present? && @unavailable_desks.size < @seats.size %>
 
       <p class="booking-lead">
         Currently <%= @booking.seat.label %> on <%= @booking.date.strftime("%-d %B %Y") %>.

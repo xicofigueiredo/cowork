@@ -1,6 +1,6 @@
 class CheckoutsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_order, only: [ :show, :pay ]
+  before_action :set_order, only: [ :show, :pay, :success, :cancel ]
 
   def new
     @plan_type = params[:plan]
@@ -45,16 +45,47 @@ class CheckoutsController < ApplicationController
   end
 
   def pay
-    if params[:success] == "true"
-      if OrderFulfillment.call(@order)
-        redirect_to bookings_path, notice: "Payment successful! Your booking is confirmed."
-      else
-        redirect_to checkout_path(@order), alert: "Unable to complete payment."
-      end
-    else
-      @order.update!(status: "failed")
-      redirect_to pricing_path, alert: "Payment failed. Please try again."
+    unless @order.pending?
+      redirect_to bookings_path, notice: "This order has already been paid."
+      return
     end
+
+    session = StripeCheckout.create_session!(
+      order: @order,
+      success_url: success_checkout_url(@order),
+      cancel_url: cancel_checkout_url(@order)
+    )
+
+    redirect_to session.url, allow_other_host: true
+  rescue StripeCheckout::ConfigurationError, Stripe::StripeError => e
+    Rails.logger.error("Stripe checkout failed for order #{@order.id}: #{e.message}")
+    redirect_to checkout_path(@order), alert: "Unable to start payment. Please try again."
+  end
+
+  def success
+    if @order.paid?
+      redirect_to bookings_path, notice: "Payment successful! Your booking is confirmed."
+      return
+    end
+
+    if @order.stripe_session_id.present?
+      session = Stripe::Checkout::Session.retrieve(@order.stripe_session_id)
+      StripePaymentConfirmation.call(session)
+      @order.reload
+    end
+
+    if @order.paid?
+      redirect_to bookings_path, notice: "Payment successful! Your booking is confirmed."
+    else
+      redirect_to checkout_path(@order), notice: "Payment received. Confirmation may take a moment."
+    end
+  rescue Stripe::StripeError => e
+    Rails.logger.error("Stripe success confirmation failed for order #{@order.id}: #{e.message}")
+    redirect_to checkout_path(@order), alert: "Payment is processing. Refresh your bookings shortly."
+  end
+
+  def cancel
+    redirect_to checkout_path(@order), alert: "Payment cancelled. You can try again when ready."
   end
 
   private

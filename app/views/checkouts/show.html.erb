@@ -53,18 +53,12 @@
       <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
     </div>
 
-    <div class="booking-payment-mock">
-      <p class="booking-payment-note">Stripe integration coming soon. Use the buttons below to simulate payment.</p>
-
-      <%= button_to "Simulate successful payment",
-            pay_checkout_path(@order, success: true),
+    <div class="booking-payment-actions">
+      <%= button_to "Pay with Stripe",
+            pay_checkout_path(@order),
             method: :post,
-            class: "booking-btn booking-btn--primary booking-btn--full" %>
-
-      <%= button_to "Simulate failed payment",
-            pay_checkout_path(@order, success: false),
-            method: :post,
-            class: "booking-btn booking-btn--danger booking-btn--full" %>
+            class: "booking-btn booking-btn--primary booking-btn--full",
+            data: { turbo: false } %>
     </div>
 
     <%= link_to "Cancel", pricing_path, class: "booking-link-back" %>

@@ -6,11 +6,18 @@
     selected_seat_id: optional pre-selected seat id
 %>
 <div class="booking-floorplan" data-controller="floor-plan"
-     data-floor-plan-seat-map-value="<%= seat_map.to_json %>"
-     data-floor-plan-unavailable-value="<%= unavailable_desks.to_json %>"
+     data-floor-plan-seat-map-value="<%= ERB::Util.json_escape(seat_map.to_json) %>"
+     data-floor-plan-unavailable-value="<%= ERB::Util.json_escape(unavailable_desks.to_json) %>"
      data-floor-plan-selected-value="<%= selected_seat_id %>">
 
-  <input type="hidden" name="<%= input_name %>" value="<%= selected_seat_id %>" data-floor-plan-target="input" required>
+  <%# Do not use HTML required on a hidden input — browsers block submit with no visible message. %>
+  <input type="hidden" name="<%= input_name %>" value="<%= selected_seat_id %>" data-floor-plan-target="input">
+
+  <% if seat_map.blank? %>
+    <p class="booking-note booking-note--error">
+      Desks are not configured yet. Please contact us or try again after setup.
+    </p>
+  <% end %>
 
   <div class="booking-floorplan-columns">
     <div class="booking-floorplan-column">
@@ -30,6 +37,7 @@
 
   <div class="booking-floorplan-footer">
     <p class="booking-floorplan-selection" data-floor-plan-target="label">Choose your desk</p>
+    <p class="booking-note booking-note--error" data-floor-plan-target="error" hidden>Please select a desk before continuing.</p>
     <ul class="booking-floorplan-legend" aria-hidden="true">
       <li><span class="booking-floorplan-swatch booking-floorplan-swatch--available"></span> Available</li>
       <li><span class="booking-floorplan-swatch booking-floorplan-swatch--selected"></span> Selected</li>
@@ -48,7 +56,14 @@ function initializeFloorPlan() {
     const unavailable = new Set(JSON.parse(root.dataset.floorPlanUnavailableValue || '[]'));
     const input = root.querySelector('[data-floor-plan-target="input"]');
     const label = root.querySelector('[data-floor-plan-target="label"]');
+    const error = root.querySelector('[data-floor-plan-target="error"]');
     const seats = root.querySelectorAll('.ourspace-seat');
+    const form = root.closest('form');
+
+    if (Object.keys(seatMap).length === 0 && error) {
+      error.textContent = 'Desks are not configured on the server yet. Run database seeds, then try again.';
+      error.hidden = false;
+    }
 
     seats.forEach(seat => {
       const desk = seat.dataset.desk;
@@ -57,10 +72,23 @@ function initializeFloorPlan() {
       seat.addEventListener('click', () => {
         if (seat.classList.contains('unavailable')) return;
 
+        const seatId = seatMap[desk];
+        if (!seatId) {
+          if (error) {
+            error.textContent = `Desk ${desk} is not available in the system. Please choose another desk.`;
+            error.hidden = false;
+          }
+          return;
+        }
+
         seats.forEach(s => s.classList.remove('selected'));
         seat.classList.add('selected');
-        input.value = seatMap[desk] || '';
+        input.value = seatId;
         label.textContent = `Desk ${desk} selected`;
+        if (error) {
+          error.textContent = 'Please select a desk before continuing.';
+          error.hidden = true;
+        }
       });
     });
 
@@ -70,6 +98,19 @@ function initializeFloorPlan() {
         if (seatMap[seat.dataset.desk] == selectedId) {
           seat.classList.add('selected');
           label.textContent = `Desk ${seat.dataset.desk} selected`;
+        }
+      });
+    }
+
+    if (form && !form.dataset.floorPlanSubmitBound) {
+      form.dataset.floorPlanSubmitBound = 'true';
+      form.addEventListener('submit', (event) => {
+        if (!input.value) {
+          event.preventDefault();
+          if (error) {
+            error.hidden = false;
+            error.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
         }
       });
     }

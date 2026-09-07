@@ -1,10 +1,16 @@
 <% content_for :title, "Checkout - Mezzanine" %>
 <% meeting_checkout = Order::MEETING_PLAN_TYPES.include?(@plan_type) %>
 <% desk_checkout = @plan_type == "daily" %>
-<% selected_calendar_day = @calendar_days&.find { |day| day[:date] == @booking_date } if desk_checkout || meeting_checkout %>
+<% selected_calendar_day = @calendar_days&.find { |day| day[:date].to_date == @booking_date.to_date } if (desk_checkout || meeting_checkout) && @booking_date.present? %>
+<% # Floor plan and this flag must agree: use actual desk availability, not only the calendar lookup.
+   desk_day_available = if desk_checkout
+     @seats.present? && @unavailable_desks.size < @seats.size
+   else
+     selected_calendar_day&.dig(:available)
+   end %>
 <% hourly_slots_available = @hour_grid&.any? { |slot| slot[:available] } %>
 <% checkout_submit_disabled = (
-     (desk_checkout && !selected_calendar_day&.dig(:available)) ||
+     (desk_checkout && !desk_day_available) ||
      (meeting_checkout && (
        (@plan_type == "meeting_daily" && !selected_calendar_day&.dig(:available)) ||
        (@plan_type == "meeting_hourly" && !hourly_slots_available)
@@ -31,7 +37,7 @@
               selected_seat_id: @order.seat_id,
               plan_type: @plan_type %>
 
-        <% unless selected_calendar_day&.dig(:available) %>
+        <% unless desk_day_available %>
           <p class="booking-note booking-note--error">No desks available on this day. Choose another day above.</p>
         <% end %>
 

@@ -257,6 +257,12 @@
   opacity: 0.9;
 }
 
+.booking-btn:disabled,
+.booking-btn:disabled:hover {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .booking-btn--primary {
   background: var(--landing-accent);
   color: #fff;
@@ -283,6 +289,7 @@
   font-size: 14px;
 }
 
+.booking-payment-actions,
 .booking-payment-mock {
   display: flex;
   flex-direction: column;

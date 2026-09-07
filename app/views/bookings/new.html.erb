@@ -1,6 +1,5 @@
 <% content_for :title, "Book with credits - Mezzanine" %>
-<% selected_day = @calendar_days.find { |day| day[:date] == @booking_date } %>
-<% day_available = selected_day&.dig(:available) %>
+<% day_available = @seats.present? && @unavailable_desks.size < @seats.size %>
 
 <main class="booking-page">
   <div class="booking-container">

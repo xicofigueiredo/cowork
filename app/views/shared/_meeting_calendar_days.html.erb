@@ -4,7 +4,7 @@
 <% calendar_credit_booking = local_assigns[:credit_booking] %>
 <div class="meeting-calendar-days">
   <% days.each do |day| %>
-    <% active = day[:date] == selected_date %>
+    <% active = day[:date].to_date == selected_date.to_date %>
     <%= link_to meeting_calendar_day_path(day[:date], plan_type: calendar_plan_type, booking: calendar_booking, credit_booking: calendar_credit_booking),
           class: [
             "meeting-calendar-day",

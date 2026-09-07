@@ -116,7 +116,6 @@ body:has(.landing) main {
 }
 
 .landing-hero {
-  position: relative;
   flex: 1;
   min-height: 0;
   display: grid;
@@ -127,95 +126,6 @@ body:has(.landing) main {
   overflow: hidden;
   min-width: 0;
   min-height: 0;
-}
-
-.landing-postit {
-  position: absolute;
-  top: clamp(18%, 20vh, 26%);
-  left: auto;
-  right: calc(33.333% + clamp(12px, 1.5vw, 20px));
-  z-index: 2;
-  width: clamp(148px, 16vw, 190px);
-  aspect-ratio: 1;
-  padding: clamp(16px, 1.8vw, 22px) clamp(14px, 1.6vw, 20px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.35) 0%, transparent 18%),
-    #ffe56a;
-  color: #2f2a22;
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.45) inset,
-    2px 10px 24px rgb(0 0 0 / 0.22);
-  transform: rotate(5deg);
-  animation: landing-postit-in 0.7s ease-out both, landing-postit-float 5s ease-in-out 0.7s infinite;
-}
-
-.landing-postit::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 18%;
-  background: linear-gradient(180deg, rgb(0 0 0 / 0.06), transparent);
-  pointer-events: none;
-}
-
-.landing-postit-note {
-  margin: 0;
-  font-size: clamp(17px, 1.7vw, 22px);
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: 0.01em;
-  text-transform: lowercase;
-}
-
-.landing-postit-day {
-  display: block;
-  margin-top: 0.15em;
-  font-size: 1.7em;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.landing-postit-tag {
-  color: inherit;
-  text-decoration: none;
-  font-size: clamp(12px, 1.1vw, 14px);
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  transition: opacity 0.15s ease;
-}
-
-.landing-postit-tag:hover {
-  opacity: 0.75;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-@keyframes landing-postit-in {
-  from {
-    opacity: 0;
-    transform: rotate(5deg) translateY(-12px) scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: rotate(5deg) translateY(0) scale(1);
-  }
-}
-
-@keyframes landing-postit-float {
-  0%,
-  100% {
-    transform: rotate(5deg) translateY(0);
-  }
-
-  50% {
-    transform: rotate(4deg) translateY(4px);
-  }
 }
 
 .landing-panel-image {
@@ -278,38 +188,6 @@ body:has(.landing) main {
 
   .landing-panel {
     min-height: 0;
-  }
-
-  .landing-postit {
-    top: 18%;
-    left: auto;
-    right: 16px;
-    width: min(168px, 44vw);
-    transform: rotate(5deg);
-    animation: landing-postit-in-mobile 0.7s ease-out both, landing-postit-float-mobile 5s ease-in-out 0.7s infinite;
-  }
-
-  @keyframes landing-postit-in-mobile {
-    from {
-      opacity: 0;
-      transform: rotate(5deg) translateY(-12px) scale(0.96);
-    }
-
-    to {
-      opacity: 1;
-      transform: rotate(5deg) translateY(0) scale(1);
-    }
-  }
-
-  @keyframes landing-postit-float-mobile {
-    0%,
-    100% {
-      transform: rotate(5deg) translateY(0);
-    }
-
-    50% {
-      transform: rotate(4deg) translateY(4px);
-    }
   }
 
   .landing-footer {

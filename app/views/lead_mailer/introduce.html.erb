@@ -1,0 +1,38 @@
+<p><%= @first_name.present? ? "Dear #{@first_name}," : "Hello," %></p>
+
+<p>
+  We’re opening Mezzanine mid-September — a new coworking space in Matosinhos,
+  built for focused workdays and small teams.
+</p>
+
+<p>
+  <%= image_tag attachments["flyer.jpeg"].url,
+        alt: "Mezzanine — coworking space in Matosinhos",
+        style: "max-width: 480px; width: 100%; height: auto; display: block; border: 0;" %>
+</p>
+
+<p>
+  You’ll find 25 flexible desks, a meeting room for up to 10 people, high-speed
+  internet, and a phone booth. Everything you need to get proper work done —
+  and still enjoy the day.
+</p>
+
+<p>
+  If you’re looking for a base for your team, we’d be happy to hop on a short
+  call and talk through group rates that fit how you work.
+</p>
+
+<p>
+  Simply reply to this email and we’ll find a time — or write to us at
+  <%= mail_to "hello@mezzaninecowork.com" %>.
+</p>
+
+<p>We’d love to welcome you.</p>
+
+<p>
+  Kind regards,<br>
+  The Mezzanine team<br>
+  Rua Brito e Cunha, 27 · Matosinhos<br>
+  Follow us on <%= link_to "Instagram", "https://www.instagram.com/mezzanine.cowork/" %>
+  Our site: <%= link_to "https://mezzaninecowork.com", "https://mezzaninecowork.com" %>
+</p>

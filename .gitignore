@@ -34,3 +34,6 @@
 /config/*.key
 
 /mezzanine-docs/*
+
+# Outreach lists (real recipient addresses)
+/db/leads.csv

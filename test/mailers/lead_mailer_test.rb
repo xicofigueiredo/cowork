@@ -23,4 +23,33 @@ class LeadMailerTest < ActionMailer::TestCase
     assert_match "Thank you for contacting Mezzanine", email.body.encoded
     assert_match "I'd like a tour", email.body.encoded
   end
+
+  test "introduce with first name" do
+    email = LeadMailer.introduce(email: "ada@example.com", first_name: "Ada")
+
+    assert_emails 1 do
+      email.deliver_now
+    end
+
+    assert_equal [ "ada@example.com" ], email.to
+    assert_equal [ "hello@mezzaninecowork.com" ], email.from
+    assert_equal "Mezzanine is opening in Matosinhos — space for your team", email.subject
+    assert_match "Dear Ada", email.body.encoded
+    assert_match "opening Mezzanine mid-September", email.body.encoded
+    assert_match "group rates", email.body.encoded
+    assert email.attachments["flyer.jpeg"].present?
+    assert email.attachments["flyer.jpeg"].inline?
+  end
+
+  test "introduce without first name" do
+    email = LeadMailer.introduce(email: "ada@example.com")
+
+    assert_emails 1 do
+      email.deliver_now
+    end
+
+    assert_equal [ "ada@example.com" ], email.to
+    assert_match "Hello,", email.body.encoded
+    assert_no_match "Dear ", email.body.encoded
+  end
 end

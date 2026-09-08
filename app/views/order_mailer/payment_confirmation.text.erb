@@ -20,7 +20,11 @@ NIF / VAT: <%= @order.vat_number %>
 IVA (23%): <%= @order.iva_euros %>
 Total: <%= @order.total_with_iva_euros %>
 
+<% if @has_official_pdf %>
+Your official invoice PDF is attached to this email.
+<% else %>
 A copy of this invoice is attached to this email.
+<% end %>
 You can also view your bookings anytime in your account.
 
 If you have any questions, reply to this email or write to us at hello@mezzaninecowork.com.

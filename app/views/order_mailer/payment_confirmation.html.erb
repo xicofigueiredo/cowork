@@ -48,7 +48,11 @@
 </table>
 
 <p style="margin-top: 20px; color: #666; font-size: 14px;">
-  A copy of this invoice is attached to this email.
+  <% if @has_official_pdf %>
+    Your official invoice PDF is attached to this email.
+  <% else %>
+    A copy of this invoice is attached to this email.
+  <% end %>
   You can also view your bookings anytime in your account.
 </p>
 

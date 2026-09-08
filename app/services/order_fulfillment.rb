@@ -28,8 +28,15 @@ class OrderFulfillment
     end
 
     @order.reload
+
+    official = Toconline::InvoiceIssuer.call(@order)
+
     begin
-      OrderMailer.payment_confirmation(@order).deliver_now
+      OrderMailer.payment_confirmation(
+        @order,
+        official_pdf: official&.pdf_bytes,
+        official_document_number: official&.document_number
+      ).deliver_now
     rescue StandardError => e
       Rails.logger.error("Payment confirmation email failed for order #{@order.id}: #{e.class}: #{e.message}")
     end

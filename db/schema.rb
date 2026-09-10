@@ -10,9 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_184204) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_08_181200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "access_codes", force: :cascade do |t|
+    t.bigint "booking_id"
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "source", default: "booking", null: false
+    t.string "status", default: "active", null: false
+    t.string "ttlock_keyboard_pwd_id"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.datetime "valid_from", null: false
+    t.datetime "valid_to", null: false
+    t.index ["booking_id"], name: "index_access_codes_on_active_booking_id", unique: true, where: "((booking_id IS NOT NULL) AND ((status)::text = 'active'::text))"
+    t.index ["source"], name: "index_access_codes_on_source"
+    t.index ["status"], name: "index_access_codes_on_status"
+    t.index ["user_id"], name: "index_access_codes_on_user_id"
+  end
 
   create_table "bookings", force: :cascade do |t|
     t.string "booking_type", null: false
@@ -106,6 +124,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_184204) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "access_codes", "bookings"
+  add_foreign_key "access_codes", "users"
   add_foreign_key "bookings", "credit_packs"
   add_foreign_key "bookings", "orders"
   add_foreign_key "bookings", "seats"

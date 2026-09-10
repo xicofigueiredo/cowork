@@ -35,6 +35,7 @@ module Toconline
       response = token_request(
         grant_type: "authorization_code",
         code: code,
+        redirect_uri: @redirect_uri,
         scope: "commercial"
       )
       persist_tokens!(response)
@@ -205,13 +206,30 @@ module Toconline
       data = print_info.is_a?(Hash) ? print_info["data"] || print_info : print_info
       attrs = data.is_a?(Hash) ? (data["attributes"] || data) : {}
 
-      if attrs["url"].present?
-        attrs["url"]
-      elsif attrs["scheme"].present? && attrs["host"].present? && attrs["path"].present?
-        "#{attrs['scheme']}://#{attrs['host']}#{attrs['path']}"
-      elsif print_info.is_a?(Hash) && print_info["scheme"].present?
-        "#{print_info['scheme']}://#{print_info['host']}#{print_info['path']}"
+      url = attrs["url"]
+      case url
+      when String
+        return url if url.present?
+      when Hash
+        return compose_url(url)
       end
+
+      compose_url(attrs) || compose_url(print_info)
+    end
+
+    def compose_url(parts)
+      return nil unless parts.is_a?(Hash)
+      return nil if parts["scheme"].blank? || parts["host"].blank? || parts["path"].blank?
+
+      port = parts["port"].presence
+      default_port = parts["scheme"] == "https" ? 443 : 80
+      authority = if port.present? && port.to_i != default_port
+        "#{parts['host']}:#{port}"
+      else
+        parts["host"]
+      end
+
+      "#{parts['scheme']}://#{authority}#{parts['path']}"
     end
   end
 end

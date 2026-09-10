@@ -22,9 +22,10 @@ module Toconline
 
       raise Error, "TOConline did not return a document id" if document_id.blank?
 
-      @order.update!(
+      @order.update_columns(
         toconline_document_id: document_id.to_s,
-        toconline_document_number: document_number
+        toconline_document_number: document_number,
+        updated_at: Time.current
       )
 
       pdf_bytes = client.download_document_pdf(document_id)

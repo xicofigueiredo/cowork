@@ -5,6 +5,8 @@ class Booking < ApplicationRecord
   belongs_to :seat
   belongs_to :order, optional: true
   belongs_to :credit_pack, optional: true
+  has_many :access_codes, dependent: :nullify
+  has_one :access_code, -> { where(status: "active") }, class_name: "AccessCode"
 
   validates :booking_type, presence: true, inclusion: { in: BOOKING_TYPES }
   validates :date, presence: true, if: -> { daily? || meeting_daily? }

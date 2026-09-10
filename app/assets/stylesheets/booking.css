@@ -367,6 +367,32 @@
   font-size: 14px;
 }
 
+.booking-door-code {
+  color: #333;
+}
+
+.booking-door-code strong {
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.booking-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.booking-section-header .booking-title {
+  margin-bottom: 0;
+}
+
+.booking-form--centered .booking-input {
+  max-width: none;
+  width: 100%;
+}
+
 .booking-list-actions {
   display: flex;
   flex-wrap: wrap;

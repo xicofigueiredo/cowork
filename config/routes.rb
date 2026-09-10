@@ -37,6 +37,9 @@ Rails.application.routes.draw do
   resources :bookings, only: [ :index, :new, :create, :edit, :update ]
   resource :meeting_booking, only: [ :new, :create ]
 
+  namespace :admin do
+    resources :access_codes, only: [ :index, :new, :create, :destroy ]
+  end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

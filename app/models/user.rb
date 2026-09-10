@@ -7,8 +7,14 @@ class User < ApplicationRecord
   has_many :orders, dependent: :destroy
   has_many :bookings, dependent: :destroy
   has_many :credit_packs, dependent: :destroy
+  has_many :access_codes, dependent: :nullify
 
   validates :first_name, :last_name, presence: true
+
+  def admin?
+    emails = ENV.fetch("ADMIN_EMAILS", "").split(",").map { |e| e.strip.downcase }.reject(&:blank?)
+    emails.include?(email.to_s.downcase)
+  end
 
   def available_credits
     credit_packs.day_credits.usable.sum(:remaining_credits)

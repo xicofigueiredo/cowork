@@ -1,0 +1,43 @@
+<% content_for :title, "Generate access code - Mezzanine" %>
+
+<main class="booking-page">
+  <div class="booking-container">
+    <h1 class="booking-title">Generate door code</h1>
+
+    <% unless @ttlock_configured %>
+      <div class="booking-credits-banner">
+        <p>TTLock is not configured. Set <code>TTLOCK_*</code> environment variables before generating codes.</p>
+      </div>
+    <% end %>
+
+    <%= form_with url: admin_access_codes_path, method: :post, class: "booking-form booking-form--centered", local: true do %>
+      <div class="booking-field booking-field--wide">
+        <label class="booking-label" for="name">Name</label>
+        <input class="booking-input" type="text" name="name" id="name" value="<%= params[:name] %>" placeholder="Guest / cleaner / courier" required>
+      </div>
+
+      <div class="booking-field booking-field--wide">
+        <label class="booking-label" for="valid_from">Valid from</label>
+        <input class="booking-input" type="datetime-local" name="valid_from" id="valid_from" value="<%= @access_code.valid_from.strftime('%Y-%m-%dT%H:%M') %>" required>
+      </div>
+
+      <div class="booking-field booking-field--wide">
+        <label class="booking-label" for="valid_to">Valid to</label>
+        <input class="booking-input" type="datetime-local" name="valid_to" id="valid_to" value="<%= @access_code.valid_to.strftime('%Y-%m-%dT%H:%M') %>" required>
+      </div>
+
+      <div class="booking-field booking-field--wide">
+        <label class="booking-label" for="code">Custom code (optional)</label>
+        <input class="booking-input" type="text" name="code" id="code" inputmode="numeric" pattern="\d{4,9}" maxlength="9" placeholder="Leave blank to auto-generate">
+        <p class="booking-note">4–9 digits. Leave blank to generate a random 6-digit code.</p>
+      </div>
+
+      <div class="booking-actions">
+        <%= link_to "Cancel", admin_access_codes_path, class: "booking-btn booking-btn--secondary" %>
+        <button type="submit" class="booking-btn booking-btn--primary" <%= "disabled" unless @ttlock_configured %>>
+          Push to lock
+        </button>
+      </div>
+    <% end %>
+  </div>
+</main>

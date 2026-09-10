@@ -28,6 +28,12 @@
               <div>
                 <strong><%= booking.seat.label %></strong>
                 <span class="booking-list-meta"><%= booking.period_label %></span>
+                <% if booking.access_code&.active? %>
+                  <span class="booking-list-meta booking-door-code">
+                    Door code: <strong><%= booking.access_code.code %></strong>
+                    <span class="booking-list-meta">(<%= booking.access_code.validity_label %>)</span>
+                  </span>
+                <% end %>
               </div>
               <div class="booking-list-actions">
                 <% if booking.editable? %>

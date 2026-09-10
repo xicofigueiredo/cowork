@@ -29,6 +29,8 @@ class OrderFulfillment
 
     @order.reload
 
+    issue_access_code_for_booking!
+
     official = Toconline::InvoiceIssuer.call(@order)
 
     begin
@@ -45,6 +47,15 @@ class OrderFulfillment
   end
 
   private
+
+  def issue_access_code_for_booking!
+    booking = @order.booking
+    return unless booking
+
+    TtLock::AccessCodeIssuer.issue_for_booking!(booking)
+  rescue StandardError => e
+    Rails.logger.error("Access code issue failed for order #{@order.id}: #{e.class}: #{e.message}")
+  end
 
   def create_credit_pack!
     config = Order.plan_config(@order.plan_type)

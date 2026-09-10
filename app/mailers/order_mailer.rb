@@ -3,6 +3,7 @@ class OrderMailer < ApplicationMailer
     @order = order
     @user = order.user
     @booking = order.booking
+    @access_code = @booking&.access_code
     @credit_pack = order.credit_pack
     @invoice_number = official_document_number.presence || order.toconline_document_number.presence || order.invoice_number
     @paid_at = order.paid_at || Time.current

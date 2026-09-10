@@ -20,6 +20,14 @@
   <% end %>
 </table>
 
+<% if @access_code&.active? %>
+  <h3 style="margin: 28px 0 8px; font-size: 16px;">Door access</h3>
+  <p style="margin: 0 0 12px;">
+    Your door code is <strong style="font-size: 20px; letter-spacing: 0.08em;"><%= @access_code.code %></strong><br>
+    <span style="color: #666; font-size: 14px;">Valid <%= @access_code.validity_label %></span>
+  </p>
+<% end %>
+
 <h3 style="margin: 28px 0 8px; font-size: 16px;">Invoice <%= @invoice_number %></h3>
 <p style="margin: 0 0 12px; color: #666; font-size: 14px;">
   Paid on <%= @paid_at.in_time_zone.strftime("%-d %B %Y at %H:%M") %><br>

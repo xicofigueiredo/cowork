@@ -10,6 +10,12 @@ BOOKING DETAILS
 NIF / VAT: <%= @order.vat_number %>
 <% end %>
 
+<% if @access_code&.active? %>
+DOOR ACCESS
+Code: <%= @access_code.code %>
+Valid: <%= @access_code.validity_label %>
+
+<% end %>
 INVOICE <%= @invoice_number %>
 Paid on <%= @paid_at.in_time_zone.strftime("%-d %B %Y at %H:%M") %>
 <% if @order.vat_number.present? %>

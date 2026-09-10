@@ -1,0 +1,51 @@
+<% content_for :title, "Access codes - Mezzanine" %>
+
+<main class="booking-page">
+  <div class="booking-container">
+    <div class="booking-section-header">
+      <h1 class="booking-title">Access codes</h1>
+      <%= link_to "Generate code", new_admin_access_code_path, class: "booking-btn booking-btn--primary booking-btn--small" %>
+    </div>
+
+    <% unless @ttlock_configured %>
+      <div class="booking-credits-banner">
+        <p>TTLock is not configured. Set <code>TTLOCK_*</code> environment variables to push codes to the lock.</p>
+      </div>
+    <% end %>
+
+    <section class="booking-section">
+      <% if @access_codes.any? %>
+        <ul class="booking-list">
+          <% @access_codes.each do |access_code| %>
+            <li class="booking-list-item">
+              <div>
+                <strong class="booking-door-code"><%= access_code.code %></strong>
+                <span class="booking-list-meta"><%= access_code.name %></span>
+                <span class="booking-list-meta"><%= access_code.validity_label %></span>
+                <span class="booking-list-meta">
+                  <%= access_code.source.capitalize %>
+                  <% if access_code.user %>
+                    · <%= access_code.user.email %>
+                  <% end %>
+                  <% if access_code.booking_id %>
+                    · Booking #<%= access_code.booking_id %>
+                  <% end %>
+                </span>
+              </div>
+              <div class="booking-list-actions">
+                <span class="booking-badge booking-badge--<%= access_code.active? ? 'active' : 'expired' %>">
+                  <%= access_code.status.capitalize %>
+                </span>
+                <% if access_code.active? %>
+                  <%= button_to "Revoke", admin_access_code_path(access_code), method: :delete, class: "booking-btn booking-btn--secondary booking-btn--small", data: { turbo_confirm: "Revoke this door code on the lock?" } %>
+                <% end %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="booking-empty">No access codes yet.</p>
+      <% end %>
+    </section>
+  </div>
+</main>

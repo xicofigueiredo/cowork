@@ -4,6 +4,8 @@
   <div class="booking-container">
     <h1 class="booking-title">Generate door code</h1>
 
+    <%= render "admin/shared/nav" %>
+
     <% unless @ttlock_configured %>
       <div class="booking-credits-banner">
         <p>TTLock is not configured. Set <code>TTLOCK_*</code> environment variables before generating codes.</p>

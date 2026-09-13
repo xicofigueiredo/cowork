@@ -38,6 +38,7 @@ Rails.application.routes.draw do
   resource :meeting_booking, only: [ :new, :create ]
 
   namespace :admin do
+    root to: "dashboard#index"
     resources :access_codes, only: [ :index, :new, :create, :destroy ]
   end
 

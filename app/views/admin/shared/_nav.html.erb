@@ -1,0 +1,4 @@
+<nav class="admin-nav" aria-label="Admin">
+  <%= link_to "Dashboard", admin_root_path, class: "admin-nav-link#{" admin-nav-link--active" if current_page?(admin_root_path)}" %>
+  <%= link_to "Access codes", admin_access_codes_path, class: "admin-nav-link#{" admin-nav-link--active" if request.path.start_with?(admin_access_codes_path)}" %>
+</nav>

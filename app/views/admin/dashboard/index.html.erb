@@ -1,0 +1,79 @@
+<% content_for :title, "Admin - Mezzanine" %>
+
+<main class="booking-page">
+  <div class="booking-container">
+    <div class="booking-section-header">
+      <h1 class="booking-title">Admin</h1>
+    </div>
+
+    <%= render "admin/shared/nav" %>
+
+    <section class="booking-section">
+      <h2 class="booking-section-title">Contact forms <span class="admin-count"><%= @leads.size %></span></h2>
+
+      <% if @leads.any? %>
+        <ul class="booking-list">
+          <% @leads.each do |lead| %>
+            <li class="booking-list-item booking-list-item--stacked">
+              <div>
+                <strong><%= lead.first_name %> <%= lead.last_name %></strong>
+                <span class="booking-list-meta">
+                  <%= mail_to lead.email %>
+                  · <%= lead.created_at.strftime("%-d %b %Y, %H:%M") %>
+                </span>
+                <% if lead.message.present? %>
+                  <p class="admin-lead-message"><%= lead.message %></p>
+                <% else %>
+                  <span class="booking-list-meta">No message</span>
+                <% end %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="booking-empty">No contact forms submitted yet.</p>
+      <% end %>
+    </section>
+
+    <section class="booking-section">
+      <h2 class="booking-section-title">Bookings <span class="admin-count"><%= @bookings.size %></span></h2>
+
+      <% if @bookings.any? %>
+        <ul class="booking-list">
+          <% @bookings.each do |booking| %>
+            <li class="booking-list-item">
+              <div>
+                <strong><%= booking.seat.label %></strong>
+                <span class="booking-list-meta"><%= booking.period_label %></span>
+                <span class="booking-list-meta">
+                  <%= [booking.user.first_name, booking.user.last_name].compact_blank.join(" ") %>
+                  · <%= booking.user.email %>
+                </span>
+                <span class="booking-list-meta">
+                  Booked <%= booking.created_at.strftime("%-d %b %Y, %H:%M") %>
+                  <% if booking.order %>
+                    · Order #<%= booking.order_id %> (<%= booking.order.status %>, <%= booking.order.plan_label %>)
+                  <% elsif booking.credit_pack %>
+                    · Used credits
+                  <% end %>
+                </span>
+                <% if booking.access_code&.active? %>
+                  <span class="booking-list-meta booking-door-code">
+                    Door code: <strong><%= booking.access_code.code %></strong>
+                  </span>
+                <% end %>
+              </div>
+              <div class="booking-list-actions">
+                <span class="booking-badge booking-badge--<%= booking.meeting_booking? ? "meeting" : booking.booking_type %>">
+                  <%= booking.meeting_booking? ? "Meeting" : booking.booking_type.capitalize %>
+                </span>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="booking-empty">No bookings yet.</p>
+      <% end %>
+    </section>
+  </div>
+</main>

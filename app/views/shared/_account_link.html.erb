@@ -18,7 +18,7 @@
       <%= link_to "My bookings", bookings_path, class: "landing-nav-profile-dropdown-link", role: "menuitem" %>
       <%= link_to "My account", edit_user_registration_path, class: "landing-nav-profile-dropdown-link", role: "menuitem" %>
       <% if current_user.admin? %>
-        <%= link_to "Access codes", admin_access_codes_path, class: "landing-nav-profile-dropdown-link", role: "menuitem" %>
+        <%= link_to "Admin", admin_root_path, class: "landing-nav-profile-dropdown-link", role: "menuitem" %>
       <% end %>
       <%= link_to "Sign out", destroy_user_session_path, data: { turbo_method: :delete }, class: "landing-nav-profile-dropdown-link", role: "menuitem" %>
     </div>

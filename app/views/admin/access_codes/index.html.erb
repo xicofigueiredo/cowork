@@ -7,6 +7,8 @@
       <%= link_to "Generate code", new_admin_access_code_path, class: "booking-btn booking-btn--primary booking-btn--small" %>
     </div>
 
+    <%= render "admin/shared/nav" %>
+
     <% unless @ttlock_configured %>
       <div class="booking-credits-banner">
         <p>TTLock is not configured. Set <code>TTLOCK_*</code> environment variables to push codes to the lock.</p>

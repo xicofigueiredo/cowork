@@ -449,6 +449,57 @@
   font-size: 15px;
 }
 
+.admin-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 32px;
+}
+
+.admin-nav-link {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.admin-nav-link:hover {
+  background: #eee;
+  color: var(--landing-dark);
+}
+
+.admin-nav-link--active {
+  background: var(--landing-dark);
+  color: #fff;
+}
+
+.admin-nav-link--active:hover {
+  background: var(--landing-dark);
+  color: #fff;
+}
+
+.admin-count {
+  margin-left: 6px;
+  color: #888;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.booking-list-item--stacked {
+  align-items: flex-start;
+}
+
+.admin-lead-message {
+  margin: 10px 0 0;
+  color: #444;
+  font-size: 15px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
 /* Meeting room calendar */
 .meeting-calendar-days {
   display: grid;

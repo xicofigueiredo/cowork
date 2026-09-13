@@ -43,6 +43,12 @@ class OrderFulfillment
       Rails.logger.error("Payment confirmation email failed for order #{@order.id}: #{e.class}: #{e.message}")
     end
 
+    begin
+      OrderMailer.space_guide(@order).deliver_now
+    rescue StandardError => e
+      Rails.logger.error("Space guide email failed for order #{@order.id}: #{e.class}: #{e.message}")
+    end
+
     true
   end
 

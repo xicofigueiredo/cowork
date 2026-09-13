@@ -31,4 +31,21 @@ class OrderMailer < ApplicationMailer
       subject: "Payment confirmed — #{@order.plan_label} (#{@invoice_number})"
     )
   end
+
+  def space_guide(order)
+    @order = order
+    @user = order.user
+
+    attachments.inline["house_rules1.png"] = File.read(
+      Rails.root.join("app/assets/images/house_rules1.png")
+    )
+    attachments.inline["house_rules2.png"] = File.read(
+      Rails.root.join("app/assets/images/house_rules2.png")
+    )
+
+    mail(
+      to: @user.email,
+      subject: "Welcome to Mezzanine — space guide & house rules"
+    )
+  end
 end

@@ -1,0 +1,40 @@
+<p>Dear <%= @user.first_name %>,</p>
+
+<p>
+  Welcome to Mezzanine. Here’s a short guide so your first visit goes smoothly.
+</p>
+
+<h3 style="margin: 24px 0 8px; font-size: 16px;">Where we are</h3>
+<p style="margin: 0 0 12px;">
+  Rua Brito e Cunha, 27, R/C<br>
+  4450-085 Matosinhos<br>
+  <%= link_to "View on Google Maps", "https://maps.app.goo.gl/zp8jWX9CJJjjR9ye7" %>
+</p>
+
+<h3 style="margin: 24px 0 8px; font-size: 16px;">Access</h3>
+<ul style="margin: 0 0 12px; padding-left: 18px; line-height: 1.6;">
+  <li>Space hours: <strong>08:00–20:00</strong></li>
+  <li>Use the door code from your payment confirmation email (when applicable)</li>
+  <li>Keep the door closed after you enter — don’t share your code</li>
+  <li>Bookings and credits are managed from your account on the website</li>
+</ul>
+
+<h3 style="margin: 24px 0 8px; font-size: 16px;">House rules</h3>
+<p style="margin: 0 0 12px;">
+  <%= image_tag attachments["house_rules1.png"].url, alt: "House rules", style: "display: block; width: 100%; max-width: 560px; height: auto; margin: 0 0 12px;" %>
+  <%= image_tag attachments["house_rules2.png"].url, alt: "House rules continued", style: "display: block; width: 100%; max-width: 560px; height: auto;" %>
+</p>
+
+<h3 style="margin: 24px 0 8px; font-size: 16px;">Need help?</h3>
+<p style="margin: 0 0 12px;">
+  Reply to this email or write to <%= mail_to "hello@mezzaninecowork.com" %>.
+  We’re happy to help.
+</p>
+
+<p>
+  Kind regards,<br>
+  The Mezzanine team<br>
+  Rua Brito e Cunha, 27 · Matosinhos<br>
+  <%= mail_to "hello@mezzaninecowork.com" %><br>
+  Follow us on <%= link_to "Instagram", "https://www.instagram.com/mezzanine.cowork/" %>
+</p>

@@ -1,1 +1,13 @@
 # See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /users
+Disallow: /bookings
+Disallow: /meeting_booking
+Disallow: /checkouts
+Disallow: /webhooks
+
+Sitemap: https://mezzaninecowork.com/sitemap.xml

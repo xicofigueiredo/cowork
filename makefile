@@ -16,8 +16,8 @@ connect: ## Connect to the server
 pass: ## Open rails console in the production container
 	docker compose exec server ./bin/rails console
 
-admin_monthly: ## Grant free monthly plans to ADMIN_EMAILS (idempotent; no Stripe/TOC/emails)
-	docker compose exec server ./bin/rails admin:grant_monthly
+admin_credits: ## Grant 100 free day credits to ADMIN_EMAILS (removes free monthly; no Stripe/TOC/emails)
+	docker compose exec server ./bin/rails admin:grant_credits
 
 seed: ## Seed the database
 	docker compose run server ./bin/rails db:seed

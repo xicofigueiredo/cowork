@@ -99,7 +99,7 @@ namespace :toconline do
 
     Order.paid.order(:id).find_each do |order|
       toc = if order.toconline_document_id.present?
-        "#{order.toconline_document_number.presence || '?} (id=#{order.toconline_document_id})"
+        "#{order.toconline_document_number.presence || '?'} (id=#{order.toconline_document_id})"
       else
         "MISSING"
       end

@@ -1,0 +1,24 @@
+<meta name="description" content="<%= seo_description %>">
+<% if (robots = seo_robots_content).present? %>
+  <meta name="robots" content="<%= robots %>">
+<% end %>
+<link rel="canonical" href="<%= seo_canonical_url %>">
+
+<meta property="og:site_name" content="<%= SeoHelper::SITE_NAME %>">
+<meta property="og:type" content="<%= content_for?(:og_type) ? content_for(:og_type) : "website" %>">
+<meta property="og:title" content="<%= seo_title %>">
+<meta property="og:description" content="<%= seo_description %>">
+<meta property="og:url" content="<%= seo_canonical_url %>">
+<meta property="og:image" content="<%= seo_og_image_url %>">
+<meta property="og:locale" content="en_PT">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<%= seo_title %>">
+<meta name="twitter:description" content="<%= seo_description %>">
+<meta name="twitter:image" content="<%= seo_og_image_url %>">
+
+<% if seo_indexable_page? %>
+  <script type="application/ld+json">
+    <%= raw local_business_json_ld.to_json %>
+  </script>
+<% end %>

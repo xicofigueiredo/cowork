@@ -1,8 +1,9 @@
-<% content_for :title, "Our Space - Mezzanine" %>
+<% content_for :title, "Our Space - Mezzanine Coworking Matosinhos" %>
+<% content_for :meta_description, "Explore Mezzanine coworking in Matosinhos: desks, meeting room, phone booth, kitchen, lounge, and pet-friendly workspace by the sea, open 8:00–20:00." %>
 
 <main class="ourspace">
   <section class="ourspace-hero">
-    <%= image_tag "ourspace/ourspace.jpg", alt: "Desks at the main floor", class: "ourspace-hero-photo" %>
+    <%= image_tag "ourspace/ourspace.jpg", alt: "Desks on the main floor at Mezzanine coworking in Matosinhos", class: "ourspace-hero-photo" %>
     <%= image_tag "ourspace/image.png", alt: "", class: "ourspace-hero-mark" %>
     <h1 class="ourspace-hero-title">Our Space</h1>
   </section>
@@ -70,7 +71,7 @@
         <div class="ourspace-carousel-track" data-ourspace-carousel-track>
           <% @carousel_images.each_with_index do |image, index| %>
             <figure class="ourspace-carousel-slide" data-ourspace-carousel-slide>
-              <%= image_tag image, alt: "Mezzanine cowork space photo #{index + 1}", class: "ourspace-carousel-image" %>
+              <%= image_tag image, alt: "Mezzanine cowork space photo #{index + 1}", class: "ourspace-carousel-image", loading: "lazy" %>
             </figure>
           <% end %>
         </div>

@@ -1,4 +1,5 @@
-<% content_for :title, "Location - Mezzanine" %>
+<% content_for :title, "Location & Contact - Mezzanine Matosinhos" %>
+<% content_for :meta_description, "Find Mezzanine coworking at Rua Brito e Cunha 27, Matosinhos. Open weekdays 8:00–20:00. Contact hello@mezzaninecowork.com or send a message." %>
 
 <main class="location">
 
@@ -37,6 +38,26 @@
 
         <%= f.button "Send", type: :submit, class: "location-submit" %>
       <% end %>
+    </div>
+  </section>
+
+  <section class="location-info" aria-label="Visit Mezzanine">
+    <div class="location-info-inner">
+      <h2 class="location-info-title">Visit our coworking space in Matosinhos</h2>
+      <p class="location-info-copy">
+        Mezzanine is a flexible workspace near the sea in Matosinhos, a short trip from Porto.
+        Drop in for a day, book a monthly desk, or reserve the meeting room for your team.
+      </p>
+      <address class="location-info-address">
+        <strong>Mezzanine</strong><br>
+        Rua Brito e Cunha 27, R/C<br>
+        4450-085 Matosinhos, Portugal
+      </address>
+      <p class="location-info-meta">
+        <span>Hours: weekdays 08:00–20:00</span>
+        <span>·</span>
+        <%= mail_to "hello@mezzaninecowork.com", "hello@mezzaninecowork.com", class: "location-info-email" %>
+      </p>
     </div>
   </section>
 

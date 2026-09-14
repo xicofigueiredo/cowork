@@ -1,8 +1,24 @@
 #!/bin/bash -e
 
+# Named Docker volumes are often created as root; the app runs as rails.
+# Fix ownership so TOC tokens, Active Storage, and cache can persist.
+if [ "$(id -u)" = "0" ]; then
+  mkdir -p /rails/storage /rails/tmp/cache /rails/log
+  chown -R rails:rails /rails/storage /rails/tmp /rails/log
+
+  if [ "${1}" = "./bin/rails" ] || [ "${1}" = "bundle" ] || [ "${1}" = "./bin/thrust" ]; then
+    # Drop privileges for the main process
+    set -- gosu rails "$@"
+  fi
+fi
+
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
-  ./bin/rails db:prepare
+  if [ "$(id -u)" = "0" ]; then
+    gosu rails ./bin/rails db:prepare
+  else
+    ./bin/rails db:prepare
+  fi
 fi
 
 exec "${@}"

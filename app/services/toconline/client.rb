@@ -20,7 +20,21 @@ module Toconline
         ENV["TOCONLINE_CLIENT_SECRET"].present? &&
         ENV["TOCONLINE_API_URL"].present? &&
         ENV["TOCONLINE_OAUTH_URL"].present? &&
-        (ENV["TOCONLINE_REFRESH_TOKEN"].present? || Rails.cache.read(REFRESH_CACHE_KEY).present?)
+        current_refresh_token.present?
+    end
+
+    def self.current_refresh_token
+      stored = TokenStore.refresh_token.presence
+      return stored if stored.present?
+
+      cached = Rails.cache.read(REFRESH_CACHE_KEY).presence
+      env = ENV["TOCONLINE_REFRESH_TOKEN"].presence
+      token = cached || env
+
+      # Seed durable storage from ENV/cache so the next rotated token has a home.
+      TokenStore.write_refresh_token!(token) if token.present?
+
+      token
     end
 
     def initialize
@@ -125,7 +139,7 @@ module Toconline
     end
 
     def refresh_access_token!
-      refresh = Rails.cache.read(REFRESH_CACHE_KEY).presence || ENV["TOCONLINE_REFRESH_TOKEN"]
+      refresh = self.class.current_refresh_token
       raise ConfigurationError, "TOCONLINE_REFRESH_TOKEN is not set. Run bin/rails toconline:auth" if refresh.blank?
 
       response = token_request(
@@ -190,8 +204,16 @@ module Toconline
 
       raise ApiError, "TOConline token response missing access_token" if access.blank?
 
+      # Access tokens are short-lived — cache is fine.
       Rails.cache.write(TOKEN_CACHE_KEY, access, expires_in: [ expires_in - 60, 60 ].max.seconds)
-      Rails.cache.write(REFRESH_CACHE_KEY, refresh, expires_in: 8.hours) if refresh.present?
+
+      # TOC rotates refresh tokens. The new one must be persisted forever on the
+      # storage volume; caching it for only a few hours caused production to fall
+      # back to the stale ENV token and start returning unauthorized_client.
+      if refresh.present?
+        TokenStore.write_refresh_token!(refresh)
+        Rails.cache.write(REFRESH_CACHE_KEY, refresh)
+      end
     end
 
     def parse_json(raw)

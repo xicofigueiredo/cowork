@@ -1,0 +1,28 @@
+<p>TOConline failed to issue an invoice for a paid order.</p>
+
+<p>
+  <strong>Order:</strong> #<%= @order.id %><br>
+  <strong>Customer:</strong> <%= @order.customer_name %> &lt;<%= @user.email %>&gt;<br>
+  <strong>Plan:</strong> <%= @order.plan_label %> (<%= @order.total_with_iva_euros %>)<br>
+  <strong>Internal ref:</strong> <%= @order.invoice_number %>
+</p>
+
+<p>
+  <strong>Error:</strong><br>
+  <code><%= @error_message %></code>
+</p>
+
+<p>
+  Fix auth if needed, then re-issue on the server:
+</p>
+<pre>
+docker compose exec -e ORDER_ID=<%= @order.id %> server ./bin/rails toconline:invoice
+</pre>
+
+<p>
+  If the error is <code>unauthorized_client</code>, re-authorize first:
+</p>
+<pre>
+docker compose exec server ./bin/rails toconline:authorize_url
+docker compose exec -e CODE='...' server ./bin/rails toconline:auth
+</pre>

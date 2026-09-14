@@ -15,21 +15,23 @@ class OrderMailer < ApplicationMailer
         mime_type: "application/pdf",
         content: official_pdf
       }
-    else
-      attachments["invoice-#{@invoice_number}.html"] = {
-        mime_type: "text/html",
-        content: render_to_string(
-          template: "order_mailer/invoice",
-          formats: [ :html ],
-          layout: false
-        )
-      }
     end
 
     mail(
       to: @user.email,
       bcc: admin_emails,
       subject: "Payment confirmed — #{@order.plan_label} (#{@invoice_number})"
+    )
+  end
+
+  def toconline_failure(order, error_message)
+    @order = order
+    @user = order.user
+    @error_message = error_message
+
+    mail(
+      to: admin_emails.presence || [ "hello@mezzaninecowork.com" ],
+      subject: "[Action required] TOConline invoice failed — order ##{order.id}"
     )
   end
 

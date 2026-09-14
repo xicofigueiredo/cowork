@@ -13,7 +13,10 @@ module Toconline
     end
 
     def call
-      return nil unless Client.configured?
+      unless Client.configured?
+        notify_failure!(ConfigurationError.new("TOConline is not configured (missing credentials / refresh token)"))
+        return nil
+      end
 
       client = Client.new
       response = client.create_sales_document!(document_attributes)
@@ -45,14 +48,22 @@ module Toconline
         document_number: document_number,
         pdf_bytes: pdf_bytes
       )
-    rescue ConfigurationError
+    rescue ConfigurationError => e
+      notify_failure!(e)
       nil
     rescue StandardError => e
       Rails.logger.error("TOConline invoice failed for order #{@order.id}: #{e.class}: #{e.message}")
+      notify_failure!(e)
       nil
     end
 
     private
+
+    def notify_failure!(error)
+      OrderMailer.toconline_failure(@order, error.message).deliver_now
+    rescue StandardError => mail_error
+      Rails.logger.error("TOConline failure alert email failed: #{mail_error.class}: #{mail_error.message}")
+    end
 
     def document_attributes
       attrs = {

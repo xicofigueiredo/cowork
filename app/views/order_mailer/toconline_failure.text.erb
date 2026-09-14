@@ -1,0 +1,16 @@
+TOConline failed to issue an invoice for a paid order.
+
+Order: #<%= @order.id %>
+Customer: <%= @order.customer_name %> <<%= @user.email %>>
+Plan: <%= @order.plan_label %> (<%= @order.total_with_iva_euros %>)
+Internal ref: <%= @order.invoice_number %>
+
+Error:
+<%= @error_message %>
+
+Re-issue:
+docker compose exec -e ORDER_ID=<%= @order.id %> server ./bin/rails toconline:invoice
+
+If unauthorized_client, re-authorize:
+docker compose exec server ./bin/rails toconline:authorize_url
+docker compose exec -e CODE='...' server ./bin/rails toconline:auth

@@ -14,6 +14,19 @@ module Toconline
     CONSUMER_NIF = "999999990"
     TOKEN_CACHE_KEY = "toconline/access_token"
     REFRESH_CACHE_KEY = "toconline/refresh_token"
+    OPEN_TIMEOUT = 30
+    READ_TIMEOUT = 60
+    MAX_ATTEMPTS = 3
+    TRANSIENT_ERRORS = [
+      Net::OpenTimeout,
+      Net::ReadTimeout,
+      Errno::ECONNRESET,
+      Errno::ECONNREFUSED,
+      Errno::EHOSTUNREACH,
+      Errno::ETIMEDOUT,
+      SocketError,
+      EOFError
+    ].freeze
 
     def self.configured?
       ENV["TOCONLINE_CLIENT_ID"].present? &&
@@ -76,7 +89,7 @@ module Toconline
       raise ApiError, "TOConline PDF URL missing for document #{document_id}" if url.blank?
 
       uri = URI(url)
-      response = Net::HTTP.get_response(uri)
+      response = http_request(:get, uri, headers: {})
       unless response.is_a?(Net::HTTPSuccess)
         raise ApiError, "TOConline PDF download failed (#{response.code})"
       end

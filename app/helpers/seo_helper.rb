@@ -1,7 +1,7 @@
 module SeoHelper
-  DEFAULT_TITLE = "Mezzanine — Coworking in Matosinhos".freeze
-  DEFAULT_DESCRIPTION = "Mezzanine is a coworking space in Matosinhos near Porto. Daily passes, monthly desks, and a meeting room with sea-side access from 8:00–20:00.".freeze
-  SITE_NAME = "Mezzanine cowork".freeze
+  DEFAULT_TITLE = "Mezzanine — Coworking Space in Matosinhos, Porto".freeze
+  DEFAULT_DESCRIPTION = "Mezzanine is a coworking space and flexible workspace in Matosinhos, near Porto. Daily coworking passes, monthly desks, and a meeting room by the sea, open 8:00–20:00.".freeze
+  SITE_NAME = "Mezzanine".freeze
 
   def seo_title
     content_for?(:title) ? content_for(:title) : DEFAULT_TITLE
@@ -51,6 +51,7 @@ module SeoHelper
       "@context" => "https://schema.org",
       "@type" => [ "LocalBusiness", "CoworkingSpace" ],
       "name" => "Mezzanine",
+      "alternateName" => "Mezzanine Cowork",
       "legalName" => "Mesa Workspace, Lda.",
       "url" => "#{request.base_url}/",
       "image" => absolute_asset_url("landing/home.jpg"),
@@ -60,6 +61,7 @@ module SeoHelper
         "@type" => "PostalAddress",
         "streetAddress" => "Rua Brito e Cunha 27, R/C",
         "addressLocality" => "Matosinhos",
+        "addressRegion" => "Porto",
         "postalCode" => "4450-085",
         "addressCountry" => "PT"
       },
@@ -68,6 +70,10 @@ module SeoHelper
         "latitude" => 41.18253087132666,
         "longitude" => -8.691271823268368
       },
+      "areaServed" => [
+        { "@type" => "City", "name" => "Matosinhos" },
+        { "@type" => "City", "name" => "Porto" }
+      ],
       "openingHoursSpecification" => [
         {
           "@type" => "OpeningHoursSpecification",

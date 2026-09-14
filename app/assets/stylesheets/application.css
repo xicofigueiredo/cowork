@@ -272,6 +272,15 @@ main {
   filter: brightness(0) invert(1);
 }
 
+.shared-footer-tagline {
+  color: #fff;
+  font-size: 14px;
+  margin: 0;
+  opacity: 0.9;
+  max-width: 22ch;
+  line-height: 1.35;
+}
+
 .shared-footer-copyright {
   color: #fff;
   font-size: 14px;

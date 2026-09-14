@@ -50,6 +50,35 @@
     </section>
 
     <section class="booking-section">
+      <h2 class="booking-section-title">Users <span class="admin-count"><%= @users.size %></span></h2>
+
+      <% if @users.any? %>
+        <ul class="booking-list">
+          <% @users.each do |user| %>
+            <li class="booking-list-item">
+              <div>
+                <strong><%= [user.first_name, user.last_name].compact_blank.join(" ").presence || "—" %></strong>
+                <span class="booking-list-meta">
+                  <%= mail_to user.email %>
+                  · Joined <%= user.created_at.strftime("%-d %b %Y, %H:%M") %>
+                </span>
+              </div>
+              <div class="booking-list-actions">
+                <% if user.confirmed? %>
+                  <span class="booking-badge booking-badge--active">Confirmed</span>
+                <% else %>
+                  <span class="booking-badge booking-badge--upcoming">Unconfirmed</span>
+                <% end %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="booking-empty">No user accounts yet.</p>
+      <% end %>
+    </section>
+
+    <section class="booking-section">
       <h2 class="booking-section-title">Contact forms <span class="admin-count"><%= @leads.size %></span></h2>
 
       <% if @leads.any? %>

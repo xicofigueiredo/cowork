@@ -28,6 +28,7 @@ class OrderMailer < ApplicationMailer
 
     mail(
       to: @user.email,
+      bcc: admin_emails,
       subject: "Payment confirmed — #{@order.plan_label} (#{@invoice_number})"
     )
   end
@@ -47,5 +48,11 @@ class OrderMailer < ApplicationMailer
       to: @user.email,
       subject: "Welcome to Mezzanine — space guide & house rules"
     )
+  end
+
+  private
+
+  def admin_emails
+    ENV.fetch("ADMIN_EMAILS", "").split(",").map { |e| e.strip }.reject(&:blank?)
   end
 end

@@ -155,6 +155,19 @@ body:has(.landing) main {
   font-weight: 500;
 }
 
+.landing-footer a.landing-footer-book {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--landing-accent);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .landing-footer-instagram {
   display: inline-flex;
   align-items: center;
@@ -208,5 +221,9 @@ body:has(.landing) main {
 
   body:has(.landing) .landing-footer {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  }
+
+  .landing-footer a.landing-footer-book {
+    display: none;
   }
 }

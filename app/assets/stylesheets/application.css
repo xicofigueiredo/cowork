@@ -129,6 +129,10 @@ main {
   z-index: 11;
 }
 
+.landing-top-book {
+  display: none;
+}
+
 .landing-nav-toggle-bar {
   display: block;
   width: 100%;
@@ -163,6 +167,23 @@ main {
     display: none;
   }
 
+  .landing-top a.landing-top-book {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--landing-accent);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    pointer-events: auto;
+  }
+
   body:has(.mobile-footbar) {
     padding-bottom: calc(var(--mobile-footbar-height) + env(safe-area-inset-bottom, 0px));
   }
@@ -186,9 +207,7 @@ main {
     gap: 2px;
     min-height: var(--mobile-footbar-height);
     padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px));
-    background: #fff;
-    border-top: 1px solid rgb(0 0 0 / 0.08);
-    box-shadow: 0 -4px 16px rgb(0 0 0 / 0.06);
+    background: var(--landing-accent);
   }
 
   .mobile-footbar-item {
@@ -200,19 +219,21 @@ main {
     justify-content: center;
     gap: 2px;
     padding: 4px 2px;
-    color: var(--landing-dark);
+    color: #fff;
     text-decoration: none;
     font-size: 10px;
     font-weight: 500;
     letter-spacing: 0.01em;
     text-transform: lowercase;
     border-radius: 8px;
-    transition: color 0.15s ease, background 0.15s ease;
+    transition: color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
   }
 
   .mobile-footbar-item svg {
     display: block;
     flex-shrink: 0;
+    width: 28px;
+    height: 28px;
   }
 
   .mobile-footbar-item span {
@@ -223,15 +244,16 @@ main {
   }
 
   .mobile-footbar-item--active {
-    color: var(--landing-accent);
+    color: #fff;
+    font-weight: 600;
   }
 
   .mobile-footbar-item--sign-out {
-    color: rgb(108 49 46 / 0.72);
+    color: rgb(255 255 255 / 0.85);
   }
 
   .mobile-footbar-item:active {
-    background: rgb(108 49 46 / 0.06);
+    background: rgb(255 255 255 / 0.12);
   }
 }
 

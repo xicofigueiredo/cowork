@@ -143,16 +143,18 @@ body:has(.landing) main {
   align-items: center;
   justify-content: space-between;
   padding: 0 34px;
-  padding-bottom: env(safe-area-inset-bottom, 0);
   letter-spacing: 0.03em;
   flex-shrink: 0;
 }
 
 .landing-footer a {
+  display: inline-flex;
+  align-items: center;
   color: #fff;
   text-decoration: none;
   font-size: clamp(14px, 1.25vw, 18px);
   font-weight: 500;
+  line-height: 1;
 }
 
 .landing-footer a.landing-footer-book {
@@ -206,7 +208,6 @@ body:has(.landing) main {
   .landing-footer {
     min-height: 80px;
     padding: 0 24px;
-    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
   .landing-footer a {
@@ -217,10 +218,6 @@ body:has(.landing) main {
 @media (max-width: 768px) {
   body:has(.landing) {
     padding-bottom: calc(var(--mobile-footbar-height) + env(safe-area-inset-bottom, 0px));
-  }
-
-  body:has(.landing) .landing-footer {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
   }
 
   .landing-footer a.landing-footer-book {

@@ -20,8 +20,9 @@ class StripeCheckout
       client_reference_id: @order.id.to_s,
       metadata: {
         order_id: @order.id,
-        plan_type: @order.plan_type
-      },
+        plan_type: @order.plan_type,
+        promocode: @order.promocode&.code
+      }.compact,
       line_items: [
         {
           quantity: 1,

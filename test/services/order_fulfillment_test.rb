@@ -68,4 +68,29 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
     assert order.paid?
     assert_equal 5, order.credit_pack.remaining_credits
   end
+
+  test "fulfills promocode order with discounted credits" do
+    promocode = Promocode.create!(
+      code: "MEZZFRIENDS30",
+      amount_cents: 3000,
+      credits: 5,
+      active: true
+    )
+    order = Order.create!(
+      user: @user,
+      plan_type: "daily",
+      amount_cents: promocode.amount_cents,
+      status: "pending",
+      promocode: promocode,
+      vat_number: "123456789"
+    )
+
+    assert OrderFulfillment.call(order)
+    order.reload
+
+    assert order.paid?
+    assert_nil order.booking
+    assert_equal 5, order.credit_pack.remaining_credits
+    assert_equal 3000, order.amount_cents
+  end
 end

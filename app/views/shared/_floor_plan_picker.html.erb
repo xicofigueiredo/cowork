@@ -105,6 +105,9 @@ function initializeFloorPlan() {
     if (form && !form.dataset.floorPlanSubmitBound) {
       form.dataset.floorPlanSubmitBound = 'true';
       form.addEventListener('submit', (event) => {
+        const submitter = event.submitter;
+        if (submitter?.value === 'apply_promocode') return;
+
         if (!input.value) {
           event.preventDefault();
           if (error) {

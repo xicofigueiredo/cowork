@@ -1,6 +1,7 @@
 <% content_for :title, "Checkout - Mezzanine" %>
 <% meeting_checkout = Order::MEETING_PLAN_TYPES.include?(@plan_type) %>
 <% desk_checkout = @plan_type == "daily" %>
+<% promo_credit_checkout = @promocode.present? %>
 <% selected_calendar_day = @calendar_days&.find { |day| day[:date].to_date == @booking_date.to_date } if (desk_checkout || meeting_checkout) && @booking_date.present? %>
 <% # Floor plan and this flag must agree: use actual desk availability, not only the calendar lookup.
    desk_day_available = if desk_checkout
@@ -9,13 +10,18 @@
      selected_calendar_day&.dig(:available)
    end %>
 <% hourly_slots_available = @hour_grid&.any? { |slot| slot[:available] } %>
-<% checkout_submit_disabled = (
+<% checkout_submit_disabled = !promo_credit_checkout && (
      (desk_checkout && !desk_day_available) ||
      (meeting_checkout && (
        (@plan_type == "meeting_daily" && !selected_calendar_day&.dig(:available)) ||
        (@plan_type == "meeting_hourly" && !hourly_slots_available)
      ))
    ) %>
+<% checkout_total_locals = {
+     amount_cents: @order.amount_cents,
+     plan_type: @order.plan_type,
+     promocode: @promocode
+   } %>
 
 <main class="booking-page">
   <div class="booking-container">
@@ -24,8 +30,30 @@
 
     <%= form_with model: @order, url: checkouts_path, class: "booking-form" do |f| %>
       <%= f.hidden_field :plan_type, value: @plan_type %>
+      <%= hidden_field_tag :plan, @plan_type %>
+      <%= hidden_field_tag :date, @booking_date if @booking_date.present? %>
+      <%= hidden_field_tag :slot, params[:slot] if params[:slot].present? %>
 
-      <% if @plan_type == "daily" %>
+      <% if promo_credit_checkout %>
+        <div class="booking-summary-card">
+          <p class="booking-summary-row">
+            <span>Promo code</span>
+            <strong><%= @promocode.code %></strong>
+          </p>
+          <p class="booking-summary-row">
+            <span>Credits</span>
+            <strong><%= @promocode.credits %> days</strong>
+          </p>
+          <p class="booking-summary-row">
+            <span>Valid for</span>
+            <strong>3 months</strong>
+          </p>
+          <p class="booking-summary-note">After payment, use your credits to book any available desk on the days you choose.</p>
+        </div>
+
+        <%= render "shared/checkout_total", **checkout_total_locals %>
+
+      <% elsif @plan_type == "daily" %>
         <%= f.hidden_field :booking_date, value: @booking_date %>
 
         <%= render "shared/desk_day_picker",
@@ -40,6 +68,8 @@
         <% unless desk_day_available %>
           <p class="booking-note booking-note--error">No desks available on this day. Choose another day above.</p>
         <% end %>
+
+        <%= render "shared/checkout_total", **checkout_total_locals %>
 
       <% elsif @plan_type == "monthly" %>
         <div class="booking-field">
@@ -57,6 +87,8 @@
                 input_name: "order[seat_id]",
                 selected_seat_id: @order.seat_id %>
         </div>
+
+        <%= render "shared/checkout_total", **checkout_total_locals %>
 
       <% elsif @plan_type == "meeting_daily" %>
         <%= f.hidden_field :booking_date, value: @booking_date %>
@@ -85,7 +117,7 @@
             </p>
           </div>
 
-          <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
+          <%= render "shared/checkout_total", **checkout_total_locals %>
         </div>
 
         <% unless selected_calendar_day&.dig(:available) %>
@@ -150,7 +182,7 @@
             </p>
           </div>
 
-          <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
+          <%= render "shared/checkout_total", **checkout_total_locals %>
         </div>
 
       <% else %>
@@ -169,22 +201,55 @@
           </p>
           <p class="booking-summary-note">After payment, use your credits to book any available desk on the days you choose.</p>
         </div>
+
+        <%= render "shared/checkout_total", **checkout_total_locals %>
       <% end %>
 
-      <% unless meeting_checkout %>
-        <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
-      <% end %>
+      <div class="booking-inline-fields">
+        <div class="booking-field">
+          <label class="booking-label" for="promocode">Promo code</label>
+          <div class="booking-promocode-row">
+            <input type="text"
+                   name="promocode"
+                   id="promocode"
+                   value="<%= @promocode_input.presence || @promocode&.code %>"
+                   class="booking-input booking-input--promocode"
+                   autocomplete="off"
+                   spellcheck="false"
+                   placeholder="Enter code">
+            <button type="submit"
+                    class="booking-btn booking-btn--secondary booking-btn--promocode"
+                    formaction="<%= new_checkout_path %>"
+                    formmethod="get"
+                    formnovalidate
+                    data-turbo="false"
+                    name="commit"
+                    value="apply_promocode">
+              Apply
+            </button>
+          </div>
+          <% if @promocode_error.present? %>
+            <p class="booking-note booking-note--error"><%= @promocode_error %></p>
+          <% elsif @promocode.present? %>
+            <p class="booking-note booking-note--success">
+              <%= @promocode.code %> applied — <%= @promocode.credits %> day credits for <%= Order.format_euros(@promocode.amount_cents) %>.
+            </p>
+          <% else %>
+            <p class="booking-note">Optional — enter a code if you have one.</p>
+          <% end %>
+        </div>
 
-      <div class="booking-field">
-        <%= f.label :vat_number, "NIF / VAT number (optional)", class: "booking-label" %>
-        <%= f.text_field :vat_number,
-              class: "booking-input booking-input--full",
-              autocomplete: "off",
-              inputmode: "numeric",
-              maxlength: 12,
-              placeholder: "123456789",
-              value: @order.vat_number %>
-        <p class="booking-note">Optional — add it if you need NIF on your invoice. Portuguese NIF (9 digits) or PT + NIF.</p>
+        <div class="booking-field">
+          <%= f.label :vat_number, "NIF / VAT number (optional)", class: "booking-label" %>
+          <%= f.text_field :vat_number,
+                class: "booking-input booking-input--full",
+                autocomplete: "off",
+                inputmode: "numeric",
+                maxlength: 12,
+                placeholder: "123456789",
+                value: @order.vat_number %>
+          <p class="booking-note">Optional — add it if you need NIF on your invoice. Portuguese NIF (9 digits) or PT + NIF.</p>
+        </div>
       </div>
 
       <div class="booking-actions">

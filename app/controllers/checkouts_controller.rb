@@ -10,6 +10,7 @@ class CheckoutsController < ApplicationController
     end
 
     @order = Order.new(plan_type: @plan_type, amount_cents: Order.plan_config(@plan_type)[:amount_cents])
+    apply_promocode_from_params!
     load_plan_defaults
     @seats = Seat.desks.ordered
     @monthly_period = current_user.next_monthly_period if @plan_type == "monthly"
@@ -26,8 +27,16 @@ class CheckoutsController < ApplicationController
     @order = current_user.orders.build(order_params)
     @order.amount_cents = Order.plan_config(@plan_type)[:amount_cents]
     @order.status = "pending"
+    apply_promocode_to_order!(params[:promocode].presence || params.dig(:order, :promocode))
 
-    if @order.save
+    if @promocode_error.present?
+      @seats = Seat.desks.ordered
+      load_plan_defaults
+      @monthly_period = current_user.next_monthly_period if @plan_type == "monthly"
+      load_unavailable_desks
+      flash.now[:alert] = @promocode_error
+      render :new, status: :unprocessable_entity
+    elsif @order.save
       redirect_to checkout_path(@order)
     else
       @seats = Seat.desks.ordered
@@ -121,6 +130,34 @@ class CheckoutsController < ApplicationController
 
   def order_params
     params.require(:order).permit(:plan_type, :seat_id, :booking_date, :starts_at, :vat_number)
+  end
+
+  def apply_promocode_from_params!
+    code = params[:promocode].presence
+    return if code.blank?
+
+    apply_promocode_to_order!(code)
+  end
+
+  def apply_promocode_to_order!(code)
+    @promocode_input = code.to_s.strip
+    return if @promocode_input.blank?
+
+    promocode = Promocode.find_active_by_code(@promocode_input)
+    unless promocode
+      @promocode_error = "Invalid or inactive promo code."
+      @order.errors.add(:base, @promocode_error) if action_name == "create"
+      return
+    end
+
+    @promocode = promocode
+    @order.promocode = promocode
+    @order.amount_cents = promocode.amount_cents
+    return unless @order.promocode_credit_pack?
+
+    @order.seat_id = nil
+    @order.booking_date = nil
+    @order.starts_at = nil
   end
 
   def load_plan_defaults

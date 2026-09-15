@@ -46,7 +46,7 @@
       <% if @order.credit_pack? %>
         <p class="booking-summary-row">
           <span>Credits</span>
-          <strong><%= Order.plan_config(@order.plan_type)[:credits] %> days</strong>
+          <strong><%= @order.credit_count %> days</strong>
         </p>
       <% end %>
 
@@ -57,7 +57,10 @@
         </p>
       <% end %>
 
-      <%= render "shared/checkout_total", amount_cents: @order.amount_cents, plan_type: @order.plan_type %>
+      <%= render "shared/checkout_total",
+            amount_cents: @order.amount_cents,
+            plan_type: @order.plan_type,
+            promocode: @order.promocode %>
     </div>
 
     <div class="booking-payment-actions">

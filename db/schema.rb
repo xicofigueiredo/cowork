@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_08_181200) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_215055) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -83,6 +83,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_08_181200) do
     t.datetime "created_at", null: false
     t.datetime "paid_at"
     t.string "plan_type", null: false
+    t.bigint "promocode_id"
     t.bigint "seat_id"
     t.datetime "starts_at"
     t.string "status", default: "pending", null: false
@@ -92,8 +93,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_08_181200) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.string "vat_number"
+    t.index ["promocode_id"], name: "index_orders_on_promocode_id"
     t.index ["seat_id"], name: "index_orders_on_seat_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
+  create_table "promocodes", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.integer "amount_cents", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.integer "credits", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_promocodes_on_code", unique: true
   end
 
   create_table "seats", force: :cascade do |t|
@@ -132,6 +144,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_08_181200) do
   add_foreign_key "bookings", "users"
   add_foreign_key "credit_packs", "orders"
   add_foreign_key "credit_packs", "users"
+  add_foreign_key "orders", "promocodes"
   add_foreign_key "orders", "seats"
   add_foreign_key "orders", "users"
 end

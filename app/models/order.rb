@@ -17,6 +17,7 @@ class Order < ApplicationRecord
 
   belongs_to :user
   belongs_to :seat, optional: true
+  belongs_to :promocode, optional: true
   has_one :credit_pack, dependent: :destroy
   has_one :booking, dependent: :destroy
 
@@ -24,14 +25,14 @@ class Order < ApplicationRecord
   validates :amount_cents, presence: true, numericality: { greater_than: 0 }
   validates :status, presence: true, inclusion: { in: STATUSES }
   validate :vat_number_format
-  validates :seat, presence: true, if: :requires_desk?
-  validates :booking_date, presence: true, if: -> { plan_type == "daily" || plan_type == "meeting_daily" }
-  validates :starts_at, presence: true, if: -> { plan_type == "meeting_hourly" }
-  validate :seat_available, if: -> { pending? && requires_desk? && seat.present? }
-  validate :meeting_booking_valid, if: -> { pending? && meeting_plan? }
+  validates :seat, presence: true, if: -> { requires_desk? && !promocode_credit_pack? }
+  validates :booking_date, presence: true, if: -> { (plan_type == "daily" || plan_type == "meeting_daily") && !promocode_credit_pack? }
+  validates :starts_at, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
+  validate :seat_available, if: -> { pending? && requires_desk? && seat.present? && !promocode_credit_pack? }
+  validate :meeting_booking_valid, if: -> { pending? && meeting_plan? && !promocode_credit_pack? }
 
   before_validation :normalize_vat_number
-  before_validation :assign_meeting_room_seat, if: -> { meeting_plan? && seat.blank? }
+  before_validation :assign_meeting_room_seat, if: -> { meeting_plan? && seat.blank? && !promocode_credit_pack? }
 
   scope :pending, -> { where(status: "pending") }
   scope :paid, -> { where(status: "paid") }
@@ -69,11 +70,23 @@ class Order < ApplicationRecord
   end
 
   def credit_pack?
-    CREDIT_PACK_TYPES.include?(plan_type)
+    CREDIT_PACK_TYPES.include?(plan_type) || promocode_credit_pack?
+  end
+
+  def promocode_credit_pack?
+    promocode.present? && promocode.credits.to_i > 0
   end
 
   def plan_label
+    return "#{promocode.credits}-day pack (#{promocode.code})" if promocode_credit_pack?
+
     PLAN_TYPES.dig(plan_type, :label)
+  end
+
+  def credit_count
+    return promocode.credits if promocode_credit_pack?
+
+    self.class.plan_config(plan_type)[:credits]
   end
 
   def amount_euros
@@ -126,7 +139,8 @@ class Order < ApplicationRecord
 
     if credit_pack?
       pack = credit_pack
-      details << [ "Credits", "#{pack&.total_credits || plan_config_credits} day credits" ]
+      details << [ "Credits", "#{pack&.total_credits || credit_count} day credits" ]
+      details << [ "Promo code", promocode.code ] if promocode.present?
       details << [ "Valid until", pack&.expires_at&.strftime("%-d %B %Y") ] if pack&.expires_at
     elsif booking.present?
       details << [ booking.seat.meeting_room? ? "Room" : "Desk", booking.seat.label ]
@@ -167,10 +181,6 @@ class Order < ApplicationRecord
     check = 11 - (total % 11)
     check = 0 if check >= 10
     check == nif[8].to_i
-  end
-
-  def plan_config_credits
-    self.class.plan_config(plan_type)[:credits]
   end
 
   def assign_meeting_room_seat

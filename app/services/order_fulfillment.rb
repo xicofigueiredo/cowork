@@ -64,13 +64,13 @@ class OrderFulfillment
   end
 
   def create_credit_pack!
-    config = Order.plan_config(@order.plan_type)
+    credits = @order.credit_count
     CreditPack.create!(
       user: @order.user,
       order: @order,
       credit_type: "day",
-      total_credits: config[:credits],
-      remaining_credits: config[:credits],
+      total_credits: credits,
+      remaining_credits: credits,
       expires_at: 3.months.from_now
     )
   end

@@ -1,9 +1,21 @@
-<%# locals: amount_cents:, plan_type: nil, original_amount_cents: nil %>
+<%# locals: amount_cents:, plan_type: nil, original_amount_cents: nil, promocode: nil %>
 <% checkout_plan_type = local_assigns[:plan_type] %>
 <% checkout_original_amount_cents = local_assigns[:original_amount_cents] %>
+<% applied_promocode = local_assigns[:promocode] %>
 <% original_cents = checkout_original_amount_cents || (checkout_plan_type && Order.original_amount_cents_for(checkout_plan_type)) %>
+<% if applied_promocode.present? && checkout_plan_type.present? %>
+  <% plan_amount = Order.plan_config(checkout_plan_type)[:amount_cents] %>
+  <% original_cents = plan_amount if plan_amount > amount_cents %>
+<% end %>
 <% show_original = original_cents.present? && original_cents > amount_cents %>
+
 <div class="booking-price-breakdown">
+  <% if applied_promocode.present? %>
+    <div class="booking-price-row booking-price-row--subtotal">
+      <span>Promo code</span>
+      <strong><%= applied_promocode.code %></strong>
+    </div>
+  <% end %>
   <div class="booking-price-row booking-price-row--subtotal">
     <span>Subtotal</span>
     <div class="booking-price-values">

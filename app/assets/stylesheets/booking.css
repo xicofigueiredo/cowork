@@ -232,6 +232,50 @@
   margin-top: 4px;
 }
 
+.booking-inline-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px 24px;
+  align-items: start;
+}
+
+.booking-promocode-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.booking-input--promocode {
+  flex: 1 1 120px;
+  max-width: none;
+  text-transform: uppercase;
+}
+
+.booking-inline-fields .booking-input--full {
+  max-width: none;
+  width: 100%;
+}
+
+.booking-btn--promocode {
+  padding: 12px 18px;
+  white-space: nowrap;
+}
+
+.booking-note--error {
+  color: #a33;
+}
+
+.booking-note--success {
+  color: #2f6b3c;
+}
+
+@media (max-width: 720px) {
+  .booking-inline-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
 .booking-actions {
   display: flex;
   flex-wrap: wrap;

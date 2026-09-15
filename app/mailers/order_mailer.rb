@@ -51,10 +51,4 @@ class OrderMailer < ApplicationMailer
       subject: "Welcome to Mezzanine — space guide & house rules"
     )
   end
-
-  private
-
-  def admin_emails
-    ENV.fetch("ADMIN_EMAILS", "").split(",").map { |e| e.strip }.reject(&:blank?)
-  end
 end

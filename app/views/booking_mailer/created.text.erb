@@ -1,0 +1,6 @@
+A new booking was created.
+
+Member: <%= @member_name %> <<%= @user.email %>>
+Type: <%= @booking.booking_type.humanize %>
+Seat: <%= @seat.label %>
+When: <%= @booking.period_label %>

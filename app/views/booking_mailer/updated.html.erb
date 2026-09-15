@@ -1,0 +1,24 @@
+<p>A booking was updated.</p>
+
+<p>
+  <strong>Member:</strong> <%= @member_name %> &lt;<%= @user.email %>&gt;<br>
+  <strong>Type:</strong> <%= @booking.booking_type.humanize %><br>
+  <strong>Seat:</strong> <%= @seat.label %><br>
+  <strong>When:</strong> <%= @booking.period_label %>
+</p>
+
+<% if @changes.any? %>
+  <h3 style="margin: 24px 0 8px; font-size: 16px;">Changes</h3>
+  <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 480px;">
+    <% @changes.each do |change| %>
+      <tr>
+        <td style="padding: 6px 12px 6px 0; color: #666; vertical-align: top;"><%= change[:label] %></td>
+        <td style="padding: 6px 0;">
+          <span style="text-decoration: line-through; color: #999;"><%= change[:before] %></span>
+          →
+          <strong><%= change[:after] %></strong>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+<% end %>

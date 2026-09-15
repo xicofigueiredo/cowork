@@ -61,6 +61,7 @@ class BookingsController < ApplicationController
 
   def update
     if @booking.update(booking_params)
+      BookingMailer.deliver_updated(@booking, changes: @booking.previous_changes)
       regenerate_access_code_if_needed!
       redirect_to bookings_path, notice: update_notice
     else

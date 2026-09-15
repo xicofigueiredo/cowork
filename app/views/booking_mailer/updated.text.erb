@@ -1,0 +1,13 @@
+A booking was updated.
+
+Member: <%= @member_name %> <<%= @user.email %>>
+Type: <%= @booking.booking_type.humanize %>
+Seat: <%= @seat.label %>
+When: <%= @booking.period_label %>
+
+<% if @changes.any? -%>
+Changes:
+<% @changes.each do |change| -%>
+- <%= change[:label] %>: <%= change[:before] %> → <%= change[:after] %>
+<% end -%>
+<% end -%>

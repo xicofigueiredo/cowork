@@ -30,8 +30,10 @@ class MeetingBookingsController < ApplicationController
     end
 
     bookings = ActiveRecord::Base.transaction do
-      slots.map { |starts_at| MeetingCreditBooking.call(user: current_user, starts_at: starts_at, hours: 1) }
+      slots.map { |starts_at| MeetingCreditBooking.call(user: current_user, starts_at: starts_at, hours: 1, notify: false) }
     end
+
+    bookings.each { |booking| BookingMailer.deliver_created(booking) }
 
     notice = if bookings.one?
       "Meeting room booked for #{bookings.first.starts_at.strftime('%-d %B %Y, %H:%M')}."

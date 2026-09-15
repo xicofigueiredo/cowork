@@ -1,0 +1,8 @@
+<p>A new booking was created.</p>
+
+<p>
+  <strong>Member:</strong> <%= @member_name %> &lt;<%= @user.email %>&gt;<br>
+  <strong>Type:</strong> <%= @booking.booking_type.humanize %><br>
+  <strong>Seat:</strong> <%= @seat.label %><br>
+  <strong>When:</strong> <%= @booking.period_label %>
+</p>

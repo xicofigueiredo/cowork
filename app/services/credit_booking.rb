@@ -38,6 +38,8 @@ class CreditBooking
       Rails.logger.error("Access code issue failed for booking #{booking.id}: #{e.class}: #{e.message}")
     end
 
+    BookingMailer.deliver_created(booking)
+
     booking
   end
 end

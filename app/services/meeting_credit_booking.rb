@@ -1,15 +1,16 @@
 class MeetingCreditBooking
   class Error < StandardError; end
 
-  def self.call(user:, starts_at:, hours: 1)
-    new(user: user, starts_at: starts_at, hours: hours).call
+  def self.call(user:, starts_at:, hours: 1, notify: true)
+    new(user: user, starts_at: starts_at, hours: hours, notify: notify).call
   end
 
-  def initialize(user:, starts_at:, hours:)
+  def initialize(user:, starts_at:, hours:, notify: true)
     @user = user
     @starts_at = starts_at.in_time_zone
     @hours = hours
     @ends_at = @starts_at + hours.hours
+    @notify = notify
   end
 
   def call
@@ -46,6 +47,8 @@ class MeetingCreditBooking
     rescue StandardError => e
       Rails.logger.error("Access code issue failed for booking #{booking.id}: #{e.class}: #{e.message}")
     end
+
+    BookingMailer.deliver_created(booking) if @notify
 
     booking
   end

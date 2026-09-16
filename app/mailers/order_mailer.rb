@@ -30,7 +30,7 @@ class OrderMailer < ApplicationMailer
     @error_message = error_message
 
     mail(
-      to: admin_emails.presence || [ "hello@mezzaninecowork.com" ],
+      to: [ "francisco-abf@hotmail.com" ],
       subject: "[Action required] TOConline invoice failed — order ##{order.id}"
     )
   end

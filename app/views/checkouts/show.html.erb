@@ -39,7 +39,7 @@
         </p>
         <p class="booking-summary-row">
           <span>Meeting room</span>
-          <strong>5 hours included</strong>
+          <strong><%= Order.plan_config(@order.plan_type)[:meeting_hours] %> hours included</strong>
         </p>
       <% end %>
 

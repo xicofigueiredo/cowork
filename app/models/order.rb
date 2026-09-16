@@ -6,7 +6,7 @@ class Order < ApplicationRecord
     "pack_5" => { amount_cents: 5500, original_amount_cents: 6500, label: "5-day pack", credits: 5 },
     "pack_10" => { amount_cents: 10_000, original_amount_cents: 13_000, label: "10-day pack", credits: 10 },
     "monthly" => { amount_cents: 14_000, original_amount_cents: 15_000, label: "1 Month", credits: nil, meeting_hours: 5, months: 1 },
-    "monthly_3" => { amount_cents: 12_000, original_amount_cents: 13_000, label: "3 Months", credits: nil, meeting_hours: 5, months: 3 },
+    "monthly_3" => { amount_cents: 12_000, original_amount_cents: 13_000, label: "3 Months", credits: nil, meeting_hours: 15, months: 3 },
     "meeting_hourly" => { amount_cents: 1500, label: "Hourly booking", credits: nil },
     "meeting_daily" => { amount_cents: 6500, label: "Daily booking", credits: nil }
   }.freeze

@@ -20,10 +20,7 @@ class CreditPack < ApplicationRecord
   end
 
   def usable?
-    return false unless remaining_credits.positive? && !expired?
-    return true unless meeting_hour_credits?
-
-    active_period?
+    remaining_credits.positive? && !expired?
   end
 
   def upcoming?
@@ -32,9 +29,9 @@ class CreditPack < ApplicationRecord
 
   def active_period?
     booking = order&.booking
-    return false unless booking&.starts_on && booking.ends_on
+    return !expired? unless booking&.ends_on
 
-    booking.starts_on <= Date.current && booking.ends_on >= Date.current
+    Date.current <= booking.ends_on
   end
 
   def day_credits?

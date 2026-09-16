@@ -106,17 +106,20 @@
               <div>
                 <strong><%= pack.remaining_credits %> / <%= pack.total_credits %> hours</strong>
                 <span class="booking-list-meta">
-                  <% if pack.upcoming? %>
-                    Available from <%= pack.order.booking.starts_on.strftime("%-d %b %Y") %>
-                  <% elsif pack.expired? %>
+                  <% if pack.expired? %>
                     Expired <%= pack.expires_at.strftime("%-d %b %Y") %>
                   <% else %>
                     Expires <%= pack.expires_at.strftime("%-d %b %Y") %>
+                    <% if pack.upcoming? %>
+                      · Desk from <%= pack.order.booking.starts_on.strftime("%-d %b %Y") %>
+                    <% end %>
                   <% end %>
                 </span>
               </div>
               <% if pack.usable? %>
                 <span class="booking-badge booking-badge--active">Active</span>
+              <% elsif pack.expired? || pack.remaining_credits <= 0 %>
+                <span class="booking-badge booking-badge--expired">Used up</span>
               <% elsif pack.upcoming? %>
                 <span class="booking-badge booking-badge--upcoming">Starts <%= pack.order.booking.starts_on.strftime("%-d %b") %></span>
               <% else %>

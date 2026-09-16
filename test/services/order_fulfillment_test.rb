@@ -93,4 +93,26 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
     assert_equal 5, order.credit_pack.remaining_credits
     assert_equal 3000, order.amount_cents
   end
+
+  test "fulfills monthly_3 order with 15 meeting hours and 3-month desk" do
+    order = Order.create!(
+      user: @user,
+      plan_type: "monthly_3",
+      amount_cents: 12_000,
+      status: "pending",
+      seat: @seat,
+      vat_number: "123456789"
+    )
+
+    assert OrderFulfillment.call(order)
+    order.reload
+
+    assert order.paid?
+    assert_equal "monthly", order.booking.booking_type
+    assert_equal order.booking.starts_on + 3.months, order.booking.ends_on
+    assert_equal "meeting_hour", order.credit_pack.credit_type
+    assert_equal 15, order.credit_pack.total_credits
+    assert_equal 15, order.credit_pack.remaining_credits
+    assert_equal 15, @user.reload.available_meeting_hours
+  end
 end

@@ -71,7 +71,7 @@
 
         <%= render "shared/checkout_total", **checkout_total_locals %>
 
-      <% elsif @plan_type == "monthly" %>
+      <% elsif Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type) %>
         <div class="booking-field">
           <p class="booking-note">
             Your dedicated desk will be reserved from

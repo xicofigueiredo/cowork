@@ -13,7 +13,8 @@
     </ul>
     <h2>Monthly</h2>
     <ul>
-      <li>Monthly dedicated desk — 140,00 € (was 150,00 €): includes 5h meeting room</li>
+      <li>1 Month — 140,00 € (was 150,00 €): includes 5h meeting room</li>
+      <li>3 Months — 120,00 € (was 130,00 €): includes 5h meeting room</li>
       <li>Long term desk — custom pricing</li>
     </ul>
     <h2>Virtual office</h2>
@@ -84,7 +85,8 @@ function initializePricing() {
     'Daily pass': 'daily',
     '5-day pack': 'pack_5',
     '10-day pack': 'pack_10',
-    'Monthly': 'monthly',
+    '1 Month': 'monthly',
+    '3 Months': 'monthly_3',
     'Hourly booking': 'meeting_hourly',
     'Daily booking': 'meeting_daily'
   };
@@ -132,12 +134,24 @@ function initializePricing() {
       title: 'Monthly',
       plans: [
         {
-          title: 'Monthly',
+          title: '1 Month',
           originalPrice: '150,00 €',
           price: '140,00 €',
           features: [
+            'Early bird discount',
             'Dedicated desk for the booked period ',
             '5h access to the meeting room',
+            'Free access to the phone booth'
+          ]
+        },
+        {
+          title: '3 Months',
+          originalPrice: '140,00 €',
+          price: '120,00 €',
+          features: [
+            '25% discount',
+            'Dedicated desk for the booked period ',
+            '15h access to the meeting room',
             'Free access to the phone booth'
           ]
         },

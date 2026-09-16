@@ -32,7 +32,7 @@
         </p>
       <% end %>
 
-      <% if @order.plan_type == "monthly" %>
+      <% if @order.monthly_desk_plan? %>
         <p class="booking-summary-row">
           <span>Period</span>
           <strong><%= @monthly_period[:starts_on].strftime("%-d %b %Y") %> – <%= @monthly_period[:ends_on].strftime("%-d %b %Y") %></strong>

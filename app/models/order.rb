@@ -5,14 +5,16 @@ class Order < ApplicationRecord
     "daily" => { amount_cents: 1300, original_amount_cents: 1500, label: "Daily pass", credits: nil },
     "pack_5" => { amount_cents: 5500, original_amount_cents: 6500, label: "5-day pack", credits: 5 },
     "pack_10" => { amount_cents: 10_000, original_amount_cents: 13_000, label: "10-day pack", credits: 10 },
-    "monthly" => { amount_cents: 14_000, original_amount_cents: 15_000, label: "Monthly", credits: nil, meeting_hours: 5 },
+    "monthly" => { amount_cents: 14_000, original_amount_cents: 15_000, label: "1 Month", credits: nil, meeting_hours: 5, months: 1 },
+    "monthly_3" => { amount_cents: 12_000, original_amount_cents: 13_000, label: "3 Months", credits: nil, meeting_hours: 5, months: 3 },
     "meeting_hourly" => { amount_cents: 1500, label: "Hourly booking", credits: nil },
     "meeting_daily" => { amount_cents: 6500, label: "Daily booking", credits: nil }
   }.freeze
 
   STATUSES = %w[pending paid failed].freeze
   CREDIT_PACK_TYPES = %w[pack_5 pack_10].freeze
-  DESK_PLAN_TYPES = %w[daily monthly].freeze
+  MONTHLY_DESK_PLAN_TYPES = %w[monthly monthly_3].freeze
+  DESK_PLAN_TYPES = (%w[daily] + MONTHLY_DESK_PLAN_TYPES).freeze
   MEETING_PLAN_TYPES = %w[meeting_hourly meeting_daily].freeze
 
   belongs_to :user
@@ -63,6 +65,14 @@ class Order < ApplicationRecord
 
   def requires_desk?
     DESK_PLAN_TYPES.include?(plan_type)
+  end
+
+  def monthly_desk_plan?
+    MONTHLY_DESK_PLAN_TYPES.include?(plan_type)
+  end
+
+  def desk_months
+    self.class.plan_config(plan_type)[:months] || 1
   end
 
   def meeting_plan?
@@ -145,7 +155,7 @@ class Order < ApplicationRecord
     elsif booking.present?
       details << [ booking.seat.meeting_room? ? "Room" : "Desk", booking.seat.label ]
       details << [ "When", booking.period_label ]
-      if plan_type == "monthly" && credit_pack.present?
+      if monthly_desk_plan? && credit_pack.present?
         details << [ "Meeting hours", "#{credit_pack.total_credits} hours included" ]
       end
     else
@@ -192,8 +202,8 @@ class Order < ApplicationRecord
       unless SeatAvailability.available_on?(seat, booking_date)
         errors.add(:seat, "is not available on #{booking_date}")
       end
-    elsif plan_type == "monthly"
-      period = user.next_monthly_period
+    elsif monthly_desk_plan?
+      period = user.next_monthly_period(months: desk_months)
       unless SeatAvailability.available_for_monthly?(seat, period[:starts_on], period[:ends_on])
         errors.add(:seat, "is not available for a monthly booking")
       end

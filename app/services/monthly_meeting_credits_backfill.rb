@@ -4,11 +4,11 @@ class MonthlyMeetingCreditsBackfill
   end
 
   def call
-    Order.paid.where(plan_type: "monthly").includes(:booking).find_each do |order|
+    Order.paid.where(plan_type: Order::MONTHLY_DESK_PLAN_TYPES).includes(:booking).find_each do |order|
       next unless order.booking
       next if CreditPack.meeting_hour_credits.exists?(order: order)
 
-      config = Order.plan_config("monthly")
+      config = Order.plan_config(order.plan_type)
       CreditPack.create!(
         user: order.user,
         order: order,

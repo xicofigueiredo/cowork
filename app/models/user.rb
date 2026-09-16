@@ -29,9 +29,9 @@ class User < ApplicationRecord
     latest_end ? latest_end + 1.day : Date.current
   end
 
-  def next_monthly_period
+  def next_monthly_period(months: 1)
     starts_on = next_monthly_starts_on
-    { starts_on: starts_on, ends_on: starts_on + 1.month }
+    { starts_on: starts_on, ends_on: starts_on + months.months }
   end
 
   protected

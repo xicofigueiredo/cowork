@@ -17,7 +17,7 @@ class OrderFulfillment
         create_credit_pack!
       elsif @order.plan_type == "daily"
         create_daily_booking!
-      elsif @order.plan_type == "monthly"
+      elsif @order.monthly_desk_plan?
         create_monthly_booking!
         create_monthly_meeting_hours!
       elsif @order.plan_type == "meeting_hourly"
@@ -87,7 +87,7 @@ class OrderFulfillment
 
   def create_monthly_booking!
     starts_on = @order.user.next_monthly_starts_on
-    ends_on = starts_on + 1.month
+    ends_on = starts_on + @order.desk_months.months
 
     Booking.create!(
       user: @order.user,
@@ -100,7 +100,7 @@ class OrderFulfillment
   end
 
   def create_monthly_meeting_hours!
-    config = Order.plan_config("monthly")
+    config = Order.plan_config(@order.plan_type)
     booking = @order.booking
 
     CreditPack.create!(

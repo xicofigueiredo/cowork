@@ -13,7 +13,7 @@ class CheckoutsController < ApplicationController
     apply_promocode_from_params!
     load_plan_defaults
     @seats = Seat.desks.ordered
-    @monthly_period = current_user.next_monthly_period if @plan_type == "monthly"
+    @monthly_period = current_user.next_monthly_period(months: Order.plan_config(@plan_type)[:months] || 1) if Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
     load_unavailable_desks
   end
 
@@ -32,7 +32,7 @@ class CheckoutsController < ApplicationController
     if @promocode_error.present?
       @seats = Seat.desks.ordered
       load_plan_defaults
-      @monthly_period = current_user.next_monthly_period if @plan_type == "monthly"
+      @monthly_period = current_user.next_monthly_period(months: Order.plan_config(@plan_type)[:months] || 1) if Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
       load_unavailable_desks
       flash.now[:alert] = @promocode_error
       render :new, status: :unprocessable_entity
@@ -41,7 +41,7 @@ class CheckoutsController < ApplicationController
     else
       @seats = Seat.desks.ordered
       load_plan_defaults
-      @monthly_period = current_user.next_monthly_period if @plan_type == "monthly"
+      @monthly_period = current_user.next_monthly_period(months: Order.plan_config(@plan_type)[:months] || 1) if Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
       load_unavailable_desks
       flash.now[:alert] = @order.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
@@ -50,7 +50,7 @@ class CheckoutsController < ApplicationController
 
   def show
     redirect_to bookings_path, notice: "This order has already been paid." if @order.paid?
-    @monthly_period = @order.user.next_monthly_period if @order.plan_type == "monthly"
+    @monthly_period = @order.user.next_monthly_period(months: @order.desk_months) if @order.monthly_desk_plan?
   end
 
   def pay
@@ -178,8 +178,9 @@ class CheckoutsController < ApplicationController
     if @plan_type == "daily"
       date = @booking_date || @order.booking_date || parsed_booking_date
       @unavailable_desks = SeatAvailability.unavailable_desk_codes(date)
-    elsif @plan_type == "monthly"
-      period = current_user.next_monthly_period
+    elsif Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
+      months = Order.plan_config(@plan_type)[:months] || 1
+      period = current_user.next_monthly_period(months: months)
       @unavailable_desks = SeatAvailability.unavailable_desk_codes_for_monthly(period[:starts_on], period[:ends_on])
     else
       @unavailable_desks = []

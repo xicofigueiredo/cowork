@@ -255,6 +255,14 @@
   color: #fff;
 }
 
+.pricing-plan-vat {
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+  vertical-align: super;
+}
+
 .pricing-plan-features {
   margin: 0;
   padding: 0;

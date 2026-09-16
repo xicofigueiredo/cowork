@@ -28,6 +28,9 @@
               <div>
                 <strong><%= booking.seat.label %></strong>
                 <span class="booking-list-meta"><%= booking.period_label %></span>
+                <% if booking.editable? && booking.edit_deadline_label %>
+                  <span class="booking-list-meta"><%= booking.edit_deadline_label %></span>
+                <% end %>
                 <% if booking.access_code&.active? %>
                   <span class="booking-list-meta booking-door-code">
                     Door code: <strong><%= booking.access_code.code %></strong>

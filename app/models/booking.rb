@@ -1,5 +1,7 @@
 class Booking < ApplicationRecord
   BOOKING_TYPES = %w[daily monthly meeting_hourly meeting_daily].freeze
+  EDIT_DEADLINE_HOUR = 22
+  EDIT_DEADLINE_MINUTE = 58
 
   belongs_to :user
   belongs_to :seat
@@ -75,7 +77,7 @@ class Booking < ApplicationRecord
     if meeting_hourly?
       ends_at >= Time.current
     elsif daily? || meeting_daily?
-      date >= Date.current
+      Time.current < edit_deadline_at
     elsif monthly?
       ends_on >= Date.current
     else
@@ -83,10 +85,23 @@ class Booking < ApplicationRecord
     end
   end
 
+  # Daily bookings can be changed until 20:30 on the day before.
+  def edit_deadline_at
+    return nil unless date.present? && (daily? || meeting_daily?)
+
+    (date - 1.day).in_time_zone.change(hour: EDIT_DEADLINE_HOUR, min: EDIT_DEADLINE_MINUTE)
+  end
+
+  def edit_deadline_label
+    return nil unless edit_deadline_at
+
+    "Editable until #{edit_deadline_at.strftime('%-d %b')} 20:00 (day before)"
+  end
+
   private
 
   def date_not_in_past
-    errors.add(:date, "cannot be in the past") if date < Date.current
+    errors.add(:date, "cannot be in the past") unless SeatAvailability.bookable_date?(date)
   end
 
   def daily_weekday

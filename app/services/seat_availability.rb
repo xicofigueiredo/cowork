@@ -1,9 +1,10 @@
 class SeatAvailability
   CALENDAR_WEEKDAYS = 14
+  SAME_DAY_CUTOFF_HOUR = 17
 
   def self.available_on?(seat, date, except_booking: nil)
     return false unless weekday?(date)
-    return false if date < Date.current
+    return false if date < minimum_bookable_date
 
     !daily_booking_exists?(seat, date, except_booking: except_booking) &&
       !monthly_booking_covers?(seat, date)
@@ -34,7 +35,7 @@ class SeatAvailability
 
   def self.any_desk_available?(date, except_booking: nil)
     return false unless weekday?(date)
-    return false if date < Date.current
+    return false if date < minimum_bookable_date
 
     Seat.desks.any? { |seat| available_on?(seat, date, except_booking: except_booking) }
   end
@@ -50,8 +51,21 @@ class SeatAvailability
     end
   end
 
+  # Today is bookable until 17:00 Lisbon time; after that, the next calendar day.
+  def self.minimum_bookable_date
+    if Time.zone.now.hour >= SAME_DAY_CUTOFF_HOUR
+      Date.current + 1.day
+    else
+      Date.current
+    end
+  end
+
   def self.earliest_bookable_date
-    ensure_weekday(Date.current)
+    ensure_weekday(minimum_bookable_date)
+  end
+
+  def self.bookable_date?(date)
+    weekday?(date) && date >= minimum_bookable_date
   end
 
   def self.weekday?(date)

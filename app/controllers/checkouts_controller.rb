@@ -189,7 +189,8 @@ class CheckoutsController < ApplicationController
   def parsed_booking_date
     return SeatAvailability.earliest_bookable_date if params[:date].blank?
 
-    SeatAvailability.ensure_weekday(Date.parse(params[:date]))
+    date = SeatAvailability.ensure_weekday(Date.parse(params[:date]))
+    date < SeatAvailability.earliest_bookable_date ? SeatAvailability.earliest_bookable_date : date
   rescue ArgumentError
     SeatAvailability.earliest_bookable_date
   end

@@ -191,6 +191,7 @@ function initializePricing() {
 
   function renderPlan(plan) {
     const showOriginalPrice = plan.originalPrice && plan.originalPrice !== plan.price;
+    const showVat = /\d/.test(plan.price);
     const featuresHtml = plan.features?.length
       ? `<ul class="pricing-plan-features">${plan.features.map(feature => `<li>${feature}</li>`).join('')}</ul>`
       : '';
@@ -204,7 +205,7 @@ function initializePricing() {
       <h4 class="pricing-plan-title">${plan.title}</h4>
       <div class="pricing-plan-prices">
         ${showOriginalPrice ? `<span class="pricing-plan-original-price">${plan.originalPrice}</span>` : ''}
-        <p class="pricing-plan-price">${plan.price}</p>
+        <p class="pricing-plan-price">${plan.price}${showVat ? ' <span class="pricing-plan-vat">+VAT</span>' : ''}</p>
       </div>
       ${featuresHtml}
       ${bookButton}

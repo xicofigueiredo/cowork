@@ -5,8 +5,13 @@ require "json"
 module Toconline
   # Persists the OAuth refresh token on the app storage volume so rotated tokens
   # survive deploys and are not lost when Rails.cache expires.
+  #
+  # TOC invalidates the previous refresh token on every refresh. Only one
+  # process may refresh at a time, and the new token must be written here
+  # before anything else uses it.
   class TokenStore
     FILENAME = "toconline_tokens.json"
+    LOCK_FILENAME = "toconline_tokens.lock"
 
     class << self
       def refresh_token
@@ -30,8 +35,21 @@ module Toconline
               "#{e.message}. Fix with: docker compose exec -u root server chown -R rails:rails /rails/storage"
       end
 
+      # Exclusive lock across Puma workers / one-off rake tasks sharing the volume.
+      def with_refresh_lock
+        path.parent.mkpath
+        File.open(lock_path, File::RDWR | File::CREAT, 0o644) do |lock|
+          lock.flock(File::LOCK_EX)
+          yield
+        end
+      end
+
       def path
         Rails.root.join("storage", FILENAME)
+      end
+
+      def lock_path
+        Rails.root.join("storage", LOCK_FILENAME)
       end
 
       private

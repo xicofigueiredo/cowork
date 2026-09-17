@@ -152,16 +152,23 @@ module Toconline
     end
 
     def refresh_access_token!
-      refresh = self.class.current_refresh_token
-      raise ConfigurationError, "TOCONLINE_REFRESH_TOKEN is not set. Run bin/rails toconline:auth" if refresh.blank?
+      TokenStore.with_refresh_lock do
+        # Another worker may have refreshed while we waited for the lock.
+        cached = Rails.cache.read(TOKEN_CACHE_KEY)
+        return cached if cached.present?
 
-      response = token_request(
-        grant_type: "refresh_token",
-        refresh_token: refresh,
-        scope: "commercial"
-      )
-      persist_tokens!(response)
+        refresh = self.class.current_refresh_token
+        raise ConfigurationError, "TOCONLINE_REFRESH_TOKEN is not set. Run bin/rails toconline:auth" if refresh.blank?
+
+        response = token_request(
+          grant_type: "refresh_token",
+          refresh_token: refresh,
+          scope: "commercial"
+        )
+        persist_tokens!(response)
+      end
     end
+
 
     def token_request(**params)
       uri = URI("#{@oauth_url}/token")
@@ -220,14 +227,17 @@ module Toconline
       # Access tokens are short-lived — cache is fine.
       Rails.cache.write(TOKEN_CACHE_KEY, access, expires_in: [ expires_in - 60, 60 ].max.seconds)
 
-      # TOC rotates refresh tokens. The new one must be persisted forever on the
-      # storage volume; caching it for only a few hours caused production to fall
-      # back to the stale ENV token and start returning unauthorized_client.
-      if refresh.present?
-        TokenStore.write_refresh_token!(refresh)
-        Rails.cache.write(REFRESH_CACHE_KEY, refresh)
+      # TOC rotates refresh tokens on every successful refresh. If we don't
+      # persist the new one, the next request gets unauthorized_client.
+      if refresh.blank?
+        raise ApiError,
+              "TOConline token response missing refresh_token — refusing to continue with a rotated-away token"
       end
+
+      TokenStore.write_refresh_token!(refresh)
+      Rails.cache.write(REFRESH_CACHE_KEY, refresh)
     end
+
 
     def parse_json(raw)
       return {} if raw.blank?

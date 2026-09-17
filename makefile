@@ -8,7 +8,7 @@ seed: ## Seed seats and reference data.
 	docker compose run --rm server ./bin/rails db:seed
 
 sync: ## Sync the application to the server
-	rsync -av -e "ssh" --exclude='node_modules' --exclude='.git' --exclude='*.log' --exclude='.tmp' --exclude='tmp' --exclude='data' . root@204.168.181.4:~/cowork
+	rsync -av -e "ssh" --exclude='node_modules' --exclude='.git' --exclude='*.log' --exclude='.tmp' --exclude='tmp' --exclude='data' --exclude='storage' --exclude='storage/**' . root@204.168.181.4:~/cowork
 
 connect: ## Connect to the server
 	ssh root@204.168.181.4

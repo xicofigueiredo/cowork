@@ -4,12 +4,13 @@ module Toconline
   class InvoiceIssuer
     Result = Struct.new(:document_id, :document_number, :pdf_bytes, keyword_init: true)
 
-    def self.call(order)
-      new(order).call
+    def self.call(order, notify_failure: true)
+      new(order, notify_failure: notify_failure).call
     end
 
-    def initialize(order)
+    def initialize(order, notify_failure: true)
       @order = order
+      @notify_failure = notify_failure
     end
 
     def call
@@ -60,6 +61,8 @@ module Toconline
     private
 
     def notify_failure!(error)
+      return unless @notify_failure
+
       OrderMailer.toconline_failure(@order, error.message).deliver_now
     rescue StandardError => mail_error
       Rails.logger.error("TOConline failure alert email failed: #{mail_error.class}: #{mail_error.message}")

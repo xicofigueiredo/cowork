@@ -136,7 +136,8 @@ namespace :toconline do
       end
 
       puts "Issuing order ##{order.id} (#{order.plan_label}, #{order.total_with_iva_euros})..."
-      result = Toconline::InvoiceIssuer.call(order)
+      # Backfill is operator-driven — log failures to the console, don't spam Action required emails.
+      result = Toconline::InvoiceIssuer.call(order, notify_failure: false)
       if result
         puts "  OK #{result.document_number} (id=#{result.document_id})"
         count += 1

@@ -17,11 +17,33 @@ class User < ApplicationRecord
   end
 
   def available_credits
-    credit_packs.day_credits.usable.sum(:remaining_credits)
+    remaining_day_credits
   end
 
   def available_meeting_hours
-    credit_packs.meeting_hour_credits.select(&:usable?).sum(&:remaining_credits)
+    remaining_meeting_hours
+  end
+
+  def remaining_day_credits
+    day_credit_packs.select(&:usable?).sum(&:remaining_credits)
+  end
+
+  def remaining_meeting_hours
+    meeting_hour_credit_packs.select(&:usable?).sum(&:remaining_credits)
+  end
+
+  def current_monthly_booking
+    today = Date.current
+    monthly_bookings
+      .select { |booking| booking.starts_on <= today && booking.ends_on >= today }
+      .max_by(&:ends_on)
+  end
+
+  def current_plan_label
+    booking = current_monthly_booking
+    return nil unless booking
+
+    booking.order&.plan_label.presence || "Monthly"
   end
 
   def next_monthly_starts_on
@@ -51,6 +73,30 @@ class User < ApplicationRecord
   end
 
   private
+
+  def day_credit_packs
+    if credit_packs.loaded?
+      credit_packs.select(&:day_credits?)
+    else
+      credit_packs.day_credits.to_a
+    end
+  end
+
+  def meeting_hour_credit_packs
+    if credit_packs.loaded?
+      credit_packs.select(&:meeting_hour_credits?)
+    else
+      credit_packs.meeting_hour_credits.to_a
+    end
+  end
+
+  def monthly_bookings
+    if bookings.loaded?
+      bookings.select(&:monthly?)
+    else
+      bookings.monthly.includes(:order).to_a
+    end
+  end
 
   def unique_confirmation_code
     loop do

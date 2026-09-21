@@ -57,4 +57,38 @@ namespace :admin do
       end
     end
   end
+
+  desc "Add day credits to one user (EMAIL + CREDITS). No Stripe/TOC/emails."
+  task add_credits: :environment do
+    email = ENV.fetch("EMAIL", "").strip.downcase
+    abort "EMAIL is empty" if email.blank?
+
+    credits = Integer(ENV.fetch("CREDITS"))
+    abort "CREDITS must be greater than 0" if credits < 1
+
+    user = User.find_by("LOWER(email) = ?", email)
+    abort "No user account for #{email}" unless user
+
+    ActiveRecord::Base.transaction do
+      order = user.orders.new(
+        plan_type: credits >= 10 ? "pack_10" : "pack_5",
+        amount_cents: 0,
+        status: "paid",
+        paid_at: Time.current
+      )
+      order.save!(validate: false)
+
+      CreditPack.create!(
+        user: user,
+        order: order,
+        credit_type: "day",
+        total_credits: credits,
+        remaining_credits: credits,
+        expires_at: EXPIRES_IN.from_now
+      )
+
+      total = user.credit_packs.day_credits.usable.sum(:remaining_credits)
+      puts "OK #{email} → +#{credits} day credits (order ##{order.id}, usable total=#{total})"
+    end
+  end
 end

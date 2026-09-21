@@ -21,54 +21,29 @@
     </section>
 
     <section class="booking-section">
-      <h2 class="booking-section-title">Bookings <span class="admin-count"><%= @bookings.size %></span></h2>
-
-      <% if @bookings.any? %>
-        <ul class="booking-list">
-          <% @bookings.each do |booking| %>
-            <li class="booking-list-item">
-              <div>
-                <strong><%= booking.seat.label %></strong>
-                <span class="booking-list-meta"><%= booking.period_label %></span>
-                <span class="booking-list-meta">
-                  <%= [booking.user.first_name, booking.user.last_name].compact_blank.join(" ") %>
-                  · <%= booking.user.email %>
-                </span>
-                <span class="booking-list-meta">
-                  Booked <%= booking.created_at.strftime("%-d %b %Y, %H:%M") %>
-                  <% if booking.order %>
-                    · Order #<%= booking.order_id %> (<%= booking.order.status %>, <%= booking.order.plan_label %>)
-                  <% elsif booking.credit_pack %>
-                    · Used credits
-                  <% end %>
-                </span>
-                <% if booking.access_code&.active? %>
-                  <span class="booking-list-meta booking-door-code">
-                    Door code: <strong><%= booking.access_code.code %></strong>
-                  </span>
-                <% end %>
-              </div>
-              <div class="booking-list-actions">
-                <span class="booking-badge booking-badge--<%= booking.meeting_booking? ? "meeting" : booking.booking_type %>">
-                  <%= booking.meeting_booking? ? "Meeting" : booking.booking_type.capitalize %>
-                </span>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="booking-empty">No bookings yet.</p>
-      <% end %>
-    </section>
-
-    <section class="booking-section">
       <h2 class="booking-section-title">Users <span class="admin-count"><%= @users.size %></span></h2>
 
       <% if @users.any? %>
         <ul class="booking-list">
           <% @users.each do |user| %>
+            <% plan_label = user.current_plan_label %>
+            <% day_credits = user.remaining_day_credits %>
+            <% meeting_hours = user.remaining_meeting_hours %>
             <li class="booking-list-item">
-              <div>
+              <div class="admin-user-summary">
+                <% if plan_label.present? || day_credits.positive? || meeting_hours.positive? %>
+                  <div class="admin-user-plan">
+                    <% if plan_label.present? %>
+                      <span class="booking-badge booking-badge--monthly"><%= plan_label %></span>
+                    <% end %>
+                    <% if day_credits.positive? %>
+                      <span class="admin-user-credits"><%= day_credits %> day <%= "credit".pluralize(day_credits) %></span>
+                    <% end %>
+                    <% if meeting_hours.positive? %>
+                      <span class="admin-user-credits"><%= meeting_hours %> meeting <%= "hour".pluralize(meeting_hours) %></span>
+                    <% end %>
+                  </div>
+                <% end %>
                 <strong><%= [user.first_name, user.last_name].compact_blank.join(" ").presence || "—" %></strong>
                 <span class="booking-list-meta">
                   <%= mail_to user.email %>

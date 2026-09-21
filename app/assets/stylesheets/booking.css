@@ -579,6 +579,26 @@
   font-size: 14px;
 }
 
+.admin-user-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.admin-user-plan {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.admin-user-credits {
+  color: #555;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 /* Meeting room calendar */
 .meeting-calendar-days {
   display: grid;

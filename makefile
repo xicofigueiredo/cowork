@@ -19,5 +19,10 @@ pass: ## Open rails console in the production container
 admin_credits: ## Grant 100 free day credits to ADMIN_EMAILS (removes free monthly; no Stripe/TOC/emails)
 	docker compose exec server ./bin/rails admin:grant_credits
 
+add_credits: ## Prompt for email + credit count, then grant day credits
+	@read -p "User email: " email; \
+	read -p "Number of credits: " credits; \
+	docker compose exec -e EMAIL="$$email" -e CREDITS="$$credits" server ./bin/rails admin:add_credits
+
 seed: ## Seed the database
 	docker compose run server ./bin/rails db:seed

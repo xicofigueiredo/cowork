@@ -8,25 +8,63 @@ class OrderFulfillment
   end
 
   def call
-    return false unless @order.pending?
+    result = :noop
 
-    ActiveRecord::Base.transaction do
-      @order.update!(status: "paid", paid_at: Time.current)
+    @order.with_lock do
+      return true if @order.paid?
+      return false unless @order.pending?
 
-      if @order.credit_pack?
-        create_credit_pack!
-      elsif @order.plan_type == "daily"
-        create_daily_booking!
-      elsif @order.monthly_desk_plan?
-        create_monthly_booking!
-        create_monthly_meeting_hours!
-      elsif @order.plan_type == "meeting_hourly"
-        create_meeting_hourly_booking!
-      elsif @order.plan_type == "meeting_daily"
-        create_meeting_daily_booking!
+      lock_inventory!
+
+      unless @order.inventory_available?(ignore_pending: true)
+        @order.update!(status: "failed")
+        result = :conflict
+      else
+        create_resources!
+        @order.update!(status: "paid", paid_at: Time.current)
+        result = :fulfilled
       end
     end
 
+    case result
+    when :fulfilled
+      after_fulfillment!
+      true
+    when :conflict
+      refund_conflict!
+      false
+    else
+      false
+    end
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique, ActiveRecord::StatementInvalid => e
+    handle_create_conflict!(e)
+    false
+  end
+
+  private
+
+  def lock_inventory!
+    return if @order.seat_id.blank?
+
+    Seat.lock.find(@order.seat_id)
+  end
+
+  def create_resources!
+    if @order.credit_pack?
+      create_credit_pack!
+    elsif @order.plan_type == "daily"
+      create_daily_booking!
+    elsif @order.monthly_desk_plan?
+      create_monthly_booking!
+      create_monthly_meeting_hours!
+    elsif @order.plan_type == "meeting_hourly"
+      create_meeting_hourly_booking!
+    elsif @order.plan_type == "meeting_daily"
+      create_meeting_daily_booking!
+    end
+  end
+
+  def after_fulfillment!
     @order.reload
 
     issue_access_code_for_booking!
@@ -48,11 +86,28 @@ class OrderFulfillment
     rescue StandardError => e
       Rails.logger.error("Space guide email failed for order #{@order.id}: #{e.class}: #{e.message}")
     end
-
-    true
   end
 
-  private
+  def handle_create_conflict!(error)
+    Rails.logger.error(
+      "Order fulfillment conflict for order #{@order.id}: #{error.class}: #{error.message}"
+    )
+
+    @order.reload
+    @order.with_lock do
+      @order.update!(status: "failed") if @order.pending?
+    end
+
+    refund_conflict!
+  end
+
+  def refund_conflict!
+    StripePaymentRefund.call(@order)
+  rescue StandardError => e
+    Rails.logger.error(
+      "Stripe refund failed after fulfillment conflict for order #{@order.id}: #{e.class}: #{e.message}"
+    )
+  end
 
   def issue_access_code_for_booking!
     booking = @order.booking

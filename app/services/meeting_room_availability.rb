@@ -3,6 +3,17 @@ class MeetingRoomAvailability
   OPEN_HOUR = 8
   CLOSE_HOUR = 20
   CALENDAR_WEEKDAYS = 14
+  PENDING_HOLD_TTL = SeatAvailability::PENDING_HOLD_TTL
+
+  Hold = Struct.new(:starts_at, :ends_at, :date, keyword_init: true) do
+    def meeting_daily?
+      date.present? && starts_at.blank?
+    end
+
+    def meeting_hourly?
+      starts_at.present?
+    end
+  end
 
   Schedule = Struct.new(:daily_dates, :hourly_bookings, :earliest_hourly_at, keyword_init: true) do
     def meeting_daily_on?(date)
@@ -90,7 +101,7 @@ class MeetingRoomAvailability
       ensure_weekday(Date.current + 1.day)
     end
 
-    def schedule_for(range, except_booking: nil)
+    def schedule_for(range, except_booking: nil, except_order: nil, ignore_pending: false)
       from_date = range.begin
       to_date = range.end
       scope = Booking.where(
@@ -102,15 +113,22 @@ class MeetingRoomAvailability
       scope = scope.where.not(id: except_booking.id) if except_booking
 
       bookings = scope.to_a
+      holds = ignore_pending ? [] : pending_holds_for(from_date, to_date, except_order: except_order)
+
       Schedule.new(
-        daily_dates: bookings.select(&:meeting_daily?).map(&:date).to_set,
-        hourly_bookings: bookings.select(&:meeting_hourly?),
+        daily_dates: (bookings.select(&:meeting_daily?).map(&:date) + holds.select(&:meeting_daily?).map(&:date)).to_set,
+        hourly_bookings: bookings.select(&:meeting_hourly?) + holds.select(&:meeting_hourly?),
         earliest_hourly_at: earliest_hourly_at
       )
     end
 
-    def daily_available?(date, except_booking: nil, schedule: nil)
-      schedule ||= schedule_for(date..date, except_booking: except_booking)
+    def daily_available?(date, except_booking: nil, except_order: nil, ignore_pending: false, schedule: nil)
+      schedule ||= schedule_for(
+        date..date,
+        except_booking: except_booking,
+        except_order: except_order,
+        ignore_pending: ignore_pending
+      )
       return false unless weekday?(date)
       return false if date < earliest_daily_date
       return false if schedule.meeting_daily_on?(date)
@@ -119,8 +137,13 @@ class MeetingRoomAvailability
       true
     end
 
-    def hourly_available?(starts_at, ends_at, except_booking: nil, schedule: nil)
-      schedule ||= schedule_for(starts_at.to_date..starts_at.to_date, except_booking: except_booking)
+    def hourly_available?(starts_at, ends_at, except_booking: nil, except_order: nil, ignore_pending: false, schedule: nil)
+      schedule ||= schedule_for(
+        starts_at.to_date..starts_at.to_date,
+        except_booking: except_booking,
+        except_order: except_order,
+        ignore_pending: ignore_pending
+      )
       schedule.hourly_available?(starts_at, ends_at)
     end
 
@@ -133,13 +156,17 @@ class MeetingRoomAvailability
       schedule.hour_grid(date, include_max_duration: include_max_duration)
     end
 
-    def max_consecutive_hours_from(starts_at, except_booking: nil, schedule: nil)
-      schedule ||= schedule_for(starts_at.to_date..starts_at.to_date, except_booking: except_booking)
+    def max_consecutive_hours_from(starts_at, except_booking: nil, except_order: nil, schedule: nil)
+      schedule ||= schedule_for(starts_at.to_date..starts_at.to_date, except_booking: except_booking, except_order: except_order)
       schedule.max_consecutive_hours_from(starts_at)
     end
 
-    def hourly_span_available?(starts_at, hours, except_booking: nil, schedule: nil)
-      schedule ||= schedule_for(starts_at.to_date..(starts_at.to_date + (hours - 1).days), except_booking: except_booking)
+    def hourly_span_available?(starts_at, hours, except_booking: nil, except_order: nil, schedule: nil)
+      schedule ||= schedule_for(
+        starts_at.to_date..(starts_at.to_date + (hours - 1).days),
+        except_booking: except_booking,
+        except_order: except_order
+      )
       schedule.hourly_span_available?(starts_at, hours)
     end
 
@@ -172,9 +199,9 @@ class MeetingRoomAvailability
       end
     end
 
-    def load_calendar(from_date, type: :hourly, except_booking: nil)
+    def load_calendar(from_date, type: :hourly, except_booking: nil, except_order: nil)
       dates = weekday_dates(from: from_date)
-      schedule = schedule_for(dates.first..dates.last, except_booking: except_booking)
+      schedule = schedule_for(dates.first..dates.last, except_booking: except_booking, except_order: except_order)
       days = type == :daily ? daily_calendar_days(from_date, schedule: schedule) : calendar_days(from_date, schedule: schedule)
       { days: days, schedule: schedule }
     end
@@ -185,6 +212,29 @@ class MeetingRoomAvailability
 
       starts_at.hour >= OPEN_HOUR &&
         (starts_at.hour + duration_hours) <= CLOSE_HOUR
+    end
+
+    private
+
+    def pending_holds_for(from_date, to_date, except_order: nil)
+      scope = Order.pending
+        .where(plan_type: Order::MEETING_PLAN_TYPES)
+        .where("orders.created_at > ?", PENDING_HOLD_TTL.ago)
+      scope = scope.where.not(id: except_order.id) if except_order&.persisted?
+
+      holds = []
+
+      scope.where(plan_type: "meeting_daily", booking_date: from_date..to_date).find_each do |order|
+        holds << Hold.new(date: order.booking_date)
+      end
+
+      scope.where(plan_type: "meeting_hourly")
+        .where(starts_at: from_date.beginning_of_day..to_date.end_of_day)
+        .find_each do |order|
+          holds << Hold.new(starts_at: order.starts_at, ends_at: order.meeting_ends_at)
+        end
+
+      holds
     end
   end
 end

@@ -3,7 +3,9 @@ require "test_helper"
 class OrderFulfillmentTest < ActiveSupport::TestCase
   setup do
     @user = users(:one)
+    @other_user = users(:two)
     @seat = seats(:main_001)
+    @booking_date = SeatAvailability.earliest_bookable_date
   end
 
   test "fulfills daily order with booking" do
@@ -13,7 +15,7 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       amount_cents: 1300,
       status: "pending",
       seat: @seat,
-      booking_date: Date.current + 1.day,
+      booking_date: @booking_date,
       vat_number: "123456789"
     )
 
@@ -114,5 +116,56 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
     assert_equal 15, order.credit_pack.total_credits
     assert_equal 15, order.credit_pack.remaining_credits
     assert_equal 15, @user.reload.available_meeting_hours
+  end
+
+  test "marks losing concurrent daily order as failed without booking" do
+    first_order = Order.create!(
+      user: @user,
+      plan_type: "daily",
+      amount_cents: 1300,
+      status: "pending",
+      seat: @seat,
+      booking_date: @booking_date,
+      vat_number: "123456789"
+    )
+
+    # Simulate a race where both pending orders were accepted before either paid.
+    second_order = Order.new(
+      user: @other_user,
+      plan_type: "daily",
+      amount_cents: 1300,
+      status: "pending",
+      seat: @seat,
+      booking_date: @booking_date,
+      vat_number: "123456789"
+    )
+    assert second_order.save(validate: false)
+
+    assert OrderFulfillment.call(first_order)
+    assert_not OrderFulfillment.call(second_order)
+
+    first_order.reload
+    second_order.reload
+
+    assert first_order.paid?
+    assert_not_nil first_order.booking
+    assert second_order.failed?
+    assert_nil second_order.booking
+  end
+
+  test "is idempotent when order is already paid" do
+    order = Order.create!(
+      user: @user,
+      plan_type: "daily",
+      amount_cents: 1300,
+      status: "pending",
+      seat: @seat,
+      booking_date: @booking_date,
+      vat_number: "123456789"
+    )
+
+    assert OrderFulfillment.call(order)
+    assert OrderFulfillment.call(order.reload)
+    assert_equal 1, Booking.where(order: order).count
   end
 end

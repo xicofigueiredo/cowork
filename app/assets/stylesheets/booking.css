@@ -544,6 +544,41 @@
   white-space: pre-wrap;
 }
 
+.admin-floorplan-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-bottom: 20px;
+}
+
+.admin-floorplan-header .booking-section-title {
+  margin: 0;
+}
+
+.admin-floorplan-date-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-floorplan-date-label {
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.admin-floorplan-date-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--landing-dark);
+  font-family: inherit;
+  font-size: 14px;
+}
+
 /* Meeting room calendar */
 .meeting-calendar-days {
   display: grid;
@@ -787,6 +822,46 @@
 
 .booking-floorplan-swatch--unavailable {
   background: rgba(203, 98, 70, 0.45);
+}
+
+.admin-floorplan {
+  position: relative;
+}
+
+.booking-floorplan.admin-floorplan .ourspace-seat {
+  cursor: default;
+}
+
+.booking-floorplan.admin-floorplan .ourspace-seat.free {
+  fill: transparent;
+}
+
+.booking-floorplan.admin-floorplan .ourspace-seat.free:hover {
+  fill: rgba(226, 181, 210, 0.35);
+}
+
+.booking-floorplan.admin-floorplan .ourspace-seat.booked {
+  fill: rgba(203, 98, 70, 0.55);
+  cursor: help;
+}
+
+.booking-floorplan.admin-floorplan .ourspace-seat.booked:hover {
+  fill: rgba(203, 98, 70, 0.75);
+}
+
+.admin-floorplan-tooltip {
+  position: absolute;
+  z-index: 5;
+  max-width: min(280px, 70vw);
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--landing-dark);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
 }
 
 @media (max-width: 768px) {

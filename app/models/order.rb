@@ -63,6 +63,44 @@ class Order < ApplicationRecord
     status == "paid"
   end
 
+  def failed?
+    status == "failed"
+  end
+
+  def inventory_available?(ignore_pending: false)
+    return true if credit_pack?
+
+    if plan_type == "daily"
+      SeatAvailability.available_on?(
+        seat, booking_date,
+        except_order: self,
+        ignore_pending: ignore_pending
+      )
+    elsif monthly_desk_plan?
+      period = user.next_monthly_period(months: desk_months)
+      SeatAvailability.available_for_monthly?(
+        seat, period[:starts_on], period[:ends_on],
+        except_order: self,
+        ignore_pending: ignore_pending
+      )
+    elsif plan_type == "meeting_daily"
+      MeetingRoomAvailability.daily_available?(
+        booking_date,
+        except_order: self,
+        ignore_pending: ignore_pending
+      )
+    elsif plan_type == "meeting_hourly"
+      ends_at = meeting_ends_at
+      ends_at.present? && MeetingRoomAvailability.hourly_available?(
+        starts_at, ends_at,
+        except_order: self,
+        ignore_pending: ignore_pending
+      )
+    else
+      true
+    end
+  end
+
   def requires_desk?
     DESK_PLAN_TYPES.include?(plan_type)
   end
@@ -199,12 +237,12 @@ class Order < ApplicationRecord
 
   def seat_available
     if plan_type == "daily"
-      unless SeatAvailability.available_on?(seat, booking_date)
+      unless SeatAvailability.available_on?(seat, booking_date, except_order: self)
         errors.add(:seat, "is not available on #{booking_date}")
       end
     elsif monthly_desk_plan?
       period = user.next_monthly_period(months: desk_months)
-      unless SeatAvailability.available_for_monthly?(seat, period[:starts_on], period[:ends_on])
+      unless SeatAvailability.available_for_monthly?(seat, period[:starts_on], period[:ends_on], except_order: self)
         errors.add(:seat, "is not available for a monthly booking")
       end
     end
@@ -212,12 +250,12 @@ class Order < ApplicationRecord
 
   def meeting_booking_valid
     if plan_type == "meeting_daily"
-      unless MeetingRoomAvailability.daily_available?(booking_date)
+      unless MeetingRoomAvailability.daily_available?(booking_date, except_order: self)
         errors.add(:booking_date, "must be booked at least 24 hours in advance and be available")
       end
     elsif plan_type == "meeting_hourly"
       ends_at = meeting_ends_at
-      unless ends_at && MeetingRoomAvailability.hourly_available?(starts_at, ends_at)
+      unless ends_at && MeetingRoomAvailability.hourly_available?(starts_at, ends_at, except_order: self)
         errors.add(:starts_at, "must be booked at least 24 hours in advance and be available")
       end
     end

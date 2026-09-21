@@ -1,0 +1,103 @@
+<%#
+  locals:
+    date: Date
+    occupancy: hash of desk code => { name:, booking_type: }
+    desk_count: total desk count
+%>
+<div class="booking-floorplan admin-floorplan"
+     data-admin-floorplan
+     data-occupancy="<%= ERB::Util.json_escape(occupancy.to_json) %>">
+
+  <div class="booking-floorplan-columns">
+    <div class="booking-floorplan-column">
+      <p class="booking-floorplan-tab">Main floor</p>
+      <div class="booking-floorplan-diagram">
+        <%= raw Rails.root.join("app/assets/images/ourspace/main.svg").read %>
+      </div>
+    </div>
+
+    <div class="booking-floorplan-column">
+      <p class="booking-floorplan-tab">Mezzanine</p>
+      <div class="booking-floorplan-diagram">
+        <%= raw Rails.root.join("app/assets/images/ourspace/mezzanine.svg").read %>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-floorplan-tooltip" data-admin-floorplan-tooltip hidden></div>
+
+  <div class="booking-floorplan-footer">
+    <p class="booking-floorplan-selection">
+      <%= occupancy.size %> of <%= desk_count %> desks booked on <%= date.strftime("%-d %B %Y") %>
+    </p>
+    <ul class="booking-floorplan-legend" aria-hidden="true">
+      <li><span class="booking-floorplan-swatch booking-floorplan-swatch--available"></span> Free</li>
+      <li><span class="booking-floorplan-swatch booking-floorplan-swatch--unavailable"></span> Booked</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function initializeAdminFloorPlan() {
+  document.querySelectorAll('[data-admin-floorplan]').forEach(root => {
+    if (root.dataset.ready === 'true') return;
+    root.dataset.ready = 'true';
+
+    const occupancy = JSON.parse(root.dataset.occupancy || '{}');
+    const tooltip = root.querySelector('[data-admin-floorplan-tooltip]');
+    const seats = root.querySelectorAll('.ourspace-seat');
+
+    function hideTooltip() {
+      if (!tooltip) return;
+      tooltip.hidden = true;
+      tooltip.textContent = '';
+    }
+
+    function showTooltip(seat, event) {
+      if (!tooltip) return;
+      const desk = seat.dataset.desk;
+      const entry = occupancy[desk];
+      if (!entry) {
+        hideTooltip();
+        return;
+      }
+
+      const typeLabel = entry.booking_type === 'monthly' ? 'Monthly' : 'Daily';
+      tooltip.textContent = `${entry.name} · Desk ${desk} · ${typeLabel}`;
+      tooltip.hidden = false;
+
+      const rootRect = root.getBoundingClientRect();
+      const x = event.clientX - rootRect.left + 12;
+      const y = event.clientY - rootRect.top + 12;
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y}px`;
+    }
+
+    seats.forEach(seat => {
+      const desk = seat.dataset.desk;
+      const entry = occupancy[desk];
+
+      if (entry) {
+        seat.classList.add('booked');
+        seat.setAttribute('aria-label', `Desk ${desk}: ${entry.name}`);
+      } else {
+        seat.classList.add('free');
+        seat.setAttribute('aria-label', `Desk ${desk}: free`);
+      }
+
+      seat.addEventListener('mouseenter', (event) => showTooltip(seat, event));
+      seat.addEventListener('mousemove', (event) => showTooltip(seat, event));
+      seat.addEventListener('mouseleave', hideTooltip);
+    });
+  });
+}
+
+document.addEventListener('turbo:before-cache', () => {
+  document.querySelectorAll('[data-admin-floorplan]').forEach(root => {
+    delete root.dataset.ready;
+  });
+});
+
+document.addEventListener('DOMContentLoaded', initializeAdminFloorPlan);
+document.addEventListener('turbo:load', initializeAdminFloorPlan);
+</script>

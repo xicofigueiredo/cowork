@@ -10,8 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_215055) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_21_163822) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
 
   create_table "access_codes", force: :cascade do |t|
@@ -46,12 +47,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_215055) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["credit_pack_id"], name: "index_bookings_on_credit_pack_id"
-    t.index ["order_id"], name: "index_bookings_on_order_id"
+    t.index ["order_id"], name: "index_bookings_on_order_id", unique: true, where: "(order_id IS NOT NULL)"
     t.index ["seat_id", "date"], name: "index_bookings_on_seat_and_meeting_daily_date", unique: true, where: "((booking_type)::text = 'meeting_daily'::text)"
     t.index ["seat_id", "date"], name: "index_bookings_on_seat_id_and_date", unique: true, where: "((booking_type)::text = 'daily'::text)"
     t.index ["seat_id", "starts_at"], name: "index_bookings_on_seat_and_meeting_hourly_starts_at", unique: true, where: "((booking_type)::text = 'meeting_hourly'::text)"
     t.index ["seat_id"], name: "index_bookings_on_seat_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
+    t.exclusion_constraint "seat_id WITH =, daterange(starts_on, ends_on, '[]'::text) WITH &&", where: "((booking_type)::text = 'monthly'::text) AND (starts_on IS NOT NULL) AND (ends_on IS NOT NULL)", using: :gist, name: "bookings_monthly_seat_no_overlap"
   end
 
   create_table "credit_packs", force: :cascade do |t|
@@ -63,7 +65,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_215055) do
     t.integer "total_credits", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.index ["order_id"], name: "index_credit_packs_on_order_id"
+    t.index ["order_id"], name: "index_credit_packs_on_order_id", unique: true
     t.index ["user_id"], name: "index_credit_packs_on_user_id"
   end
 

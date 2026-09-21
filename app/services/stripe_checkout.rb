@@ -1,5 +1,6 @@
 class StripeCheckout
   class ConfigurationError < StandardError; end
+  class AvailabilityError < StandardError; end
 
   def self.create_session!(order:, success_url:, cancel_url:)
     new(order:, success_url:, cancel_url:).create_session!
@@ -14,37 +15,65 @@ class StripeCheckout
   def create_session!
     raise ConfigurationError, "Stripe is not configured" if Stripe.api_key.blank?
 
-    session = Stripe::Checkout::Session.create(
-      mode: "payment",
-      customer_email: @order.user.email,
-      client_reference_id: @order.id.to_s,
-      metadata: {
-        order_id: @order.id,
-        plan_type: @order.plan_type,
-        promocode: @order.promocode&.code
-      }.compact,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "eur",
-            unit_amount: @order.total_with_iva_cents,
-            product_data: {
-              name: @order.plan_label,
-              description: line_item_description
+    @order.with_lock do
+      raise AvailabilityError, "This order is no longer payable." unless @order.pending?
+
+      lock_inventory!
+      unless @order.inventory_available?
+        raise AvailabilityError, "That desk or room is no longer available. Please choose another option."
+      end
+
+      if (existing = reusable_session)
+        return existing
+      end
+
+      session = Stripe::Checkout::Session.create(
+        mode: "payment",
+        customer_email: @order.user.email,
+        client_reference_id: @order.id.to_s,
+        metadata: {
+          order_id: @order.id,
+          plan_type: @order.plan_type,
+          promocode: @order.promocode&.code
+        }.compact,
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: "eur",
+              unit_amount: @order.total_with_iva_cents,
+              product_data: {
+                name: @order.plan_label,
+                description: line_item_description
+              }
             }
           }
-        }
-      ],
-      success_url: @success_url,
-      cancel_url: @cancel_url
-    )
+        ],
+        success_url: @success_url,
+        cancel_url: @cancel_url
+      )
 
-    @order.update!(stripe_session_id: session.id)
-    session
+      @order.update!(stripe_session_id: session.id)
+      session
+    end
   end
 
   private
+
+  def lock_inventory!
+    return if @order.seat_id.blank?
+
+    Seat.lock.find(@order.seat_id)
+  end
+
+  def reusable_session
+    return if @order.stripe_session_id.blank?
+
+    session = Stripe::Checkout::Session.retrieve(@order.stripe_session_id)
+    session.status == "open" ? session : nil
+  rescue Stripe::InvalidRequestError
+    nil
+  end
 
   def line_item_description
     parts = [ "Includes 23% IVA" ]

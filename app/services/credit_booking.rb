@@ -14,14 +14,17 @@ class CreditBooking
   def call
     raise Error, "Desks are not available on weekends" unless SeatAvailability.weekday?(@date)
     raise Error, "Same-day bookings close at 17:00" unless SeatAvailability.bookable_date?(@date)
-    raise Error, "Seat is not available on this date" unless SeatAvailability.available_on?(@seat, @date)
-
-    credit_pack = @user.credit_packs.day_credits.usable.first
-    raise Error, "No credits available" unless credit_pack
 
     booking = nil
 
     ActiveRecord::Base.transaction do
+      Seat.lock.find(@seat.id)
+
+      raise Error, "Seat is not available on this date" unless SeatAvailability.available_on?(@seat, @date)
+
+      credit_pack = @user.credit_packs.day_credits.usable.lock.first
+      raise Error, "No credits available" unless credit_pack
+
       credit_pack.use_credit!
       booking = Booking.create!(
         user: @user,

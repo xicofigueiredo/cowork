@@ -66,6 +66,8 @@ class CheckoutsController < ApplicationController
     )
 
     redirect_to session.url, allow_other_host: true
+  rescue StripeCheckout::AvailabilityError => e
+    redirect_to new_checkout_path(plan: @order.plan_type), alert: e.message
   rescue StripeCheckout::ConfigurationError, Stripe::StripeError => e
     Rails.logger.error("Stripe checkout failed for order #{@order.id}: #{e.class}: #{e.message}")
     redirect_to checkout_path(@order), alert: stripe_checkout_error_message(e)
@@ -77,6 +79,12 @@ class CheckoutsController < ApplicationController
       return
     end
 
+    if @order.failed?
+      redirect_to new_checkout_path(plan: @order.plan_type),
+        alert: "That desk or room was taken just as you paid. Your payment has been refunded — please choose another option."
+      return
+    end
+
     if @order.stripe_session_id.present?
       session = Stripe::Checkout::Session.retrieve(@order.stripe_session_id)
       StripePaymentConfirmation.call(session)
@@ -85,6 +93,9 @@ class CheckoutsController < ApplicationController
 
     if @order.paid?
       redirect_to bookings_path, notice: "Payment successful! Your booking is confirmed."
+    elsif @order.failed?
+      redirect_to new_checkout_path(plan: @order.plan_type),
+        alert: "That desk or room was taken just as you paid. Your payment has been refunded — please choose another option."
     else
       redirect_to checkout_path(@order), notice: "Payment received. Confirmation may take a moment."
     end

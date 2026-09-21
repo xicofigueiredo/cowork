@@ -18,23 +18,26 @@ class MeetingCreditBooking
     raise Error, "Meeting room is not available on weekends" unless MeetingRoomAvailability.weekday?(@starts_at.to_date)
     raise Error, "Booking must be within opening hours (8:00–20:00)" unless within_opening_hours?
 
-    @hours.times do |index|
-      slot_start = @starts_at + index.hours
-      slot_end = slot_start + 1.hour
-      raise Error, "Meeting room is not available at this time" unless MeetingRoomAvailability.hourly_available?(slot_start, slot_end)
-    end
-
-    credit_pack = @user.credit_packs.meeting_hour_credits.select(&:usable?).first
-    raise Error, "No meeting room hours available" unless credit_pack
-    raise Error, "Not enough meeting room hours" if credit_pack.remaining_credits < @hours
-
     booking = nil
+    seat = Seat.meeting_room
 
     ActiveRecord::Base.transaction do
+      Seat.lock.find(seat.id)
+
+      @hours.times do |index|
+        slot_start = @starts_at + index.hours
+        slot_end = slot_start + 1.hour
+        raise Error, "Meeting room is not available at this time" unless MeetingRoomAvailability.hourly_available?(slot_start, slot_end)
+      end
+
+      credit_pack = @user.credit_packs.meeting_hour_credits.usable.lock.first
+      raise Error, "No meeting room hours available" unless credit_pack
+      raise Error, "Not enough meeting room hours" if credit_pack.remaining_credits < @hours
+
       credit_pack.use_credit!(@hours)
       booking = Booking.create!(
         user: @user,
-        seat: Seat.meeting_room,
+        seat: seat,
         booking_type: "meeting_hourly",
         starts_at: @starts_at,
         ends_at: @ends_at,

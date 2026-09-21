@@ -27,6 +27,13 @@ class Booking < ApplicationRecord
   scope :monthly, -> { where(booking_type: "monthly") }
   scope :meeting_hourly, -> { where(booking_type: "meeting_hourly") }
   scope :meeting_daily, -> { where(booking_type: "meeting_daily") }
+  scope :desk_covering, ->(date) {
+    joins(:seat).merge(Seat.desks).where(
+      "(booking_type = 'daily' AND date = ?) OR " \
+      "(booking_type = 'monthly' AND starts_on <= ? AND ends_on >= ?)",
+      date, date, date
+    )
+  }
   scope :upcoming, -> {
     where(
       "(booking_type = 'daily' AND date >= ?) OR " \
@@ -116,11 +123,15 @@ class Booking < ApplicationRecord
 
   def seat_available
     if daily?
-      unless SeatAvailability.available_on?(seat, date)
+      unless SeatAvailability.available_on?(seat, date, except_order: order, ignore_pending: order.present?)
         errors.add(:seat, "is not available on #{date}")
       end
     elsif monthly?
-      unless SeatAvailability.available_for_monthly?(seat, starts_on, ends_on)
+      unless SeatAvailability.available_for_monthly?(
+        seat, starts_on, ends_on,
+        except_order: order,
+        ignore_pending: order.present?
+      )
         errors.add(:seat, "is not available for this period")
       end
     end
@@ -128,11 +139,15 @@ class Booking < ApplicationRecord
 
   def meeting_room_available
     if meeting_daily?
-      unless MeetingRoomAvailability.daily_available?(date)
+      unless MeetingRoomAvailability.daily_available?(date, except_order: order, ignore_pending: order.present?)
         errors.add(:date, "is not available")
       end
     elsif meeting_hourly?
-      unless MeetingRoomAvailability.hourly_available?(starts_at, ends_at)
+      unless MeetingRoomAvailability.hourly_available?(
+        starts_at, ends_at,
+        except_order: order,
+        ignore_pending: order.present?
+      )
         errors.add(:starts_at, "is not available")
       end
     end
@@ -140,18 +155,18 @@ class Booking < ApplicationRecord
 
   def meeting_room_available_on_update
     if meeting_daily?
-      unless MeetingRoomAvailability.daily_available?(date, except_booking: self)
+      unless MeetingRoomAvailability.daily_available?(date, except_booking: self, except_order: order)
         errors.add(:date, "is not available")
       end
     elsif meeting_hourly?
-      unless MeetingRoomAvailability.hourly_available?(starts_at, ends_at, except_booking: self)
+      unless MeetingRoomAvailability.hourly_available?(starts_at, ends_at, except_booking: self, except_order: order)
         errors.add(:starts_at, "is not available")
       end
     end
   end
 
   def seat_available_on_update
-    unless SeatAvailability.available_on?(seat, date, except_booking: self)
+    unless SeatAvailability.available_on?(seat, date, except_booking: self, except_order: order)
       errors.add(:base, "#{seat.label} is not available on #{date.strftime('%-d %B %Y')}")
     end
   end
@@ -160,6 +175,7 @@ class Booking < ApplicationRecord
     unless SeatAvailability.available_for_monthly?(
       seat, starts_on, ends_on,
       except_booking: self,
+      except_order: order,
       from_date: Date.current
     )
       errors.add(:base, "#{seat.label} is not available for this period")

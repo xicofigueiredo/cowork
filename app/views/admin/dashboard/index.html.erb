@@ -9,6 +9,18 @@
     <%= render "admin/shared/nav" %>
 
     <section class="booking-section">
+      <div class="admin-floorplan-header">
+        <h2 class="booking-section-title">Floor plan</h2>
+        <%= form_with url: admin_root_path, method: :get, class: "admin-floorplan-date-form", local: true do %>
+          <label for="admin-floorplan-date" class="admin-floorplan-date-label">Date</label>
+          <%= date_field_tag :date, @floor_plan_date, id: "admin-floorplan-date", class: "admin-floorplan-date-input", onchange: "this.form.requestSubmit()" %>
+        <% end %>
+      </div>
+
+      <%= render "admin/dashboard/floor_plan", date: @floor_plan_date, occupancy: @desk_occupancy, desk_count: @desk_count %>
+    </section>
+
+    <section class="booking-section">
       <h2 class="booking-section-title">Bookings <span class="admin-count"><%= @bookings.size %></span></h2>
 
       <% if @bookings.any? %>

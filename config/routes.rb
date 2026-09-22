@@ -40,6 +40,11 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: "dashboard#index"
     resources :access_codes, only: [ :index, :new, :create, :destroy ]
+    resources :users, only: [] do
+      member do
+        post :issue_access_code
+      end
+    end
   end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)

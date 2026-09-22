@@ -18,6 +18,23 @@
       </div>
     <% end %>
 
+    <% if @door_code %>
+      <section class="booking-section">
+        <h2 class="booking-section-title">Door access</h2>
+        <ul class="booking-list">
+          <li class="booking-list-item booking-door-code-card">
+            <div>
+              <p class="booking-door-code-label">Door code</p>
+              <p class="booking-door-code-value"><%= @door_code.code %></p>
+              <% unless @door_code.permanent? %>
+                <span class="booking-list-meta"><%= @door_code.validity_label %></span>
+              <% end %>
+            </div>
+          </li>
+        </ul>
+      </section>
+    <% end %>
+
     <section class="booking-section">
       <h2 class="booking-section-title">Upcoming</h2>
 
@@ -30,12 +47,6 @@
                 <span class="booking-list-meta"><%= booking.period_label %></span>
                 <% if booking.editable? && booking.edit_deadline_label %>
                   <span class="booking-list-meta"><%= booking.edit_deadline_label %></span>
-                <% end %>
-                <% if booking.access_code&.active? %>
-                  <span class="booking-list-meta booking-door-code">
-                    Door code: <strong><%= booking.access_code.code %></strong>
-                    <span class="booking-list-meta">(<%= booking.access_code.validity_label %>)</span>
-                  </span>
                 <% end %>
               </div>
               <div class="booking-list-actions">

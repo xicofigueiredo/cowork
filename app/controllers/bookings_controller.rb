@@ -4,7 +4,7 @@ class BookingsController < ApplicationController
   before_action :ensure_editable, only: [ :edit, :update ]
 
   def index
-    @bookings = current_user.bookings.includes(:seat, :access_code).upcoming.order(:date, :starts_on, :starts_at)
+    @bookings = current_user.bookings.includes(:seat).upcoming.order(:date, :starts_on, :starts_at)
     @past_bookings = current_user.bookings.includes(:seat)
       .where(
         "(booking_type = 'daily' AND date < ?) OR " \
@@ -19,6 +19,7 @@ class BookingsController < ApplicationController
     @meeting_credit_packs = current_user.credit_packs.meeting_hour_credits.order(expires_at: :desc)
     @available_credits = current_user.available_credits
     @available_meeting_hours = current_user.available_meeting_hours
+    @door_code = current_user.access_code if current_user.access_code&.synced_to_lock?
   end
 
   def new
@@ -62,7 +63,6 @@ class BookingsController < ApplicationController
   def update
     if @booking.update(booking_params)
       BookingMailer.deliver_updated(@booking, changes: @booking.previous_changes)
-      regenerate_access_code_if_needed!
       redirect_to bookings_path, notice: update_notice
     else
       load_edit_form_data(validate_date: false)
@@ -73,15 +73,6 @@ class BookingsController < ApplicationController
   end
 
   private
-
-  def regenerate_access_code_if_needed!
-    relevant = %w[date starts_on ends_on starts_at ends_at]
-    return unless (relevant & @booking.previous_changes.keys).any?
-
-    TtLock::AccessCodeIssuer.regenerate_for_booking!(@booking)
-  rescue StandardError => e
-    Rails.logger.error("Access code regenerate failed for booking #{@booking.id}: #{e.class}: #{e.message}")
-  end
 
   def load_edit_form_data(validate_date: true)
     if @booking.meeting_hourly?

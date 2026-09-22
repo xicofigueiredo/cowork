@@ -3,7 +3,7 @@ class OrderMailer < ApplicationMailer
     @order = order
     @user = order.user
     @booking = order.booking
-    @access_code = @booking&.access_code
+    @access_code = @order.user&.access_code
     @credit_pack = order.credit_pack
     @invoice_number = official_document_number.presence || order.toconline_document_number.presence || order.invoice_number
     @paid_at = order.paid_at || Time.current
@@ -38,6 +38,8 @@ class OrderMailer < ApplicationMailer
   def space_guide(order)
     @order = order
     @user = order.user
+    @booking = order.booking
+    @access_code = @order.user&.access_code
 
     attachments.inline["house_rules1.png"] = File.read(
       Rails.root.join("app/assets/images/house_rules1.png")

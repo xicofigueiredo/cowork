@@ -9,7 +9,11 @@ Map: https://maps.app.goo.gl/zp8jWX9CJJjjR9ye7
 
 ACCESS
 - Space hours: 08:00–20:00
-- The door code will be sent to you via email (when applicable)
+<% if @access_code&.synced_to_lock? %>
+- The door code is: <%= @access_code.code %>
+<% else %>
+- Your door code will appear in your booking confirmation once the lock confirms it
+<% end %>
 - Keep the door closed after you enter — don't share your code
 - Bookings and credits are managed from your account on the website
 

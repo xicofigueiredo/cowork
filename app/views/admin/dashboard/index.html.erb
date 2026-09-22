@@ -21,6 +21,46 @@
     </section>
 
     <section class="booking-section">
+      <h2 class="booking-section-title">
+        Members without door code
+        <span class="admin-count"><%= @users_needing_codes.size %></span>
+      </h2>
+
+      <% unless @ttlock_configured %>
+        <div class="booking-credits-banner">
+          <p>TTLock is not configured. Set <code>TTLOCK_*</code> environment variables to issue codes.</p>
+        </div>
+      <% end %>
+
+      <% if @users_needing_codes.any? %>
+        <ul class="booking-list">
+          <% @users_needing_codes.each do |user| %>
+            <li class="booking-list-item">
+              <div>
+                <strong><%= user.display_name %></strong>
+                <span class="booking-list-meta"><%= mail_to user.email %></span>
+              </div>
+              <div class="booking-list-actions">
+                <% if user.door_code_status == :failed %>
+                  <span class="booking-badge booking-badge--failed">Failed</span>
+                <% else %>
+                  <span class="booking-badge booking-badge--missing">Missing</span>
+                <% end %>
+                <%= button_to "Issue code",
+                      issue_access_code_admin_user_path(user),
+                      method: :post,
+                      class: "booking-btn booking-btn--primary booking-btn--small",
+                      disabled: !@ttlock_configured %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="booking-empty">Every member has a door code on the lock.</p>
+      <% end %>
+    </section>
+
+    <section class="booking-section">
       <h2 class="booking-section-title">Users <span class="admin-count"><%= @users.size %></span></h2>
 
       <% if @users.any? %>
@@ -29,6 +69,7 @@
             <% plan_label = user.current_plan_label %>
             <% day_credits = user.remaining_day_credits %>
             <% meeting_hours = user.remaining_meeting_hours %>
+            <% door_code = user.access_code if user.access_code&.synced_to_lock? %>
             <li class="booking-list-item">
               <div class="admin-user-summary">
                 <% if plan_label.present? || day_credits.positive? || meeting_hours.positive? %>
@@ -44,13 +85,28 @@
                     <% end %>
                   </div>
                 <% end %>
-                <strong><%= [user.first_name, user.last_name].compact_blank.join(" ").presence || "—" %></strong>
+                <strong><%= user.display_name %></strong>
                 <span class="booking-list-meta">
                   <%= mail_to user.email %>
                   · Joined <%= user.created_at.strftime("%-d %b %Y, %H:%M") %>
                 </span>
+                <% if door_code %>
+                  <span class="booking-list-meta booking-door-code">
+                    Door code: <strong class="booking-door-code-inline"><%= door_code.code %></strong>
+                  </span>
+                <% end %>
               </div>
               <div class="booking-list-actions">
+                <% if door_code %>
+                  <span class="booking-badge booking-badge--active">Has code</span>
+                <% elsif user.needs_door_code? %>
+                  <span class="booking-badge booking-badge--missing">No code</span>
+                  <%= button_to "Issue",
+                        issue_access_code_admin_user_path(user),
+                        method: :post,
+                        class: "booking-btn booking-btn--primary booking-btn--small",
+                        disabled: !@ttlock_configured %>
+                <% end %>
                 <% if user.confirmed? %>
                   <span class="booking-badge booking-badge--active">Confirmed</span>
                 <% else %>

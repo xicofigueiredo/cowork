@@ -2,64 +2,53 @@
 
 module TtLock
   class AccessCodeIssuer
-    OPEN_HOUR = MeetingRoomAvailability::OPEN_HOUR
-    CLOSE_HOUR = MeetingRoomAvailability::CLOSE_HOUR
-
     def self.call(**kwargs)
       new(**kwargs).call
     end
 
-    def self.issue_for_booking!(booking)
-      return unless booking
-      return if booking.access_code&.active?
+    # One permanent door code per client. Booking hooks call this.
+    def self.issue_for_user!(user)
+      return unless user
+      return user.access_code if user.access_code&.synced_to_lock?
 
-      window = validity_window_for(booking)
       call(
-        booking: booking,
-        user: booking.user,
-        name: booking_name(booking),
-        valid_from: window[:valid_from],
-        valid_to: window[:valid_to],
-        source: "booking"
+        user: user,
+        name: user_name(user),
+        permanent: true,
+        source: "member"
       )
     end
 
-    def self.regenerate_for_booking!(booking)
+    def self.issue_for_booking!(booking)
       return unless booking
 
-      AccessCodeRevoker.call(booking.access_code) if booking.access_code&.active?
-      booking.reload
-      issue_for_booking!(booking)
+      issue_for_user!(booking.user)
     end
 
-    def self.validity_window_for(booking)
-      if booking.meeting_hourly?
-        { valid_from: booking.starts_at, valid_to: booking.ends_at }
-      elsif booking.monthly?
-        {
-          valid_from: booking.starts_on.in_time_zone.change(hour: OPEN_HOUR),
-          valid_to: booking.ends_on.in_time_zone.change(hour: CLOSE_HOUR)
-        }
-      else
-        date = booking.date
-        {
-          valid_from: date.in_time_zone.change(hour: OPEN_HOUR),
-          valid_to: date.in_time_zone.change(hour: CLOSE_HOUR)
-        }
+    def self.ensure_for_user!(user)
+      return unless user
+      return user.access_code if user.access_code&.synced_to_lock?
+
+      if user.access_code&.active?
+        AccessCodeRevoker.call(user.access_code)
+        user.reload
       end
+
+      issue_for_user!(user)
     end
 
-    def self.booking_name(booking)
-      user_label = [ booking.user.first_name, booking.user.last_name ].compact.join(" ").presence || booking.user.email
-      "Booking ##{booking.id} — #{user_label}"
+    def self.user_name(user)
+      label = [ user.first_name, user.last_name ].compact.join(" ").presence || user.email
+      "Member — #{label}"
     end
 
-    def initialize(name:, valid_from:, valid_to:, source:, booking: nil, user: nil, code: nil)
+    def initialize(name:, source:, valid_from: nil, valid_to: nil, permanent: false, booking: nil, user: nil, code: nil)
       @booking = booking
       @user = user || booking&.user
       @name = name
-      @valid_from = valid_from
-      @valid_to = valid_to
+      @permanent = permanent
+      @valid_from = valid_from || Time.current
+      @valid_to = permanent ? AccessCode.permanent_until : valid_to
       @source = source
       @code = code.presence || generate_code
     end
@@ -68,6 +57,10 @@ module TtLock
       unless Client.configured?
         Rails.logger.warn("TTLock not configured; skipping access code issue for #{@name}")
         return nil
+      end
+
+      if @user&.access_code&.synced_to_lock?
+        return @user.access_code
       end
 
       access_code = AccessCode.new(
@@ -84,13 +77,14 @@ module TtLock
       begin
         keyboard_pwd_id = Client.new.add_passcode!(
           keyboard_pwd: @code,
-          start_date: @valid_from,
-          end_date: @valid_to,
+          start_date: @permanent ? nil : @valid_from,
+          end_date: @permanent ? nil : @valid_to,
+          permanent: @permanent,
           name: @name
         )
         access_code.ttlock_keyboard_pwd_id = keyboard_pwd_id
         access_code.save!
-        @booking&.association(:access_code)&.reload
+        @user&.association(:access_code)&.reload
         access_code
       rescue Error, ActiveRecord::RecordInvalid => e
         Rails.logger.error("TTLock access code issue failed: #{e.class}: #{e.message}")
@@ -111,7 +105,7 @@ module TtLock
 
     def generate_code
       loop do
-        code = format("%06d", SecureRandom.random_number(1_000_000))
+        code = format("%05d", SecureRandom.random_number(100_000))
         break code unless AccessCode.active.exists?(code: code)
       end
     end

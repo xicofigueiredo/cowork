@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_21_163822) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_22_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -30,6 +30,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_21_163822) do
     t.index ["booking_id"], name: "index_access_codes_on_active_booking_id", unique: true, where: "((booking_id IS NOT NULL) AND ((status)::text = 'active'::text))"
     t.index ["source"], name: "index_access_codes_on_source"
     t.index ["status"], name: "index_access_codes_on_status"
+    t.index ["user_id"], name: "index_access_codes_on_active_user_id", unique: true, where: "((user_id IS NOT NULL) AND ((status)::text = 'active'::text))"
     t.index ["user_id"], name: "index_access_codes_on_user_id"
   end
 

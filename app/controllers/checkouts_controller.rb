@@ -133,7 +133,7 @@ class CheckoutsController < ApplicationController
     if message.match?(/https|http|url|ssl/i)
       "Stripe requires HTTPS return URLs in live mode. Check the site is served over https."
     elsif message.match?(/api.?key|invalid|No such/i)
-      "Stripe API key rejected. Confirm live keys are from the same Stripe account and the server was restarted."
+      "Stripe API key rejected. Confirm the keys in .env match the mode (test vs live) and restart the server."
     else
       "Unable to start payment: #{message.truncate(140)}"
     end

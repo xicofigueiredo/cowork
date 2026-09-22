@@ -1,4 +1,5 @@
 <% content_for :title, "Generate access code - Mezzanine" %>
+<% selected_validity = params[:validity_type].presence || "period" %>
 
 <main class="booking-page">
   <div class="booking-container">
@@ -12,26 +13,47 @@
       </div>
     <% end %>
 
-    <%= form_with url: admin_access_codes_path, method: :post, class: "booking-form booking-form--centered", local: true do %>
+    <%= form_with url: admin_access_codes_path, method: :post, class: "booking-form booking-form--centered", local: true, data: { controller: "access-code-validity", action: "change->access-code-validity#sync" } do %>
+      <div class="booking-field booking-field--wide">
+        <label class="booking-label" for="user_id">Member</label>
+        <select class="booking-input" name="user_id" id="user_id">
+          <option value="">No member (guest / staff)</option>
+          <% @users.each do |user| %>
+            <option value="<%= user.id %>" <%= "selected" if params[:user_id].to_s == user.id.to_s %>>
+              <%= user.first_name %> <%= user.last_name %> — <%= user.email %>
+            </option>
+          <% end %>
+        </select>
+        <p class="booking-note">If you pick a member, the code appears on their My bookings page.</p>
+      </div>
+
       <div class="booking-field booking-field--wide">
         <label class="booking-label" for="name">Name</label>
         <input class="booking-input" type="text" name="name" id="name" value="<%= params[:name] %>" placeholder="Guest / cleaner / courier" required>
       </div>
 
       <div class="booking-field booking-field--wide">
-        <label class="booking-label" for="valid_from">Valid from</label>
-        <input class="booking-input" type="datetime-local" name="valid_from" id="valid_from" value="<%= @access_code.valid_from.strftime('%Y-%m-%dT%H:%M') %>" required>
+        <label class="booking-label" for="validity_type">Validity</label>
+        <select class="booking-input" name="validity_type" id="validity_type">
+          <option value="period" <%= "selected" if selected_validity == "period" %>>Timed (valid from / to)</option>
+          <option value="permanent" <%= "selected" if selected_validity == "permanent" %>>Permanent</option>
+        </select>
       </div>
 
-      <div class="booking-field booking-field--wide">
+      <div class="booking-field booking-field--wide" data-access-code-validity-target="periodFields" <%= "hidden" if selected_validity == "permanent" %>>
+        <label class="booking-label" for="valid_from">Valid from</label>
+        <input class="booking-input" type="datetime-local" name="valid_from" id="valid_from" data-access-code-validity-target="fromInput" value="<%= @access_code.valid_from.strftime('%Y-%m-%dT%H:%M') %>" <%= "required" unless selected_validity == "permanent" %> <%= "disabled" if selected_validity == "permanent" %>>
+      </div>
+
+      <div class="booking-field booking-field--wide" data-access-code-validity-target="periodFields" <%= "hidden" if selected_validity == "permanent" %>>
         <label class="booking-label" for="valid_to">Valid to</label>
-        <input class="booking-input" type="datetime-local" name="valid_to" id="valid_to" value="<%= @access_code.valid_to.strftime('%Y-%m-%dT%H:%M') %>" required>
+        <input class="booking-input" type="datetime-local" name="valid_to" id="valid_to" data-access-code-validity-target="toInput" value="<%= @access_code.valid_to.strftime('%Y-%m-%dT%H:%M') %>" <%= "required" unless selected_validity == "permanent" %> <%= "disabled" if selected_validity == "permanent" %>>
       </div>
 
       <div class="booking-field booking-field--wide">
         <label class="booking-label" for="code">Custom code (optional)</label>
         <input class="booking-input" type="text" name="code" id="code" inputmode="numeric" pattern="\d{4,9}" maxlength="9" placeholder="Leave blank to auto-generate">
-        <p class="booking-note">4–9 digits. Leave blank to generate a random 6-digit code.</p>
+        <p class="booking-note">4–9 digits. Leave blank to generate a random 5-digit code.</p>
       </div>
 
       <div class="booking-actions">

@@ -415,9 +415,33 @@
   color: #333;
 }
 
-.booking-door-code strong {
-  letter-spacing: 0.06em;
+.booking-door-code strong,
+.booking-door-code-inline {
+  letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
+  font-size: 1.05em;
+}
+
+.booking-door-code-card {
+  background: #f7f7f5;
+  border: 1px solid #e6e6e2;
+}
+
+.booking-door-code-label {
+  margin: 0 0 4px;
+  color: #666;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.booking-door-code-value {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: #111;
 }
 
 .booking-section-header {
@@ -485,6 +509,16 @@
 .booking-badge--expired {
   background: #f5f5f5;
   color: #888;
+}
+
+.booking-badge--missing {
+  background: #f8f0e8;
+  color: #8a5a20;
+}
+
+.booking-badge--failed {
+  background: #f8ecec;
+  color: #8a2b2b;
 }
 
 .booking-empty {

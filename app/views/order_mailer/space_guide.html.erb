@@ -14,7 +14,11 @@
 <h3 style="margin: 24px 0 8px; font-size: 16px;">Access</h3>
 <ul style="margin: 0 0 12px; padding-left: 18px; line-height: 1.6;">
   <li>Space hours: <strong>08:00–20:00</strong></li>
-  <li>The door code will be sent to you via email (when applicable)</li>
+  <% if @access_code&.synced_to_lock? %>
+    <li>The door code is: <strong style="letter-spacing: 0.08em;"><%= @access_code.code %></strong></li>
+  <% else %>
+    <li>Your door code will be sent to you by email (when applicable)</li>
+  <% end %>
   <li>Keep the door closed after you enter — don’t share your code</li>
   <li>Bookings and credits are managed from your account on the website</li>
 </ul>

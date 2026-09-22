@@ -10,7 +10,7 @@ BOOKING DETAILS
 NIF / VAT: <%= @order.vat_number %>
 <% end %>
 
-<% if @access_code&.active? %>
+<% if @access_code&.synced_to_lock? %>
 DOOR ACCESS
 Code: <%= @access_code.code %>
 Valid: <%= @access_code.validity_label %>

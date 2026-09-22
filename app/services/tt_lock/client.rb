@@ -34,21 +34,28 @@ module TtLock
       @api_base = ENV.fetch("TTLOCK_API_URL", API_BASE).chomp("/")
     end
 
-    def add_passcode!(keyboard_pwd:, start_date:, end_date:, name: nil)
+    def add_passcode!(keyboard_pwd:, name: nil, start_date: nil, end_date: nil, permanent: false)
+      ensure_gateway_online!
+
       params = {
         clientId: @client_id,
         accessToken: access_token,
         lockId: @lock_id,
         keyboardPwd: keyboard_pwd.to_s,
         keyboardPwdName: name,
-        keyboardPwdType: 3,
-        startDate: to_ms(start_date),
-        endDate: to_ms(end_date),
+        keyboardPwdType: permanent ? 2 : 3,
         addType: 2,
         date: now_ms
-      }.compact
+      }
 
-      response = api_post("/v3/keyboardPwd/add", params)
+      unless permanent
+        raise ArgumentError, "start_date and end_date are required for timed passcodes" if start_date.blank? || end_date.blank?
+
+        params[:startDate] = to_ms(start_date)
+        params[:endDate] = to_ms(end_date)
+      end
+
+      response = api_post("/v3/keyboardPwd/add", params.compact)
       keyboard_pwd_id = response["keyboardPwdId"]
       raise ApiError, "TTLock add passcode missing keyboardPwdId: #{response.inspect}" if keyboard_pwd_id.blank?
 
@@ -68,7 +75,25 @@ module TtLock
       api_post("/v3/keyboardPwd/delete", params)
     end
 
+    def gateway_online?
+      response = api_post("/v3/gateway/list", {
+        clientId: @client_id,
+        accessToken: access_token,
+        pageNo: 1,
+        pageSize: 100,
+        date: now_ms
+      })
+
+      Array(response["list"]).any? { |gateway| gateway["isOnline"].to_i == 1 }
+    end
+
     private
+
+    def ensure_gateway_online!
+      return if gateway_online?
+
+      raise ApiError, "TTLock gateway is offline; refusing to issue a door code that would not reach the lock"
+    end
 
     def access_token
       cached = Rails.cache.read(TOKEN_CACHE_KEY)

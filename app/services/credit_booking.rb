@@ -36,7 +36,7 @@ class CreditBooking
     end
 
     begin
-      TtLock::AccessCodeIssuer.issue_for_booking!(booking)
+      TtLock::AccessCodeIssuer.issue_for_user!(@user)
     rescue StandardError => e
       Rails.logger.error("Access code issue failed for booking #{booking.id}: #{e.class}: #{e.message}")
     end

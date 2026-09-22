@@ -8,12 +8,34 @@ class User < ApplicationRecord
   has_many :bookings, dependent: :destroy
   has_many :credit_packs, dependent: :destroy
   has_many :access_codes, dependent: :nullify
+  has_one :access_code, -> { where(status: "active") }, class_name: "AccessCode"
 
   validates :first_name, :last_name, presence: true
 
   def admin?
     emails = ENV.fetch("ADMIN_EMAILS", "").split(",").map { |e| e.strip.downcase }.reject(&:blank?)
     emails.include?(email.to_s.downcase)
+  end
+
+  def door_code_status
+    return :synced if access_code&.synced_to_lock?
+
+    failed = if access_codes.loaded?
+      access_codes.any?(&:failed?)
+    else
+      access_codes.where(status: "failed").exists?
+    end
+    return :failed if failed
+
+    :missing
+  end
+
+  def needs_door_code?
+    door_code_status != :synced
+  end
+
+  def display_name
+    [ first_name, last_name ].compact_blank.join(" ").presence || email
   end
 
   def available_credits

@@ -13,6 +13,7 @@ module Admin
         valid_to: Time.zone.now.change(hour: 20, min: 0, sec: 0)
       )
       @ttlock_configured = TtLock::Client.configured?
+      load_users
     end
 
     def create
@@ -21,26 +22,38 @@ module Admin
         return
       end
 
-      valid_from = parse_datetime(params[:valid_from])
-      valid_to = parse_datetime(params[:valid_to])
+      permanent = params[:validity_type].to_s == "permanent"
+      valid_from = permanent ? Time.current : parse_datetime(params[:valid_from])
+      valid_to = permanent ? AccessCode.permanent_until : parse_datetime(params[:valid_to])
       name = params[:name].to_s.strip.presence || "Manual code"
       code = params[:code].to_s.strip.presence
+      user = User.find_by(id: params[:user_id]) if params[:user_id].present?
 
       if code.present? && !code.match?(/\A\d{4,9}\z/)
         redirect_to new_admin_access_code_path, alert: "Code must be 4–9 digits."
         return
       end
 
+      if user&.access_code&.active?
+        TtLock::AccessCodeRevoker.call(user.access_code)
+      end
+
       access_code = TtLock::AccessCodeIssuer.call(
         name: name,
         valid_from: valid_from,
         valid_to: valid_to,
+        permanent: permanent,
         source: "manual",
-        user: current_user,
+        user: user,
         code: code
       )
 
-      redirect_to admin_access_codes_path, notice: "Door code #{access_code.code} created."
+      notice = if user
+        "Door code #{access_code.code} created for #{user.email}."
+      else
+        "Door code #{access_code.code} created."
+      end
+      redirect_to admin_access_codes_path, notice: notice
     rescue ArgumentError
       redirect_to new_admin_access_code_path, alert: "Invalid date or time."
     rescue TtLock::Error => e
@@ -55,6 +68,10 @@ module Admin
     end
 
     private
+
+    def load_users
+      @users = User.order(:first_name, :last_name, :email)
+    end
 
     def set_access_code
       @access_code = AccessCode.find(params[:id])

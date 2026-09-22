@@ -35,9 +35,21 @@
                 </span>
               </div>
               <div class="booking-list-actions">
-                <span class="booking-badge booking-badge--<%= access_code.active? ? 'active' : 'expired' %>">
-                  <%= access_code.status.capitalize %>
+                <% badge_class = case access_code.status
+                  when "active" then access_code.synced_to_lock? ? "active" : "missing"
+                  when "failed" then "failed"
+                  else "expired"
+                  end %>
+                <span class="booking-badge booking-badge--<%= badge_class %>">
+                  <%= access_code.synced_to_lock? ? "On lock" : access_code.status.capitalize %>
                 </span>
+                <% if access_code.user_id.present? && !access_code.synced_to_lock? %>
+                  <%= button_to "Re-issue",
+                        issue_access_code_admin_user_path(access_code.user_id),
+                        method: :post,
+                        class: "booking-btn booking-btn--primary booking-btn--small",
+                        disabled: !@ttlock_configured %>
+                <% end %>
                 <% if access_code.active? %>
                   <%= button_to "Revoke", admin_access_code_path(access_code), method: :delete, class: "booking-btn booking-btn--secondary booking-btn--small", data: { turbo_confirm: "Revoke this door code on the lock?" } %>
                 <% end %>

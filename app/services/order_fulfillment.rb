@@ -67,7 +67,7 @@ class OrderFulfillment
   def after_fulfillment!
     @order.reload
 
-    issue_access_code_for_booking!
+    issue_access_code_for_user!
 
     official = Toconline::InvoiceIssuer.call(@order)
 
@@ -109,11 +109,8 @@ class OrderFulfillment
     )
   end
 
-  def issue_access_code_for_booking!
-    booking = @order.booking
-    return unless booking
-
-    TtLock::AccessCodeIssuer.issue_for_booking!(booking)
+  def issue_access_code_for_user!
+    TtLock::AccessCodeIssuer.issue_for_user!(@order.user)
   rescue StandardError => e
     Rails.logger.error("Access code issue failed for order #{@order.id}: #{e.class}: #{e.message}")
   end

@@ -20,7 +20,7 @@
   <% end %>
 </table>
 
-<% if @access_code&.active? %>
+<% if @access_code&.synced_to_lock? %>
   <h3 style="margin: 28px 0 8px; font-size: 16px;">Door access</h3>
   <p style="margin: 0 0 12px;">
     Your door code is <strong style="font-size: 20px; letter-spacing: 0.08em;"><%= @access_code.code %></strong><br>

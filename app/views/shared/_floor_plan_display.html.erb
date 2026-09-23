@@ -1,0 +1,30 @@
+<%#
+  locals:
+    seat: Seat (desk)
+%>
+<%
+  floor = seat.floor
+  floor_label = floor == "mezzanine" ? "Mezzanine" : "Main floor"
+  svg_path = Rails.root.join("app/assets/images/ourspace/#{floor}.svg")
+  svg = svg_path.read.sub(
+    /class="ourspace-seat"(?=[^>]*data-desk="#{Regexp.escape(seat.code)}")/,
+    'class="ourspace-seat selected"'
+  )
+%>
+<div class="booking-floorplan booking-floorplan--display">
+  <div class="booking-floorplan-columns booking-floorplan-columns--single">
+    <div class="booking-floorplan-column">
+      <p class="booking-floorplan-tab"><%= floor_label %></p>
+      <div class="booking-floorplan-diagram">
+        <%= raw svg %>
+      </div>
+    </div>
+  </div>
+
+  <div class="booking-floorplan-footer">
+    <p class="booking-floorplan-selection">Your desk: <%= seat.label %></p>
+    <ul class="booking-floorplan-legend" aria-hidden="true">
+      <li><span class="booking-floorplan-swatch booking-floorplan-swatch--selected"></span> Your seat</li>
+    </ul>
+  </div>
+</div>

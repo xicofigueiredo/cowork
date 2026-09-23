@@ -93,6 +93,14 @@ namespace :toconline do
     end
   end
 
+  desc "Probe TOC auth, auto-reauth if needed, email log to francisco-abf@hotmail.com"
+  task health: :environment do
+    ToconlineEnv.load!
+    result = ToconlineConnectionCheckJob.perform_now
+    puts result.log
+    exit 1 if result.status.to_sym == :failed
+  end
+
   desc "List paid orders and their TOConline invoice status"
   task orders: :environment do
     ToconlineEnv.load!

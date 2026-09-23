@@ -69,6 +69,48 @@ module Toconline
       response
     end
 
+    # Forces a refresh so a cached access token cannot hide a dead refresh token.
+    def healthy?
+      probe!
+      true
+    rescue StandardError
+      false
+    end
+
+    def probe!
+      Rails.cache.delete(TOKEN_CACHE_KEY)
+      access_token
+    end
+
+    def authorize_url
+      params = {
+        client_id: @client_id,
+        redirect_uri: @redirect_uri,
+        response_type: "code",
+        scope: "commercial"
+      }
+      "#{@oauth_url}/auth?#{URI.encode_www_form(params)}"
+    end
+
+    # Non-interactive re-auth used by the daily health job. Relies on TOC
+    # auto-approving this OAuth client (same flow as curl + toconline:auth).
+    def reauthorize!
+      TokenStore.with_refresh_lock do
+        uri = URI(authorize_url)
+        response = http_request(:get, uri, headers: { "Accept" => "*/*" })
+        location = response["location"].to_s
+        if location.blank?
+          raise ApiError,
+                "TOConline authorize did not redirect (#{response.code}): re-auth needs a browser"
+        end
+
+        code = extract_oauth_code(location)
+        raise ApiError, "TOConline authorize redirect missing code: #{location}" if code.blank?
+
+        exchange_authorization_code(code)
+      end
+    end
+
     def create_sales_document!(attributes)
       api_request(
         :post,
@@ -238,6 +280,13 @@ module Toconline
       Rails.cache.write(REFRESH_CACHE_KEY, refresh)
     end
 
+
+    def extract_oauth_code(location)
+      query = URI(location).query.to_s
+      URI.decode_www_form(query).to_h["code"].presence
+    rescue URI::InvalidURIError
+      nil
+    end
 
     def parse_json(raw)
       return {} if raw.blank?

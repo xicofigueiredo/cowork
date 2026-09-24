@@ -5,6 +5,7 @@ class BookingsController < ApplicationController
 
   def index
     @bookings = current_user.bookings.includes(:seat).upcoming.order(:date, :starts_on, :starts_at)
+    @next_desk_booking = @bookings.find(&:desk_booking?)
     @past_bookings = current_user.bookings.includes(:seat)
       .where(
         "(booking_type = 'daily' AND date < ?) OR " \

@@ -33,6 +33,25 @@ class OrderMailer < ApplicationMailer
     )
   end
 
+  def toconline_health(result)
+    @result = result
+    @log = result.log
+    @status = result.status
+    @error = result.error
+    @issued_order_ids = result.issued_order_ids || []
+
+    subject = case result.status.to_sym
+    when :ok then "TOConline health OK"
+    when :reauthed then "TOConline health: reauthorized"
+    else "[Action required] TOConline health FAILED"
+    end
+
+    mail(
+      to: Toconline::ConnectionMonitor::HEALTH_EMAIL,
+      subject: subject
+    )
+  end
+
   def space_guide(order)
     @order = order
     @user = order.user

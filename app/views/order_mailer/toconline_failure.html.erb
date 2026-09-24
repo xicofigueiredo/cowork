@@ -12,17 +12,16 @@
   <code><%= @error_message %></code>
 </p>
 
-<p>
-  Fix auth if needed, then re-issue on the server:
-</p>
-<pre>
-docker compose exec -e ORDER_ID=<%= @order.id %> server ./bin/rails toconline:invoice
-</pre>
+<p>Fix on the server (in <code>~/cowork</code>):</p>
+<pre style="white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 13px;"># Preferred: probe + auto-reauth + backfill missing invoices, emails the log
+docker compose exec -u rails server ./bin/rails toconline:health
 
-<p>
-  If the error is <code>unauthorized_client</code>, re-authorize first:
-</p>
-<pre>
-docker compose exec server ./bin/rails toconline:authorize_url
-docker compose exec -e CODE='...' server ./bin/rails toconline:auth
-</pre>
+# Status only
+docker compose exec -u rails server ./bin/rails toconline:status
+
+# If unauthorized_client and auto-reauth failed:
+docker compose exec -u rails server ./bin/rails toconline:authorize_url
+docker compose exec -u rails -e CODE='...' server ./bin/rails toconline:auth
+
+# Invoice all paid orders still missing a fatura
+docker compose exec -u rails server ./bin/rails toconline:backfill</pre>

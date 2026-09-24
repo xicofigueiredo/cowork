@@ -35,6 +35,16 @@
       </section>
     <% end %>
 
+    <% if @next_desk_booking %>
+      <section class="booking-section">
+        <h2 class="booking-section-title">Next visit</h2>
+        <p class="booking-list-meta booking-next-visit-meta">
+          <%= @next_desk_booking.seat.label %> · <%= @next_desk_booking.period_label %>
+        </p>
+        <%= render "shared/floor_plan_display", seat: @next_desk_booking.seat %>
+      </section>
+    <% end %>
+
     <section class="booking-section">
       <h2 class="booking-section-title">Upcoming</h2>
 

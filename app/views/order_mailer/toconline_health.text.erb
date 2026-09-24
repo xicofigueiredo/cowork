@@ -1,0 +1,29 @@
+TOConline daily connection check
+
+Status: <%= @status %>
+<% if @error.present? %>
+Error: <%= @error %>
+<% end %>
+<% if @issued_order_ids.any? %>
+Invoices issued for orders: <%= @issued_order_ids.join(", ") %>
+<% end %>
+
+Log:
+<%= @log %>
+
+---
+Manual commands (on the server, in ~/cowork):
+
+# Re-run the full health check (probe + auto-reauth + email this log again)
+docker compose exec -u rails server ./bin/rails toconline:health
+
+# Status only (no email, no reauth)
+docker compose exec -u rails server ./bin/rails toconline:status
+
+# If unauthorized_client and auto-reauth failed:
+docker compose exec -u rails server ./bin/rails toconline:authorize_url
+docker compose exec -u rails -e CODE='...' server ./bin/rails toconline:auth
+
+# Invoice a specific order / all missing paid invoices
+docker compose exec -u rails -e ORDER_ID=ID server ./bin/rails toconline:invoice
+docker compose exec -u rails server ./bin/rails toconline:backfill

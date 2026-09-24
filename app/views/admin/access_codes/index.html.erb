@@ -50,8 +50,16 @@
                         class: "booking-btn booking-btn--primary booking-btn--small",
                         disabled: !@ttlock_configured %>
                 <% end %>
-                <% if access_code.active? %>
-                  <%= button_to "Revoke", admin_access_code_path(access_code), method: :delete, class: "booking-btn booking-btn--secondary booking-btn--small", data: { turbo_confirm: "Revoke this door code on the lock?" } %>
+                <% if access_code.active? || access_code.failed? %>
+                  <%= button_to "Delete",
+                        admin_access_code_path(access_code),
+                        method: :delete,
+                        class: "booking-btn booking-btn--secondary booking-btn--small",
+                        data: {
+                          turbo_confirm: access_code.synced_to_lock? ?
+                            "Delete door code #{access_code.code} from the lock?" :
+                            "Delete this door code record?"
+                        } %>
                 <% end %>
               </div>
             </li>

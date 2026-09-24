@@ -43,6 +43,7 @@ Rails.application.routes.draw do
     resources :users, only: [] do
       member do
         post :issue_access_code
+        delete :access_code, action: :destroy_access_code
       end
     end
   end

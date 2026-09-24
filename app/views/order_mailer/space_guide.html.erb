@@ -11,11 +11,19 @@
   <%= link_to "View on Google Maps", "https://maps.app.goo.gl/zp8jWX9CJJjjR9ye7" %>
 </p>
 
+<% if @booking&.seat.present? %>
+  <h3 style="margin: 24px 0 8px; font-size: 16px;">Your <%= @booking.seat.meeting_room? ? "room" : "desk" %></h3>
+  <p style="margin: 0 0 12px;">
+    <strong><%= @booking.seat.label %></strong><br>
+    <%= @booking.period_label %>
+  </p>
+<% end %>
+
 <h3 style="margin: 24px 0 8px; font-size: 16px;">Access</h3>
 <ul style="margin: 0 0 12px; padding-left: 18px; line-height: 1.6;">
   <li>Space hours: <strong>08:00–20:00</strong></li>
   <% if @access_code&.synced_to_lock? %>
-    <li>The door code is: <strong style="letter-spacing: 0.08em;"><%= @access_code.code %></strong></li>
+    <li>The door code is: <strong style="letter-spacing: 0.08em;"><%= @access_code.code %> - (Also available in your account on the my bookings page)</strong></li>
   <% else %>
     <li>Your door code will be available in your account on the my bookings page</li>
   <% end %>

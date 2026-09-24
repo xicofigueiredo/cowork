@@ -7,6 +7,12 @@ Rua Brito e Cunha, 27, R/C
 4450-085 Matosinhos
 Map: https://maps.app.goo.gl/zp8jWX9CJJjjR9ye7
 
+<% if @booking&.seat.present? %>
+YOUR <%= @booking.seat.meeting_room? ? "ROOM" : "DESK" %>
+<%= @booking.seat.label %>
+<%= @booking.period_label %>
+
+<% end %>
 ACCESS
 - Space hours: 08:00–20:00
 <% if @access_code&.synced_to_lock? %>

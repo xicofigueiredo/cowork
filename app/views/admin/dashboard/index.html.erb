@@ -99,6 +99,11 @@
               <div class="booking-list-actions">
                 <% if door_code %>
                   <span class="booking-badge booking-badge--active">Has code</span>
+                  <%= button_to "Delete code",
+                        access_code_admin_user_path(user),
+                        method: :delete,
+                        class: "booking-btn booking-btn--secondary booking-btn--small",
+                        data: { turbo_confirm: "Delete door code #{door_code.code} for #{user.email}? It will be removed from the lock." } %>
                 <% elsif user.needs_door_code? %>
                   <span class="booking-badge booking-badge--missing">No code</span>
                   <%= button_to "Issue",

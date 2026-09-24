@@ -21,7 +21,7 @@ module TtLock
           Rails.logger.error(
             "TTLock access code revoke failed for ##{@access_code.id}: #{e.class}: #{e.message}"
           )
-          raise if @access_code.manual?
+          raise if @access_code.manual? || @access_code.source == "member"
         end
       end
 

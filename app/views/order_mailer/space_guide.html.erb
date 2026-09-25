@@ -23,7 +23,7 @@
 <ul style="margin: 0 0 12px; padding-left: 18px; line-height: 1.6;">
   <li>Space hours: <strong>08:00–20:00</strong></li>
   <% if @access_code&.synced_to_lock? %>
-    <li>The door code is: <strong style="letter-spacing: 0.08em;"><%= @access_code.code %> - (Also available in your account on the my bookings page)</strong></li>
+    <li>The door code is: <strong style="letter-spacing: 0.08em;">*<%= @access_code.code %># - (Also available in your account on the my bookings page)</strong></li>
   <% else %>
     <li>Your door code will be available in your account on the my bookings page</li>
   <% end %>

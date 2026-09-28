@@ -25,7 +25,7 @@
           <li class="booking-list-item booking-door-code-card">
             <div>
               <p class="booking-door-code-label">Door code</p>
-              <p class="booking-door-code-value"><%= @door_code.code %></p>
+              <p class="booking-door-code-value">*<%= @door_code.code %>#</p>
               <% unless @door_code.permanent? %>
                 <span class="booking-list-meta"><%= @door_code.validity_label %></span>
               <% end %>

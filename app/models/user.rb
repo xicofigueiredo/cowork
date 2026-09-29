@@ -4,6 +4,13 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable, :confirmable
 
+  REFERRAL_SOURCES = {
+    "google_search" => "Google search",
+    "social_media" => "Social media",
+    "coworking_marketplaces" => "Coworking marketplaces",
+    "a_friend" => "A friend"
+  }.freeze
+
   has_many :orders, dependent: :destroy
   has_many :bookings, dependent: :destroy
   has_many :credit_packs, dependent: :destroy
@@ -11,6 +18,7 @@ class User < ApplicationRecord
   has_one :access_code, -> { where(status: "active") }, class_name: "AccessCode"
 
   validates :first_name, :last_name, presence: true
+  validates :referral_source, presence: true, inclusion: { in: REFERRAL_SOURCES.keys }, on: :create
 
   def admin?
     emails = ENV.fetch("ADMIN_EMAILS", "").split(",").map { |e| e.strip.downcase }.reject(&:blank?)

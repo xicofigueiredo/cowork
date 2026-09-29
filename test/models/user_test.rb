@@ -8,7 +8,8 @@ class UserTest < ActiveSupport::TestCase
         last_name: "Lovelace",
         email: "ada-new@example.com",
         password: "password123",
-        password_confirmation: "password123"
+        password_confirmation: "password123",
+        referral_source: "google_search"
       )
     end
   end
@@ -19,7 +20,8 @@ class UserTest < ActiveSupport::TestCase
       last_name: "Lovelace",
       email: "ada-confirm@example.com",
       password: "password123",
-      password_confirmation: "password123"
+      password_confirmation: "password123",
+      referral_source: "a_friend"
     )
 
     assert_emails 1 do
@@ -33,9 +35,23 @@ class UserTest < ActiveSupport::TestCase
       last_name: "Lovelace",
       email: "ada-code@example.com",
       password: "password123",
-      password_confirmation: "password123"
+      password_confirmation: "password123",
+      referral_source: "social_media"
     )
 
     assert_match(/\A\d{6}\z/, user.confirmation_token)
+  end
+
+  test "requires referral source on create" do
+    user = User.new(
+      first_name: "Ada",
+      last_name: "Lovelace",
+      email: "ada-referral@example.com",
+      password: "password123",
+      password_confirmation: "password123"
+    )
+
+    assert_not user.valid?
+    assert_includes user.errors[:referral_source], "can't be blank"
   end
 end

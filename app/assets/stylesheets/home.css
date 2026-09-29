@@ -220,7 +220,7 @@ body:has(.landing) main {
     padding-bottom: calc(var(--mobile-footbar-height) + env(safe-area-inset-bottom, 0px));
   }
 
-  .landing-footer a.landing-footer-book {
+  .landing-footer {
     display: none;
   }
 }

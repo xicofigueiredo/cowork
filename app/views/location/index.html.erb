@@ -65,14 +65,44 @@
     <div class="location-map-embed">
       <iframe
         data-requires-consent
-        data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6000!2d-8.691271823268368!3d41.18253087132666!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd246f3a12497d49%3A0xdd9697361659ca3c!2sR.%20Brito%20e%20Cunha%2027%2C%204450-081%20Matosinhos!5e0!3m2!1spt-PT!2spt!4v1779300766318!5m2!1spt-PT!2spt"
-        title="Mezzanine coworking space in Matosinhos, near Porto"
+        data-src="https://www.google.com/maps/d/embed?mid=1w1SP8dh96q223Ud9r_cLiOJv9dx37pM&ehbc=2E312F"
+        title="Mezzanine coworking space and nearby landmarks in Matosinhos, near Porto"
         allowfullscreen=""
         loading="lazy"
         referrerpolicy="no-referrer-when-downgrade"
         hidden></iframe>
     </div>
-    <div class="location-map-side" aria-hidden="true"></div>
+    <aside class="location-map-side" aria-label="Map legend">
+      <div class="location-map-legend-intro">
+        <h2 class="location-map-legend-title">How to get here</h2>
+        <p class="location-map-legend-copy">A short walk from metro and affordable parking.</p>
+      </div>
+      <ul class="location-map-legend">
+        <li class="location-map-legend-item">
+          <%= image_tag "pricing/logo-options.png", alt: "", class: "location-map-legend-icon location-map-legend-icon--logo", aria: { hidden: true } %>
+          <span class="location-map-legend-label">
+            <strong>Mezzanine</strong>
+            <span>where you're going</span>
+          </span>
+        </li>
+        <li class="location-map-legend-item">
+          <span class="location-map-legend-icon location-map-legend-icon--metro" aria-hidden="true">M</span>
+          <span class="location-map-legend-label">
+            <strong>Metro Station</strong>
+            <span>Matosinhos Sul</span>
+            <span class="location-map-legend-meta">3 min walk</span>
+          </span>
+        </li>
+        <li class="location-map-legend-item">
+          <span class="location-map-legend-icon location-map-legend-icon--parking" aria-hidden="true">P</span>
+          <span class="location-map-legend-label">
+            <strong>Public Parking</strong>
+            <span>€1 / day</span>
+            <span class="location-map-legend-meta">9 min walk</span>
+          </span>
+        </li>
+      </ul>
+    </aside>
   </section>
 
 </main>

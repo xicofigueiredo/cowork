@@ -2,7 +2,8 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable, :confirmable
+         :recoverable, :rememberable, :validatable, :confirmable,
+         :omniauthable, omniauth_providers: [ :google_oauth2 ]
 
   REFERRAL_SOURCES = {
     "google_search" => "Google search",
@@ -19,6 +20,37 @@ class User < ApplicationRecord
 
   validates :first_name, :last_name, presence: true
   validates :referral_source, presence: true, inclusion: { in: REFERRAL_SOURCES.keys }, on: :create
+
+  def self.google_oauth_configured?
+    ENV["GOOGLE_CLIENT_ID"].present? && ENV["GOOGLE_CLIENT_SECRET"].present?
+  end
+
+  def self.from_omniauth(auth)
+    return nil unless auth&.provider.present? && auth.uid.present?
+
+    user = find_by(provider: auth.provider, uid: auth.uid)
+    return user if user
+
+    email = auth.info.email.to_s.strip.downcase
+    return nil if email.blank?
+
+    user = find_by(email: email)
+    if user
+      user.provider = auth.provider
+      user.uid = auth.uid
+      user.skip_confirmation! unless user.confirmed?
+      user.save!
+      return user
+    end
+
+    nil
+  end
+
+  def password_required?
+    return false if provider.present?
+
+    super
+  end
 
   def admin?
     emails = ENV.fetch("ADMIN_EMAILS", "").split(",").map { |e| e.strip.downcase }.reject(&:blank?)

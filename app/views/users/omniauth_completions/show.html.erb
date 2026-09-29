@@ -1,0 +1,36 @@
+<% content_for :title, "Finish signing up - Mezzanine" %>
+
+<%= render layout: "devise/shared/auth_card", locals: { title: "Finish signing up" } do %>
+  <p class="auth-lead">Signed in with Google as <strong><%= @auth["email"] %></strong>. One quick question before we continue.</p>
+
+  <%= form_with model: @user, url: users_omniauth_complete_path, method: :post, class: "auth-form", local: true do |f| %>
+    <%= render "devise/shared/error_messages", resource: @user %>
+
+    <% if @user.first_name.blank? || @user.last_name.blank? %>
+      <div class="auth-field">
+        <%= f.label :first_name, "First name" %>
+        <%= f.text_field :first_name, autocomplete: "given-name", required: true %>
+      </div>
+
+      <div class="auth-field">
+        <%= f.label :last_name, "Last name" %>
+        <%= f.text_field :last_name, autocomplete: "family-name", required: true %>
+      </div>
+    <% else %>
+      <%= f.hidden_field :first_name %>
+      <%= f.hidden_field :last_name %>
+    <% end %>
+
+    <div class="auth-field">
+      <%= f.label :referral_source, "How did you hear about us?" %>
+      <%= f.select :referral_source,
+            User::REFERRAL_SOURCES.map { |value, label| [label, value] },
+            { include_blank: "Select an option" },
+            required: true %>
+    </div>
+
+    <div class="auth-actions">
+      <%= f.submit "Complete sign up", class: "auth-button" %>
+    </div>
+  <% end %>
+<% end %>

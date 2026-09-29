@@ -2,12 +2,15 @@ Rails.application.routes.draw do
   devise_for :users, controllers: {
     registrations: "users/registrations",
     confirmations: "users/confirmations",
-    sessions: "users/sessions"
+    sessions: "users/sessions",
+    omniauth_callbacks: "users/omniauth_callbacks"
   }
 
   devise_scope :user do
     get "users/confirm-code", to: "users/confirmations#confirm_code_form", as: :user_confirm_code
     post "users/confirmation/verify", to: "users/confirmations#confirm_code", as: :user_confirmation_verify
+    get "users/auth/google_oauth2/complete", to: "users/omniauth_completions#show", as: :users_omniauth_complete
+    post "users/auth/google_oauth2/complete", to: "users/omniauth_completions#create"
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

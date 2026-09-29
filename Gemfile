@@ -18,6 +18,8 @@ gem "stimulus-rails"
 gem "jbuilder"
 
 gem "devise"
+gem "omniauth-google-oauth2"
+gem "omniauth-rails_csrf_protection"
 gem "stripe", "~> 19.6"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

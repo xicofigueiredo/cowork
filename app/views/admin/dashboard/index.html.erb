@@ -89,6 +89,9 @@
                 <span class="booking-list-meta">
                   <%= mail_to user.email %>
                   · Joined <%= user.created_at.strftime("%-d %b %Y, %H:%M") %>
+                  <% if user.referral_source.present? %>
+                    · Heard from: <%= User::REFERRAL_SOURCES[user.referral_source] || user.referral_source %>
+                  <% end %>
                 </span>
                 <% if door_code %>
                   <span class="booking-list-meta booking-door-code">

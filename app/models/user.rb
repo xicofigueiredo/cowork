@@ -47,7 +47,7 @@ class User < ApplicationRecord
   end
 
   def password_required?
-    return false if provider.present?
+    return false if has_attribute?(:provider) && provider.present?
 
     super
   end

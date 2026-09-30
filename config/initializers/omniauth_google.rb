@@ -11,3 +11,9 @@ if ENV["GOOGLE_CLIENT_ID"].present? && ENV["GOOGLE_CLIENT_SECRET"].present?
       }
   end
 end
+
+# Behind Cloudflare / SSL proxy, request.base_url can be http://. Force https
+# callback URLs in production so they match Google Cloud Console.
+if Rails.env.production?
+  OmniAuth.config.full_host = "https://#{ENV.fetch("APP_HOST", "mezzaninecowork.com")}"
+end

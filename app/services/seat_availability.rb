@@ -38,17 +38,19 @@ class SeatAvailability
     end
   end
 
-  # desk code => { name:, booking_type: } for bookings covering the given date
+  # desk code => { name:, booking_type:, door_code: } for bookings covering the given date
   def self.desk_occupancy_for(date)
     return {} if date.blank?
 
-    bookings = Booking.desk_covering(date).includes(:user, :seat)
+    bookings = Booking.desk_covering(date).includes(:seat, user: :access_code)
     bookings.each_with_object({}) do |booking, occupancy|
       user = booking.user
       name = [ user.first_name, user.last_name ].compact_blank.join(" ").presence || user.email
+      door_code = user.access_code&.synced_to_lock? ? user.access_code.code : nil
       occupancy[booking.seat.code] = {
         name: name,
-        booking_type: booking.booking_type
+        booking_type: booking.booking_type,
+        door_code: door_code
       }
     end
   end

@@ -63,7 +63,7 @@ module Admin
     def destroy
       code = @access_code.code
       TtLock::AccessCodeRevoker.call(@access_code)
-      redirect_to admin_access_codes_path, notice: "Door code #{code} deleted."
+      redirect_to admin_access_codes_path, notice: "Door code #{code} deleted from the lock and database."
     rescue TtLock::Error => e
       redirect_to admin_access_codes_path, alert: "Could not delete door code on the lock: #{e.message}"
     end

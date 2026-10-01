@@ -1,7 +1,7 @@
 <%#
   locals:
     date: Date
-    occupancy: hash of desk code => { name:, booking_type: }
+    occupancy: hash of desk code => { name:, booking_type:, door_code: }
     desk_count: total desk count
 %>
 <div class="booking-floorplan admin-floorplan"
@@ -63,7 +63,8 @@ function initializeAdminFloorPlan() {
       }
 
       const typeLabel = entry.booking_type === 'monthly' ? 'Monthly' : 'Daily';
-      tooltip.textContent = `${entry.name} · Desk ${desk} · ${typeLabel}`;
+      const codePart = entry.door_code ? ` · Code ${entry.door_code}` : '';
+      tooltip.textContent = `${entry.name} · Desk ${desk} · ${typeLabel}${codePart}`;
       tooltip.hidden = false;
 
       const rootRect = root.getBoundingClientRect();
@@ -79,7 +80,8 @@ function initializeAdminFloorPlan() {
 
       if (entry) {
         seat.classList.add('booked');
-        seat.setAttribute('aria-label', `Desk ${desk}: ${entry.name}`);
+        const codeLabel = entry.door_code ? `, code ${entry.door_code}` : '';
+        seat.setAttribute('aria-label', `Desk ${desk}: ${entry.name}${codeLabel}`);
       } else {
         seat.classList.add('free');
         seat.setAttribute('aria-label', `Desk ${desk}: free`);

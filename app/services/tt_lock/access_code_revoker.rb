@@ -12,9 +12,8 @@ module TtLock
 
     def call
       return nil unless @access_code
-      return @access_code if @access_code.revoked?
 
-      if @access_code.ttlock_keyboard_pwd_id.present? && Client.configured?
+      if !@access_code.revoked? && @access_code.ttlock_keyboard_pwd_id.present? && Client.configured?
         begin
           Client.new.delete_passcode!(@access_code.ttlock_keyboard_pwd_id)
         rescue Error => e
@@ -25,8 +24,8 @@ module TtLock
         end
       end
 
-      @access_code.update!(status: "revoked")
-      @access_code
+      @access_code.destroy!
+      nil
     end
   end
 end

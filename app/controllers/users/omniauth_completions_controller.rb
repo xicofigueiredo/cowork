@@ -12,7 +12,7 @@ class Users::OmniauthCompletionsController < ApplicationController
 
   def create
     @auth = pending_omniauth
-    attrs = params.fetch(:user, {}).permit(:first_name, :last_name, :referral_source)
+    attrs = params.fetch(:user, {}).permit(:first_name, :last_name, :referral_source, :referral_source_other)
 
     user = User.new(
       provider: @auth["provider"],
@@ -21,6 +21,7 @@ class Users::OmniauthCompletionsController < ApplicationController
       first_name: attrs[:first_name].presence || @auth["first_name"],
       last_name: attrs[:last_name].presence || @auth["last_name"],
       referral_source: attrs[:referral_source],
+      referral_source_other: attrs[:referral_source_other],
       password: Devise.friendly_token[0, 20]
     )
     user.skip_confirmation!

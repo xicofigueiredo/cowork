@@ -9,7 +9,8 @@ class User < ApplicationRecord
     "google_search" => "Google search",
     "social_media" => "Social media",
     "coworking_marketplaces" => "Coworking marketplaces",
-    "a_friend" => "A friend"
+    "a_friend" => "A friend",
+    "other" => "Other"
   }.freeze
 
   has_many :orders, dependent: :destroy
@@ -20,6 +21,20 @@ class User < ApplicationRecord
 
   validates :first_name, :last_name, presence: true
   validates :referral_source, presence: true, inclusion: { in: REFERRAL_SOURCES.keys }, on: :create
+  validates :referral_source_other, presence: true, length: { maximum: 200 }, if: :referral_other?
+
+  def referral_other?
+    referral_source == "other"
+  end
+
+  def referral_source_label
+    return nil if referral_source.blank?
+
+    label = REFERRAL_SOURCES[referral_source] || referral_source
+    return "#{label}: #{referral_source_other}" if referral_other? && referral_source_other.present?
+
+    label
+  end
 
   def self.google_oauth_configured?
     ENV["GOOGLE_CLIENT_ID"].present? && ENV["GOOGLE_CLIENT_SECRET"].present?

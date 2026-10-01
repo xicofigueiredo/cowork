@@ -106,4 +106,34 @@ class UserTest < ActiveSupport::TestCase
 
     assert user.valid?
   end
+
+  test "requires referral source other when other is selected" do
+    user = User.new(
+      first_name: "Ada",
+      last_name: "Lovelace",
+      email: "ada-other@example.com",
+      password: "password123",
+      password_confirmation: "password123",
+      referral_source: "other"
+    )
+
+    assert_not user.valid?
+    assert_includes user.errors[:referral_source_other], "can't be blank"
+  end
+
+  test "accepts referral source other details" do
+    user = User.new(
+      first_name: "Ada",
+      last_name: "Lovelace",
+      email: "ada-other-ok@example.com",
+      password: "password123",
+      password_confirmation: "password123",
+      referral_source: "other",
+      referral_source_other: "Podcast interview"
+    )
+    user.skip_confirmation!
+
+    assert user.valid?
+    assert_equal "Other: Podcast interview", user.referral_source_label
+  end
 end

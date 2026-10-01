@@ -131,6 +131,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_173800) do
     t.string "last_name"
     t.string "provider"
     t.string "referral_source"
+    t.string "referral_source_other"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"

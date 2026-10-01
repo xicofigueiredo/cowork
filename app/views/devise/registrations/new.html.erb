@@ -34,13 +34,7 @@
       <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true %>
     </div>
 
-    <div class="auth-field">
-      <%= f.label :referral_source, "How did you hear about us?" %>
-      <%= f.select :referral_source,
-            User::REFERRAL_SOURCES.map { |value, label| [label, value] },
-            { include_blank: "Select an option" },
-            required: true %>
-    </div>
+    <%= render "devise/shared/referral_source_fields", f: f %>
 
     <div class="auth-actions">
       <%= f.submit "Sign up", class: "auth-button" %>

@@ -1,0 +1,22 @@
+<div data-controller="referral-source">
+  <div class="auth-field">
+    <%= f.label :referral_source, "How did you hear about us?" %>
+    <%= f.select :referral_source,
+          User::REFERRAL_SOURCES.map { |value, label| [label, value] },
+          { include_blank: "Select an option" },
+          required: true,
+          data: { referral_source_target: "select", action: "change->referral-source#toggleOther" } %>
+  </div>
+
+  <div class="auth-field"
+       data-referral-source-target="otherField"
+       <%= "hidden" unless f.object.referral_other? %>>
+    <%= f.label :referral_source_other, "Please tell us more" %>
+    <%= f.text_field :referral_source_other,
+          maxlength: 200,
+          autocomplete: "off",
+          placeholder: "Where did you hear about us?",
+          data: { referral_source_target: "otherInput" },
+          required: f.object.referral_other? %>
+  </div>
+</div>

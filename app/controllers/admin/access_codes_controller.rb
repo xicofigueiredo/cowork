@@ -1,6 +1,6 @@
 module Admin
   class AccessCodesController < BaseController
-    before_action :set_access_code, only: [ :destroy ]
+    before_action :set_access_code, only: [ :destroy, :reissue ]
 
     def index
       @access_codes = AccessCode.includes(:user, :booking).recent_first.limit(100)
@@ -58,6 +58,24 @@ module Admin
       redirect_to new_admin_access_code_path, alert: "Invalid date or time."
     rescue TtLock::Error => e
       redirect_to new_admin_access_code_path, alert: "Could not add code to the lock: #{e.message}"
+    end
+
+    def reissue
+      unless TtLock::Client.configured?
+        redirect_to admin_access_codes_path, alert: "TTLock is not configured. Set TTLOCK_* env vars first."
+        return
+      end
+
+      if @access_code.synced_to_lock?
+        redirect_to admin_access_codes_path, notice: "Door code #{@access_code.code} is already on the lock."
+        return
+      end
+
+      access_code = TtLock::AccessCodeIssuer.reissue!(@access_code)
+      redirect_to admin_access_codes_path,
+        notice: "Door code #{access_code.code} re-issued to the lock."
+    rescue TtLock::Error => e
+      redirect_to admin_access_codes_path, alert: "Could not re-issue door code: #{e.message}"
     end
 
     def destroy

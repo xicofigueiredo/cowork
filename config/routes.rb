@@ -42,7 +42,11 @@ Rails.application.routes.draw do
 
   namespace :admin do
     root to: "dashboard#index"
-    resources :access_codes, only: [ :index, :new, :create, :destroy ]
+    resources :access_codes, only: [ :index, :new, :create, :destroy ] do
+      member do
+        post :reissue
+      end
+    end
     resources :users, only: [] do
       member do
         post :issue_access_code

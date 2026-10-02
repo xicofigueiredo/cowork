@@ -37,10 +37,52 @@ module TtLock
       issue_for_user!(user)
     end
 
+    # Push an existing code to the lock and mark that same record as synced.
+    def self.reissue!(access_code)
+      raise ArgumentError, "access_code is required" unless access_code
+      return access_code if access_code.synced_to_lock?
+
+      unless Client.configured?
+        raise ConfigurationError, "TTLock is not configured"
+      end
+
+      clear_other_active_codes!(access_code)
+
+      permanent = access_code.permanent?
+      begin
+        keyboard_pwd_id = Client.new.add_passcode!(
+          keyboard_pwd: access_code.code,
+          start_date: permanent ? nil : access_code.valid_from,
+          end_date: permanent ? nil : access_code.valid_to,
+          permanent: permanent,
+          name: access_code.name
+        )
+        access_code.update!(
+          status: "active",
+          ttlock_keyboard_pwd_id: keyboard_pwd_id.to_s
+        )
+        access_code.user&.association(:access_code)&.reload
+        access_code
+      rescue Error, ActiveRecord::RecordInvalid => e
+        Rails.logger.error("TTLock access code reissue failed: #{e.class}: #{e.message}")
+        access_code.update_columns(status: "failed", ttlock_keyboard_pwd_id: nil, updated_at: Time.current)
+        raise
+      end
+    end
+
     def self.user_name(user)
       label = [ user.first_name, user.last_name ].compact.join(" ").presence || user.email
       "Member — #{label}"
     end
+
+    def self.clear_other_active_codes!(access_code)
+      return unless access_code.user_id
+
+      AccessCode.active.where(user_id: access_code.user_id).where.not(id: access_code.id).find_each do |other|
+        AccessCodeRevoker.call(other)
+      end
+    end
+    private_class_method :clear_other_active_codes!
 
     def initialize(name:, source:, valid_from: nil, valid_to: nil, permanent: false, booking: nil, user: nil, code: nil)
       @booking = booking

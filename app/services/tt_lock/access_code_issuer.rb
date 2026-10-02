@@ -38,9 +38,10 @@ module TtLock
     end
 
     # Push an existing code to the lock and mark that same record as synced.
+    # Fallback codes get a fresh personal code when the gateway is back online.
     def self.reissue!(access_code)
       raise ArgumentError, "access_code is required" unless access_code
-      return access_code if access_code.synced_to_lock?
+      return access_code if access_code.synced_to_lock? && !access_code.fallback?
 
       unless Client.configured?
         raise ConfigurationError, "TTLock is not configured"
@@ -48,21 +49,30 @@ module TtLock
 
       clear_other_active_codes!(access_code)
 
+      code_to_push = if access_code.fallback?
+        new(name: access_code.name, source: access_code.source).send(:generate_code)
+      else
+        access_code.code
+      end
       permanent = access_code.permanent?
+
       begin
         keyboard_pwd_id = Client.new.add_passcode!(
-          keyboard_pwd: access_code.code,
+          keyboard_pwd: code_to_push,
           start_date: permanent ? nil : access_code.valid_from,
           end_date: permanent ? nil : access_code.valid_to,
           permanent: permanent,
           name: access_code.name
         )
         access_code.update!(
+          code: code_to_push,
           status: "active",
           ttlock_keyboard_pwd_id: keyboard_pwd_id.to_s
         )
         access_code.user&.association(:access_code)&.reload
         access_code
+      rescue GatewayOfflineError
+        apply_fallback!(access_code)
       rescue Error, ActiveRecord::RecordInvalid => e
         Rails.logger.error("TTLock access code reissue failed: #{e.class}: #{e.message}")
         access_code.update_columns(status: "failed", ttlock_keyboard_pwd_id: nil, updated_at: Time.current)
@@ -73,6 +83,26 @@ module TtLock
     def self.user_name(user)
       label = [ user.first_name, user.last_name ].compact.join(" ").presence || user.email
       "Member — #{label}"
+    end
+
+    # Store FALLBACK_CODE in the DB so email + My Bookings can show it.
+    # The code itself is already programmed on the lock via the TTLock app.
+    def self.apply_fallback!(access_code)
+      code = Client.fallback_code
+      raise ApiError, "TTLock gateway is offline and FALLBACK_CODE is not set" if code.blank?
+
+      Rails.logger.warn(
+        "TTLock gateway offline; storing FALLBACK_CODE for access_code ##{access_code.id || "new"} (#{access_code.name})"
+      )
+
+      access_code.assign_attributes(
+        code: code,
+        ttlock_keyboard_pwd_id: Client::FALLBACK_TTLOCK_ID,
+        status: "active"
+      )
+      access_code.save!
+      access_code.user&.association(:access_code)&.reload
+      access_code
     end
 
     def self.clear_other_active_codes!(access_code)
@@ -128,6 +158,8 @@ module TtLock
         access_code.save!
         @user&.association(:access_code)&.reload
         access_code
+      rescue GatewayOfflineError
+        self.class.apply_fallback!(access_code)
       rescue Error, ActiveRecord::RecordInvalid => e
         Rails.logger.error("TTLock access code issue failed: #{e.class}: #{e.message}")
         access_code.status = "failed"

@@ -34,9 +34,13 @@ class AccessCode < ApplicationRecord
     status == "failed"
   end
 
-  # Only true when the code was accepted by TTLock (written via gateway).
+  # True when accepted by TTLock, or stored as the offline FALLBACK_CODE.
   def synced_to_lock?
     active? && ttlock_keyboard_pwd_id.present?
+  end
+
+  def fallback?
+    ttlock_keyboard_pwd_id.to_s == TtLock::Client::FALLBACK_TTLOCK_ID
   end
 
   def permanent?

@@ -57,6 +57,11 @@ class OrderMailer < ApplicationMailer
     @user = order.user
     @booking = order.booking
     @access_code = @order.user&.access_code
+    @door_code = if @access_code&.synced_to_lock?
+      @access_code.code
+    else
+      TtLock::Client.fallback_code
+    end
 
     attachments.inline["house_rules1.png"] = File.read(
       Rails.root.join("app/assets/images/house_rules1.png")

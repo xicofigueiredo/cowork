@@ -76,4 +76,38 @@ class TtLockAccessCodeIssuerTest < ActiveSupport::TestCase
       ENV.delete("ADMIN_EMAILS")
     end
   end
+
+  test "stores FALLBACK_CODE when gateway is offline" do
+    previous_fallback = ENV["FALLBACK_CODE"]
+    ENV["FALLBACK_CODE"] = "1904"
+
+    client = Object.new
+    def client.add_passcode!(**)
+      raise TtLock::GatewayOfflineError, "TTLock gateway is offline"
+    end
+
+    TtLock::Client.stub(:configured?, true) do
+      TtLock::Client.stub(:new, client) do
+        access_code = TtLock::AccessCodeIssuer.call(
+          user: @user,
+          name: "Member — Test",
+          permanent: true,
+          source: "member"
+        )
+
+        assert access_code.persisted?
+        assert_equal "1904", access_code.code
+        assert access_code.fallback?
+        assert access_code.synced_to_lock?
+        assert_equal "1904", @user.reload.access_code.code
+        assert_equal :synced, @user.door_code_status
+      end
+    end
+  ensure
+    if previous_fallback
+      ENV["FALLBACK_CODE"] = previous_fallback
+    else
+      ENV.delete("FALLBACK_CODE")
+    end
+  end
 end

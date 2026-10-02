@@ -9,11 +9,13 @@ module TtLock
   class Error < StandardError; end
   class ConfigurationError < Error; end
   class ApiError < Error; end
+  class GatewayOfflineError < ApiError; end
 
   class Client
     API_BASE = "https://api.sciener.com"
     TOKEN_CACHE_KEY = "tt_lock/access_token"
     REFRESH_CACHE_KEY = "tt_lock/refresh_token"
+    FALLBACK_TTLOCK_ID = "fallback"
 
     def self.configured?
       ENV["TTLOCK_CLIENT_ID"].present? &&
@@ -21,6 +23,10 @@ module TtLock
         ENV["TTLOCK_USERNAME"].present? &&
         ENV["TTLOCK_PASSWORD"].present? &&
         ENV["TTLOCK_LOCK_ID"].present?
+    end
+
+    def self.fallback_code
+      ENV["FALLBACK_CODE"].to_s.strip.presence
     end
 
     def initialize
@@ -63,6 +69,8 @@ module TtLock
     end
 
     def delete_passcode!(keyboard_pwd_id)
+      return if keyboard_pwd_id.to_s == FALLBACK_TTLOCK_ID
+
       params = {
         clientId: @client_id,
         accessToken: access_token,
@@ -92,7 +100,7 @@ module TtLock
     def ensure_gateway_online!
       return if gateway_online?
 
-      raise ApiError, "TTLock gateway is offline; refusing to issue a door code that would not reach the lock"
+      raise GatewayOfflineError, "TTLock gateway is offline"
     end
 
     def access_token

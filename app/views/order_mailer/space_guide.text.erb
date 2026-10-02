@@ -15,8 +15,8 @@ YOUR <%= @booking.seat.meeting_room? ? "ROOM" : "DESK" %>
 <% end %>
 ACCESS
 - Space hours: 08:00–20:00
-<% if @access_code&.synced_to_lock? %>
-- The door code is: <%= @access_code.code %>
+<% if @door_code.present? %>
+- The door code is: *<%= @door_code %>#
 <% else %>
 - Your door code will appear in your booking confirmation once the lock confirms it
 <% end %>

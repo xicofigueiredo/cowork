@@ -66,7 +66,7 @@ module Admin
         return
       end
 
-      if @access_code.synced_to_lock?
+      if @access_code.synced_to_lock? && !@access_code.fallback?
         redirect_to admin_access_codes_path, notice: "Door code #{@access_code.code} is already on the lock."
         return
       end

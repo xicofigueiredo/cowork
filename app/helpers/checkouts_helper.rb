@@ -18,7 +18,7 @@ module CheckoutsHelper
     when "pack_10"
       "Purchase 10 day credits, valid for 3 months."
     when "meeting_hourly"
-      "Book the meeting room for 1 hour on a weekday. Must be booked at least 24 hours in advance."
+      "Book the meeting room by the hour on a weekday, including today. Select consecutive hours — bookings over 3 hours get 20% off."
     when "meeting_daily"
       "Book the meeting room for a full weekday (8:00–20:00). Must be booked at least 24 hours in advance."
     else

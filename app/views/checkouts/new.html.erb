@@ -14,12 +14,13 @@
      (desk_checkout && !desk_day_available) ||
      (meeting_checkout && (
        (@plan_type == "meeting_daily" && !selected_calendar_day&.dig(:available)) ||
-       (@plan_type == "meeting_hourly" && !hourly_slots_available)
+       (@plan_type == "meeting_hourly" && (!hourly_slots_available || Array(@selected_slots).blank?))
      ))
    ) %>
 <% checkout_total_locals = {
      amount_cents: @order.amount_cents,
      plan_type: @order.plan_type,
+     original_amount_cents: @order.original_amount_cents,
      promocode: @promocode
    } %>
 
@@ -134,17 +135,24 @@
                 plan_type: @plan_type %>
         </div>
 
-        <div class="booking-field">
+        <div class="booking-field"
+             data-meeting-hourly-checkout
+             data-rate-cents="<%= Order.meeting_hourly_rate_cents %>"
+             data-discount-threshold="<%= Order::MEETING_HOURLY_DISCOUNT_THRESHOLD %>"
+             data-discount-rate="<%= Order::MEETING_HOURLY_DISCOUNT_RATE %>">
           <span class="booking-label">Available slots · <%= @booking_date.strftime("%-d %B %Y") %></span>
+          <p class="booking-note" data-meeting-hourly-summary>Tap consecutive slots to select. Bookings over 3 hours get 20% off.</p>
           <div class="meeting-slot-grid">
-            <% selected_value = @order.starts_at&.iso8601 %>
+            <% selected_values = Array(@selected_slots).map(&:iso8601) %>
             <% @hour_grid.each do |slot| %>
               <% if slot[:available] %>
                 <label class="meeting-slot meeting-slot--available">
-                  <%= f.radio_button :starts_at,
-                        slot[:starts_at].iso8601,
-                        checked: selected_value == slot[:starts_at].iso8601,
-                        required: hourly_slots_available %>
+                  <input type="checkbox"
+                         name="order[starts_at][]"
+                         value="<%= slot[:starts_at].iso8601 %>"
+                         data-slot-label="<%= slot[:label] %>"
+                         data-slot-ms="<%= (slot[:starts_at].to_f * 1000).to_i %>"
+                         <%= "checked" if selected_values.include?(slot[:starts_at].iso8601) %>>
                   <span class="meeting-slot-time"><%= slot[:label] %></span>
                   <span class="meeting-slot-range"><%= slot[:label] %> – <%= slot[:ends_at].strftime("%H:%M") %></span>
                 </label>
@@ -171,19 +179,25 @@
               <span>Room</span>
               <strong>Meeting room</strong>
             </p>
-            <% if @order.starts_at.present? %>
-              <p class="booking-summary-row">
-                <span>Time</span>
-                <strong><%= @order.starts_at.strftime("%H:%M") %> – <%= @order.meeting_ends_at.strftime("%H:%M") %></strong>
-              </p>
-            <% end %>
+            <p class="booking-summary-row">
+              <span>Time</span>
+              <strong data-meeting-hourly-time>—</strong>
+            </p>
             <p class="booking-summary-row">
               <span>Duration</span>
-              <strong>1 hour</strong>
+              <strong data-meeting-hourly-duration>Select slots</strong>
+            </p>
+            <p class="booking-summary-row" data-meeting-hourly-discount-row hidden>
+              <span>Discount</span>
+              <strong>20% off</strong>
             </p>
           </div>
 
-          <%= render "shared/checkout_total", **checkout_total_locals %>
+          <%= render "shared/checkout_total",
+                amount_cents: @order.amount_cents,
+                plan_type: @order.plan_type,
+                original_amount_cents: @order.original_amount_cents,
+                promocode: @promocode %>
         </div>
 
       <% else %>
@@ -256,9 +270,136 @@
       <div class="booking-actions">
         <%= f.submit "Continue to payment",
               class: "booking-btn booking-btn--primary",
+              id: "checkout-submit",
               disabled: checkout_submit_disabled %>
         <%= link_to "Back to pricing", pricing_path, class: "booking-btn booking-btn--secondary" %>
       </div>
     <% end %>
   </div>
 </main>
+
+<% if @plan_type == "meeting_hourly" %>
+<script>
+function initializeMeetingHourlyCheckout() {
+  const root = document.querySelector("[data-meeting-hourly-checkout]");
+  if (!root || root.dataset.ready === "true") return;
+  root.dataset.ready = "true";
+
+  const rateCents = parseInt(root.dataset.rateCents, 10);
+  const discountThreshold = parseInt(root.dataset.discountThreshold, 10);
+  const discountRate = parseFloat(root.dataset.discountRate);
+  const summary = root.querySelector("[data-meeting-hourly-summary]");
+  const timeEl = document.querySelector("[data-meeting-hourly-time]");
+  const durationEl = document.querySelector("[data-meeting-hourly-duration]");
+  const discountRow = document.querySelector("[data-meeting-hourly-discount-row]");
+  const submitButton = document.getElementById("checkout-submit");
+  const slotInputs = Array.from(root.querySelectorAll('input[name="order[starts_at][]"]'));
+  const priceRoot = document.querySelector(".booking-price-breakdown");
+
+  function formatEuros(cents) {
+    return (cents / 100).toFixed(2).replace(".", ",") + " €";
+  }
+
+  function ivaCents(amount) {
+    return Math.round(amount * 0.23);
+  }
+
+  function selectedSlots() {
+    return slotInputs
+      .filter((input) => input.checked)
+      .sort((a, b) => parseInt(a.dataset.slotMs, 10) - parseInt(b.dataset.slotMs, 10));
+  }
+
+  function isConsecutive(slots) {
+    if (slots.length <= 1) return true;
+    for (let i = 1; i < slots.length; i += 1) {
+      if (parseInt(slots[i].dataset.slotMs, 10) - parseInt(slots[i - 1].dataset.slotMs, 10) !== 60 * 60 * 1000) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function updatePrice(hours) {
+    if (!priceRoot) return;
+    const original = hours * rateCents;
+    const amount = hours > discountThreshold ? Math.round(original * (1 - discountRate)) : original;
+    const showOriginal = original > amount;
+    const values = priceRoot.querySelectorAll(".booking-price-row--subtotal .booking-price-values, .booking-price-row--total .booking-price-values");
+    const subtotalStrong = priceRoot.querySelector(".booking-price-row--subtotal strong");
+    const ivaStrong = priceRoot.querySelector(".booking-price-row--iva strong");
+    const totalStrong = priceRoot.querySelector(".booking-price-row--total strong:last-child");
+
+    values.forEach((container) => {
+      container.querySelectorAll(".booking-price-original").forEach((el) => el.remove());
+    });
+
+    if (subtotalStrong) {
+      if (showOriginal) {
+        const originalEl = document.createElement("span");
+        originalEl.className = "booking-price-original";
+        originalEl.textContent = formatEuros(original);
+        subtotalStrong.parentElement.insertBefore(originalEl, subtotalStrong);
+      }
+      subtotalStrong.textContent = formatEuros(amount);
+    }
+    if (ivaStrong) ivaStrong.textContent = formatEuros(ivaCents(amount));
+    if (totalStrong) {
+      if (showOriginal) {
+        const originalEl = document.createElement("span");
+        originalEl.className = "booking-price-original";
+        originalEl.textContent = formatEuros(original + ivaCents(original));
+        totalStrong.parentElement.insertBefore(originalEl, totalStrong);
+      }
+      totalStrong.textContent = formatEuros(amount + ivaCents(amount));
+    }
+  }
+
+  function updateSelection(changedInput) {
+    const selected = selectedSlots();
+    if (!isConsecutive(selected) && changedInput) {
+      changedInput.checked = false;
+      summary.textContent = "Please select consecutive hours.";
+      return updateSelection();
+    }
+
+    const count = selected.length;
+    if (count === 0) {
+      summary.textContent = "Tap consecutive slots to select. Bookings over 3 hours get 20% off.";
+      if (timeEl) timeEl.textContent = "—";
+      if (durationEl) durationEl.textContent = "Select slots";
+      if (discountRow) discountRow.hidden = true;
+      if (submitButton) submitButton.disabled = true;
+      updatePrice(1);
+      return;
+    }
+
+    const labels = selected.map((input) => input.dataset.slotLabel);
+    const startLabel = labels[0];
+    const endHour = parseInt(startLabel.split(":")[0], 10) + count;
+    const endLabel = `${String(endHour).padStart(2, "0")}:00`;
+    summary.textContent = `${count} ${count === 1 ? "hour" : "hours"} selected (${labels.join(", ")}).`;
+    if (timeEl) timeEl.textContent = `${startLabel} – ${endLabel}`;
+    if (durationEl) durationEl.textContent = `${count} ${count === 1 ? "hour" : "hours"}`;
+    if (discountRow) discountRow.hidden = count <= discountThreshold;
+    if (submitButton) submitButton.disabled = false;
+    updatePrice(count);
+  }
+
+  slotInputs.forEach((input) => {
+    input.addEventListener("change", () => updateSelection(input));
+  });
+
+  updateSelection();
+}
+
+document.addEventListener("turbo:before-cache", () => {
+  const root = document.querySelector("[data-meeting-hourly-checkout]");
+  if (root) delete root.dataset.ready;
+});
+
+document.addEventListener("DOMContentLoaded", initializeMeetingHourlyCheckout);
+document.addEventListener("turbo:load", initializeMeetingHourlyCheckout);
+</script>
+<% end %>
+

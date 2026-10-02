@@ -1,5 +1,7 @@
 class Order < ApplicationRecord
   IVA_RATE = BigDecimal("0.23")
+  MEETING_HOURLY_DISCOUNT_THRESHOLD = 3
+  MEETING_HOURLY_DISCOUNT_RATE = BigDecimal("0.20")
 
   PLAN_TYPES = {
     "daily" => { amount_cents: 1300, original_amount_cents: 1500, label: "Daily pass", credits: nil },
@@ -26,10 +28,12 @@ class Order < ApplicationRecord
   validates :plan_type, presence: true, inclusion: { in: PLAN_TYPES.keys }
   validates :amount_cents, presence: true, numericality: { greater_than: 0 }
   validates :status, presence: true, inclusion: { in: STATUSES }
+  validates :hours, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validate :vat_number_format
   validates :seat, presence: true, if: -> { requires_desk? && !promocode_credit_pack? }
   validates :booking_date, presence: true, if: -> { (plan_type == "daily" || plan_type == "meeting_daily") && !promocode_credit_pack? }
   validates :starts_at, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
+  validates :hours, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
   validate :seat_available, if: -> { pending? && requires_desk? && seat.present? && !promocode_credit_pack? }
   validate :meeting_booking_valid, if: -> { pending? && meeting_plan? && !promocode_credit_pack? }
 
@@ -47,8 +51,28 @@ class Order < ApplicationRecord
     plan_config(plan_type)[:original_amount_cents]
   end
 
+  def self.meeting_hourly_rate_cents
+    plan_config("meeting_hourly")[:amount_cents]
+  end
+
+  def self.meeting_hourly_original_amount_cents(hours)
+    hours.to_i * meeting_hourly_rate_cents
+  end
+
+  def self.meeting_hourly_amount_cents(hours)
+    hours = hours.to_i
+    base = meeting_hourly_original_amount_cents(hours)
+    return base if hours <= MEETING_HOURLY_DISCOUNT_THRESHOLD
+
+    (base * (BigDecimal("1") - MEETING_HOURLY_DISCOUNT_RATE)).round
+  end
+
   def original_amount_cents
-    self.class.original_amount_cents_for(plan_type)
+    if plan_type == "meeting_hourly" && meeting_hours > MEETING_HOURLY_DISCOUNT_THRESHOLD
+      self.class.meeting_hourly_original_amount_cents(meeting_hours)
+    else
+      self.class.original_amount_cents_for(plan_type)
+    end
   end
 
   def discounted?
@@ -127,6 +151,9 @@ class Order < ApplicationRecord
 
   def plan_label
     return "#{promocode.credits}-day pack (#{promocode.code})" if promocode_credit_pack?
+    if plan_type == "meeting_hourly" && meeting_hours > 1
+      return "#{meeting_hours}-hour meeting room"
+    end
 
     PLAN_TYPES.dig(plan_type, :label)
   end
@@ -169,8 +196,12 @@ class Order < ApplicationRecord
     format("%.2f €", cents / 100.0)
   end
 
+  def meeting_hours
+    hours.to_i.positive? ? hours.to_i : 1
+  end
+
   def meeting_ends_at
-    starts_at + 1.hour if starts_at.present?
+    starts_at + meeting_hours.hours if starts_at.present?
   end
 
   def invoice_number
@@ -256,7 +287,7 @@ class Order < ApplicationRecord
     elsif plan_type == "meeting_hourly"
       ends_at = meeting_ends_at
       unless ends_at && MeetingRoomAvailability.hourly_available?(starts_at, ends_at, except_order: self)
-        errors.add(:starts_at, "must be booked at least 24 hours in advance and be available")
+        errors.add(:starts_at, "must be available and within opening hours")
       end
     end
   end

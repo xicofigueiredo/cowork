@@ -12,6 +12,7 @@ class CheckoutsController < ApplicationController
     @order = Order.new(plan_type: @plan_type, amount_cents: Order.plan_config(@plan_type)[:amount_cents])
     apply_promocode_from_params!
     load_plan_defaults
+    load_selected_meeting_slots
     @seats = Seat.desks.ordered
     @monthly_period = current_user.next_monthly_period(months: Order.plan_config(@plan_type)[:months] || 1) if Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
     load_unavailable_desks
@@ -25,26 +26,26 @@ class CheckoutsController < ApplicationController
     end
 
     @order = current_user.orders.build(order_params)
-    @order.amount_cents = Order.plan_config(@plan_type)[:amount_cents]
     @order.status = "pending"
+
+    if @plan_type == "meeting_hourly"
+      apply_meeting_hourly_slots!(@order)
+    else
+      @order.amount_cents = Order.plan_config(@plan_type)[:amount_cents]
+    end
+
     apply_promocode_to_order!(params[:promocode].presence || params.dig(:order, :promocode))
 
     if @promocode_error.present?
-      @seats = Seat.desks.ordered
-      load_plan_defaults
-      @monthly_period = current_user.next_monthly_period(months: Order.plan_config(@plan_type)[:months] || 1) if Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
-      load_unavailable_desks
+      reload_checkout_form
       flash.now[:alert] = @promocode_error
       render :new, status: :unprocessable_entity
-    elsif @order.save
-      redirect_to checkout_path(@order)
-    else
-      @seats = Seat.desks.ordered
-      load_plan_defaults
-      @monthly_period = current_user.next_monthly_period(months: Order.plan_config(@plan_type)[:months] || 1) if Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
-      load_unavailable_desks
-      flash.now[:alert] = @order.errors.full_messages.to_sentence
+    elsif @order.errors.any? || !@order.save
+      reload_checkout_form
+      flash.now[:alert] = @order.errors.full_messages.to_sentence.presence || "Could not start checkout."
       render :new, status: :unprocessable_entity
+    else
+      redirect_to checkout_path(@order)
     end
   end
 
@@ -140,7 +141,66 @@ class CheckoutsController < ApplicationController
   end
 
   def order_params
-    params.require(:order).permit(:plan_type, :seat_id, :booking_date, :starts_at, :vat_number)
+    params.require(:order).permit(:plan_type, :seat_id, :booking_date, :vat_number, starts_at: [])
+      .tap do |permitted|
+        # Multi-hour checkboxes post an array; strip it so build does not assign an Array.
+        # apply_meeting_hourly_slots! sets starts_at + hours from the raw params.
+        permitted.delete(:starts_at)
+      end
+  end
+
+  def apply_meeting_hourly_slots!(order)
+    raw = params.dig(:order, :starts_at)
+    slots = Array(raw).filter_map { |value| parse_slot_time(value) }.uniq.sort
+
+    if slots.empty?
+      order.errors.add(:starts_at, "Select at least one time slot")
+      order.amount_cents = Order.meeting_hourly_rate_cents
+      return
+    end
+
+    unless consecutive_hourly_slots?(slots)
+      order.errors.add(:starts_at, "must be consecutive hours")
+      order.starts_at = slots.first
+      order.hours = slots.size
+      order.amount_cents = Order.meeting_hourly_amount_cents(slots.size)
+      return
+    end
+
+    order.starts_at = slots.first
+    order.hours = slots.size
+    order.amount_cents = Order.meeting_hourly_amount_cents(slots.size)
+  end
+
+  def consecutive_hourly_slots?(slots)
+    slots.each_cons(2).all? { |first, second| second == first + 1.hour }
+  end
+
+  def reload_checkout_form
+    @seats = Seat.desks.ordered
+    load_plan_defaults
+    @monthly_period = current_user.next_monthly_period(months: Order.plan_config(@plan_type)[:months] || 1) if Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
+    load_unavailable_desks
+    load_selected_meeting_slots
+  end
+
+  def load_selected_meeting_slots
+    return unless @plan_type == "meeting_hourly"
+
+    raw = params.dig(:order, :starts_at)
+    @selected_slots = if raw.present?
+      Array(raw).filter_map { |value| parse_slot_time(value) }
+    elsif @order.starts_at.present?
+      @order.meeting_hours.times.map { |index| @order.starts_at + index.hours }
+    else
+      []
+    end
+  end
+
+  def parse_slot_time(value)
+    Time.zone.parse(value.to_s)
+  rescue ArgumentError, TypeError
+    nil
   end
 
   def apply_promocode_from_params!
@@ -169,6 +229,7 @@ class CheckoutsController < ApplicationController
     @order.seat_id = nil
     @order.booking_date = nil
     @order.starts_at = nil
+    @order.hours = nil
   end
 
   def load_plan_defaults
@@ -225,7 +286,9 @@ class CheckoutsController < ApplicationController
   def parsed_meeting_hourly_date
     return MeetingRoomAvailability.earliest_hourly_date if params[:date].blank?
 
-    MeetingRoomAvailability.ensure_weekday(Date.parse(params[:date]))
+    date = MeetingRoomAvailability.ensure_weekday(Date.parse(params[:date]))
+    earliest = MeetingRoomAvailability.earliest_hourly_date
+    date < earliest ? earliest : date
   rescue ArgumentError
     MeetingRoomAvailability.earliest_hourly_date
   end

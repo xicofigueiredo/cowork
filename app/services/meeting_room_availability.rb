@@ -1,5 +1,4 @@
 class MeetingRoomAvailability
-  ADVANCE_NOTICE = 24.hours
   OPEN_HOUR = 8
   CLOSE_HOUR = 20
   CALENDAR_WEEKDAYS = 14
@@ -90,7 +89,7 @@ class MeetingRoomAvailability
     end
 
     def earliest_hourly_at
-      Time.current + ADVANCE_NOTICE
+      Time.current
     end
 
     def earliest_hourly_date

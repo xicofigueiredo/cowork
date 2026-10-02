@@ -5,7 +5,7 @@
     <h1 class="booking-title">Book meeting room</h1>
     <p class="booking-lead">
       You have <%= @available_meeting_hours %> meeting room <%= "hour".pluralize(@available_meeting_hours) %> available (1 hour = 1 credit).
-      Book at least 24 hours in advance on weekdays. Room hours: 8:00–20:00.
+      Book on weekdays, including today for slots that have not started yet. Room hours: 8:00–20:00.
     </p>
 
     <%= form_with url: meeting_booking_path, method: :post,

@@ -30,6 +30,18 @@
           <span>Time</span>
           <strong><%= @order.starts_at.strftime("%-d %B %Y, %H:%M") %> – <%= @order.meeting_ends_at.strftime("%H:%M") %></strong>
         </p>
+        <% if @order.plan_type == "meeting_hourly" %>
+          <p class="booking-summary-row">
+            <span>Duration</span>
+            <strong><%= @order.meeting_hours %> <%= "hour".pluralize(@order.meeting_hours) %></strong>
+          </p>
+          <% if @order.meeting_hours > Order::MEETING_HOURLY_DISCOUNT_THRESHOLD %>
+            <p class="booking-summary-row">
+              <span>Discount</span>
+              <strong>20% off</strong>
+            </p>
+          <% end %>
+        <% end %>
       <% end %>
 
       <% if @order.monthly_desk_plan? %>
@@ -60,6 +72,7 @@
       <%= render "shared/checkout_total",
             amount_cents: @order.amount_cents,
             plan_type: @order.plan_type,
+            original_amount_cents: @order.original_amount_cents,
             promocode: @order.promocode %>
     </div>
 

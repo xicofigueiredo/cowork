@@ -1,0 +1,74 @@
+<% content_for :title, "Leads - Mezzanine" %>
+
+<main class="booking-page">
+  <div class="booking-container">
+    <div class="booking-section-header">
+      <h1 class="booking-title">Leads</h1>
+    </div>
+
+    <%= render "admin/shared/nav" %>
+
+    <section class="booking-section">
+      <h2 class="booking-section-title">How users found us</h2>
+
+      <% if @referral_breakdown.any? %>
+        <% referral_total = @referral_breakdown.sum { |slice| slice[:count] } %>
+        <% gradient_stops = [] %>
+        <% cursor = 0.0 %>
+        <% @referral_breakdown.each_with_index do |slice, index| %>
+          <% start_pct = cursor %>
+          <% cursor = index == @referral_breakdown.size - 1 ? 100.0 : cursor + (slice[:count].to_f / referral_total * 100) %>
+          <% gradient_stops << "#{slice[:color]} #{start_pct}% #{cursor}%" %>
+        <% end %>
+
+        <div class="admin-referral-chart">
+          <div class="admin-referral-pie"
+               style="background: conic-gradient(<%= gradient_stops.join(", ") %>);"
+               role="img"
+               aria-label="Pie chart of how users heard about us"></div>
+
+          <ul class="admin-referral-legend">
+            <% @referral_breakdown.each do |slice| %>
+              <li class="admin-referral-legend-item">
+                <span class="admin-referral-swatch" style="background: <%= slice[:color] %>;"></span>
+                <span class="admin-referral-legend-label"><%= slice[:label] %></span>
+                <span class="admin-referral-legend-stats">
+                  <%= slice[:percent] %>% · <%= slice[:count] %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% else %>
+        <p class="booking-empty">No referral data yet.</p>
+      <% end %>
+    </section>
+
+    <section class="booking-section">
+      <h2 class="booking-section-title">Contact forms <span class="admin-count"><%= @leads.size %></span></h2>
+
+      <% if @leads.any? %>
+        <ul class="booking-list">
+          <% @leads.each do |lead| %>
+            <li class="booking-list-item booking-list-item--stacked">
+              <div>
+                <strong><%= lead.first_name %> <%= lead.last_name %></strong>
+                <span class="booking-list-meta">
+                  <%= mail_to lead.email %>
+                  · <%= lead.created_at.strftime("%-d %b %Y, %H:%M") %>
+                </span>
+                <% if lead.message.present? %>
+                  <p class="admin-lead-message"><%= lead.message %></p>
+                <% else %>
+                  <span class="booking-list-meta">No message</span>
+                <% end %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="booking-empty">No contact forms submitted yet.</p>
+      <% end %>
+    </section>
+  </div>
+</main>

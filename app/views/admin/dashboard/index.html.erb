@@ -88,32 +88,5 @@
         <p class="booking-empty">No user accounts yet.</p>
       <% end %>
     </section>
-
-    <section class="booking-section">
-      <h2 class="booking-section-title">Contact forms <span class="admin-count"><%= @leads.size %></span></h2>
-
-      <% if @leads.any? %>
-        <ul class="booking-list">
-          <% @leads.each do |lead| %>
-            <li class="booking-list-item booking-list-item--stacked">
-              <div>
-                <strong><%= lead.first_name %> <%= lead.last_name %></strong>
-                <span class="booking-list-meta">
-                  <%= mail_to lead.email %>
-                  · <%= lead.created_at.strftime("%-d %b %Y, %H:%M") %>
-                </span>
-                <% if lead.message.present? %>
-                  <p class="admin-lead-message"><%= lead.message %></p>
-                <% else %>
-                  <span class="booking-list-meta">No message</span>
-                <% end %>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="booking-empty">No contact forms submitted yet.</p>
-      <% end %>
-    </section>
   </div>
 </main>

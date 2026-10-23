@@ -4,6 +4,7 @@ class LeadMailer < ApplicationMailer
 
     mail(
       to: @lead.email,
+      bcc: admin_emails,
       subject: "We received your message — Mezzanine"
     )
   end

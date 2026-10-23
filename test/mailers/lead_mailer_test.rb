@@ -1,6 +1,19 @@
 require "test_helper"
 
 class LeadMailerTest < ActionMailer::TestCase
+  setup do
+    @previous_admin_emails = ENV["ADMIN_EMAILS"]
+    ENV["ADMIN_EMAILS"] = "admin@example.com, other@example.com"
+  end
+
+  teardown do
+    if @previous_admin_emails
+      ENV["ADMIN_EMAILS"] = @previous_admin_emails
+    else
+      ENV.delete("ADMIN_EMAILS")
+    end
+  end
+
   test "received" do
     lead = Lead.create!(
       first_name: "Ada",
@@ -17,6 +30,7 @@ class LeadMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [ "ada@example.com" ], email.to
+    assert_equal [ "admin@example.com", "other@example.com" ], email.bcc
     assert_equal [ "hello@mezzaninecowork.com" ], email.from
     assert_equal "We received your message — Mezzanine", email.subject
     assert_match "Dear Ada", email.body.encoded
@@ -32,6 +46,7 @@ class LeadMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [ "ada@example.com" ], email.to
+    assert_nil email.bcc
     assert_equal [ "hello@mezzaninecowork.com" ], email.from
     assert_equal "Mezzanine - Your new workspace in Matosinhos", email.subject
     assert_match "Hi Ada,", email.body.encoded
@@ -49,6 +64,7 @@ class LeadMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [ "ada@example.com" ], email.to
+    assert_nil email.bcc
     assert_match "Hi there,", email.body.encoded
   end
 end

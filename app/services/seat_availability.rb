@@ -147,13 +147,15 @@ class SeatAvailability
 
   def self.pending_daily_hold?(seat, date, except_order: nil)
     pending_hold_scope(except_order: except_order)
-      .where(plan_type: "daily", seat_id: seat.id, booking_date: date)
+      .where(plan_type: "daily", booking_date: date)
+      .where("orders.seat_id = :seat_id OR :seat_id = ANY(orders.seat_ids)", seat_id: seat.id)
       .exists?
   end
 
   def self.pending_daily_in_range?(seat, starts_on, ends_on, except_order: nil)
     pending_hold_scope(except_order: except_order)
-      .where(plan_type: "daily", seat_id: seat.id, booking_date: starts_on..ends_on)
+      .where(plan_type: "daily", booking_date: starts_on..ends_on)
+      .where("orders.seat_id = :seat_id OR :seat_id = ANY(orders.seat_ids)", seat_id: seat.id)
       .exists?
   end
 

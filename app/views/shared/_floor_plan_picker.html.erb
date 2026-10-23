@@ -2,16 +2,40 @@
   locals:
     unavailable_desks: array of desk codes (strings)
     seat_map: hash of desk code => seat id
-    input_name: name for the hidden seat_id field
+    input_name: name for the hidden seat_id field (single-select)
     selected_seat_id: optional pre-selected seat id
+    multiple: allow selecting more than one desk (daily pass)
+    selected_seat_ids: optional array of pre-selected seat ids
 %>
+<% picker_multiple = local_assigns.fetch(:multiple, false) %>
+<% picker_selected_ids = Array(local_assigns[:selected_seat_ids]).presence ||
+     Array(local_assigns[:selected_seat_id]).compact %>
+<% picker_input_name = if picker_multiple
+  name = input_name.to_s
+  name = name.sub(/\[seat_id\]\z/, "[seat_ids]") if name.end_with?("[seat_id]")
+  name = "seat_ids" if name == "seat_id"
+  name.end_with?("[]") ? name : "#{name}[]"
+else
+  input_name
+end %>
 <div class="booking-floorplan" data-controller="floor-plan"
      data-floor-plan-seat-map-value="<%= ERB::Util.json_escape(seat_map.to_json) %>"
      data-floor-plan-unavailable-value="<%= ERB::Util.json_escape(unavailable_desks.to_json) %>"
-     data-floor-plan-selected-value="<%= selected_seat_id %>">
+     data-floor-plan-selected-value="<%= picker_selected_ids.first %>"
+     data-floor-plan-selected-ids-value="<%= ERB::Util.json_escape(picker_selected_ids.map(&:to_s).to_json) %>"
+     data-floor-plan-multiple-value="<%= picker_multiple %>"
+     data-floor-plan-input-name-value="<%= picker_input_name %>">
 
-  <%# Do not use HTML required on a hidden input — browsers block submit with no visible message. %>
-  <input type="hidden" name="<%= input_name %>" value="<%= selected_seat_id %>" data-floor-plan-target="input">
+  <% if picker_multiple %>
+    <div data-floor-plan-target="inputs">
+      <% picker_selected_ids.each do |id| %>
+        <input type="hidden" name="<%= picker_input_name %>" value="<%= id %>">
+      <% end %>
+    </div>
+  <% else %>
+    <%# Do not use HTML required on a hidden input — browsers block submit with no visible message. %>
+    <input type="hidden" name="<%= input_name %>" value="<%= picker_selected_ids.first %>" data-floor-plan-target="input">
+  <% end %>
 
   <% if seat_map.blank? %>
     <p class="booking-note booking-note--error">
@@ -36,8 +60,12 @@
   </div>
 
   <div class="booking-floorplan-footer">
-    <p class="booking-floorplan-selection" data-floor-plan-target="label">Choose your desk</p>
-    <p class="booking-note booking-note--error" data-floor-plan-target="error" hidden>Please select a desk before continuing.</p>
+    <p class="booking-floorplan-selection" data-floor-plan-target="label">
+      <%= picker_multiple ? "Choose one or more desks" : "Choose your desk" %>
+    </p>
+    <p class="booking-note booking-note--error" data-floor-plan-target="error" hidden>
+      <%= picker_multiple ? "Please select at least one desk before continuing." : "Please select a desk before continuing." %>
+    </p>
     <ul class="booking-floorplan-legend" aria-hidden="true">
       <li><span class="booking-floorplan-swatch booking-floorplan-swatch--available"></span> Available</li>
       <li><span class="booking-floorplan-swatch booking-floorplan-swatch--selected"></span> Selected</li>
@@ -54,15 +82,79 @@ function initializeFloorPlan() {
 
     const seatMap = JSON.parse(root.dataset.floorPlanSeatMapValue || '{}');
     const unavailable = new Set(JSON.parse(root.dataset.floorPlanUnavailableValue || '[]'));
+    const multiple = root.dataset.floorPlanMultipleValue === 'true';
+    const inputName = root.dataset.floorPlanInputNameValue || 'seat_id';
     const input = root.querySelector('[data-floor-plan-target="input"]');
+    const inputsContainer = root.querySelector('[data-floor-plan-target="inputs"]');
     const label = root.querySelector('[data-floor-plan-target="label"]');
     const error = root.querySelector('[data-floor-plan-target="error"]');
     const seats = root.querySelectorAll('.ourspace-seat');
     const form = root.closest('form');
+    let selectedIds = JSON.parse(root.dataset.floorPlanSelectedIdsValue || '[]').map(String);
 
     if (Object.keys(seatMap).length === 0 && error) {
       error.textContent = 'Desks are not configured on the server yet. Run database seeds, then try again.';
       error.hidden = false;
+    }
+
+    function deskCodeForId(seatId) {
+      return Object.keys(seatMap).find((code) => String(seatMap[code]) === String(seatId));
+    }
+
+    function syncHiddenInputs() {
+      if (!multiple || !inputsContainer) return;
+      inputsContainer.innerHTML = '';
+      selectedIds.forEach((id) => {
+        const el = document.createElement('input');
+        el.type = 'hidden';
+        el.name = inputName;
+        el.value = id;
+        inputsContainer.appendChild(el);
+      });
+    }
+
+    function updateLabel() {
+      if (!label) return;
+      const codes = selectedIds.map(deskCodeForId).filter(Boolean);
+      if (codes.length === 0) {
+        label.textContent = multiple ? 'Choose one or more desks' : 'Choose your desk';
+      } else if (codes.length === 1) {
+        label.textContent = `Desk ${codes[0]} selected`;
+      } else {
+        label.textContent = `Desks ${codes.join(', ')} selected`;
+      }
+    }
+
+    function applySelectionClasses() {
+      const selectedSet = new Set(selectedIds.map(String));
+      seats.forEach((seat) => {
+        const seatId = seatMap[seat.dataset.desk];
+        seat.classList.toggle('selected', seatId && selectedSet.has(String(seatId)));
+      });
+    }
+
+    function emitChange() {
+      root.dispatchEvent(new CustomEvent('floor-plan:change', {
+        bubbles: true,
+        detail: { seatIds: selectedIds.slice(), count: selectedIds.length }
+      }));
+    }
+
+    function setSelection(nextIds) {
+      selectedIds = nextIds.map(String);
+      if (!multiple && input) {
+        input.value = selectedIds[0] || '';
+      }
+      syncHiddenInputs();
+      applySelectionClasses();
+      updateLabel();
+      if (error && selectedIds.length > 0) {
+        error.textContent = multiple
+          ? 'Please select at least one desk before continuing.'
+          : 'Please select a desk before continuing.';
+        error.hidden = true;
+      }
+      emitChange();
     }
 
     seats.forEach(seat => {
@@ -81,26 +173,20 @@ function initializeFloorPlan() {
           return;
         }
 
-        seats.forEach(s => s.classList.remove('selected'));
-        seat.classList.add('selected');
-        input.value = seatId;
-        label.textContent = `Desk ${desk} selected`;
-        if (error) {
-          error.textContent = 'Please select a desk before continuing.';
-          error.hidden = true;
+        const id = String(seatId);
+        if (multiple) {
+          if (selectedIds.includes(id)) {
+            setSelection(selectedIds.filter((value) => value !== id));
+          } else {
+            setSelection(selectedIds.concat(id));
+          }
+        } else {
+          setSelection([id]);
         }
       });
     });
 
-    const selectedId = root.dataset.floorPlanSelectedValue;
-    if (selectedId) {
-      seats.forEach(seat => {
-        if (seatMap[seat.dataset.desk] == selectedId) {
-          seat.classList.add('selected');
-          label.textContent = `Desk ${seat.dataset.desk} selected`;
-        }
-      });
-    }
+    setSelection(selectedIds);
 
     if (form && !form.dataset.floorPlanSubmitBound) {
       form.dataset.floorPlanSubmitBound = 'true';
@@ -108,11 +194,25 @@ function initializeFloorPlan() {
         const submitter = event.submitter;
         if (submitter?.value === 'apply_promocode') return;
 
-        if (!input.value) {
+        const activeRoot = form.querySelector('[data-controller="floor-plan"]');
+        if (!activeRoot) return;
+
+        const isMultiple = activeRoot.dataset.floorPlanMultipleValue === 'true';
+        const activeError = activeRoot.querySelector('[data-floor-plan-target="error"]');
+        let hasSelection = false;
+
+        if (isMultiple) {
+          hasSelection = activeRoot.querySelectorAll('[data-floor-plan-target="inputs"] input').length > 0;
+        } else {
+          const activeInput = activeRoot.querySelector('[data-floor-plan-target="input"]');
+          hasSelection = Boolean(activeInput?.value);
+        }
+
+        if (!hasSelection) {
           event.preventDefault();
-          if (error) {
-            error.hidden = false;
-            error.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          if (activeError) {
+            activeError.hidden = false;
+            activeError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           }
         }
       });

@@ -10,8 +10,9 @@
      selected_calendar_day&.dig(:available)
    end %>
 <% hourly_slots_available = @hour_grid&.any? { |slot| slot[:available] } %>
+<% selected_daily_seat_ids = @order.selected_seat_ids %>
 <% checkout_submit_disabled = !promo_credit_checkout && (
-     (desk_checkout && !desk_day_available) ||
+     (desk_checkout && (!desk_day_available || selected_daily_seat_ids.blank?)) ||
      (meeting_checkout && (
        (@plan_type == "meeting_daily" && !selected_calendar_day&.dig(:available)) ||
        (@plan_type == "meeting_hourly" && (!hourly_slots_available || Array(@selected_slots).blank?))
@@ -57,20 +58,25 @@
       <% elsif @plan_type == "daily" %>
         <%= f.hidden_field :booking_date, value: @booking_date %>
 
-        <%= render "shared/desk_day_picker",
-              calendar_days: @calendar_days,
-              booking_date: @booking_date,
-              unavailable_desks: @unavailable_desks,
-              seats: @seats,
-              input_name: "order[seat_id]",
-              selected_seat_id: @order.seat_id,
-              plan_type: @plan_type %>
+        <div data-daily-checkout
+             data-rate-cents="<%= Order.daily_unit_amount_cents %>"
+             data-original-rate-cents="<%= Order.daily_unit_original_amount_cents %>">
+          <%= render "shared/desk_day_picker",
+                calendar_days: @calendar_days,
+                booking_date: @booking_date,
+                unavailable_desks: @unavailable_desks,
+                seats: @seats,
+                input_name: "order[seat_ids]",
+                selected_seat_ids: selected_daily_seat_ids,
+                multiple: true,
+                plan_type: @plan_type %>
 
-        <% unless desk_day_available %>
-          <p class="booking-note booking-note--error">No desks available on this day. Choose another day above.</p>
-        <% end %>
+          <% unless desk_day_available %>
+            <p class="booking-note booking-note--error">No desks available on this day. Choose another day above.</p>
+          <% end %>
 
-        <%= render "shared/checkout_total", **checkout_total_locals %>
+          <%= render "shared/checkout_total", **checkout_total_locals %>
+        </div>
 
       <% elsif Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type) %>
         <% meeting_hours = Order.plan_config(@plan_type)[:meeting_hours] %>
@@ -277,6 +283,89 @@
     <% end %>
   </div>
 </main>
+
+<% if @plan_type == "daily" %>
+<script>
+function initializeDailyCheckout() {
+  const root = document.querySelector("[data-daily-checkout]");
+  if (!root || root.dataset.ready === "true") return;
+  root.dataset.ready = "true";
+
+  const rateCents = parseInt(root.dataset.rateCents, 10);
+  const originalRateCents = parseInt(root.dataset.originalRateCents, 10);
+  const submitButton = document.getElementById("checkout-submit");
+  const priceRoot = root.querySelector(".booking-price-breakdown") || document.querySelector(".booking-price-breakdown");
+
+  function formatEuros(cents) {
+    return (cents / 100).toFixed(2).replace(".", ",") + " €";
+  }
+
+  function ivaCents(amount) {
+    return Math.round(amount * 0.23);
+  }
+
+  function updatePrice(count) {
+    if (!priceRoot) return;
+    const seats = Math.max(count, 0);
+    const amount = seats * rateCents;
+    const original = seats * originalRateCents;
+    const showOriginal = original > amount && seats > 0;
+    const displayAmount = seats > 0 ? amount : rateCents;
+    const displayOriginal = seats > 0 ? original : originalRateCents;
+    const values = priceRoot.querySelectorAll(".booking-price-row--subtotal .booking-price-values, .booking-price-row--total .booking-price-values");
+    const subtotalStrong = priceRoot.querySelector(".booking-price-row--subtotal strong");
+    const ivaStrong = priceRoot.querySelector(".booking-price-row--iva strong");
+    const totalStrong = priceRoot.querySelector(".booking-price-row--total strong:last-child");
+
+    values.forEach((container) => {
+      container.querySelectorAll(".booking-price-original").forEach((el) => el.remove());
+    });
+
+    if (subtotalStrong) {
+      if (showOriginal) {
+        const originalEl = document.createElement("span");
+        originalEl.className = "booking-price-original";
+        originalEl.textContent = formatEuros(displayOriginal);
+        subtotalStrong.parentElement.insertBefore(originalEl, subtotalStrong);
+      }
+      subtotalStrong.textContent = formatEuros(displayAmount);
+    }
+    if (ivaStrong) ivaStrong.textContent = formatEuros(ivaCents(displayAmount));
+    if (totalStrong) {
+      if (showOriginal) {
+        const originalEl = document.createElement("span");
+        originalEl.className = "booking-price-original";
+        originalEl.textContent = formatEuros(displayOriginal + ivaCents(displayOriginal));
+        totalStrong.parentElement.insertBefore(originalEl, totalStrong);
+      }
+      totalStrong.textContent = formatEuros(displayAmount + ivaCents(displayAmount));
+    }
+  }
+
+  function syncSubmit(count) {
+    if (submitButton) submitButton.disabled = count < 1;
+  }
+
+  root.addEventListener("floor-plan:change", (event) => {
+    const count = event.detail?.count || 0;
+    updatePrice(count);
+    syncSubmit(count);
+  });
+
+  const initialCount = root.querySelectorAll('[data-floor-plan-target="inputs"] input').length;
+  updatePrice(initialCount);
+  syncSubmit(initialCount);
+}
+
+document.addEventListener("turbo:before-cache", () => {
+  const root = document.querySelector("[data-daily-checkout]");
+  if (root) delete root.dataset.ready;
+});
+
+document.addEventListener("DOMContentLoaded", initializeDailyCheckout);
+document.addEventListener("turbo:load", initializeDailyCheckout);
+</script>
+<% end %>
 
 <% if @plan_type == "meeting_hourly" %>
 <script>

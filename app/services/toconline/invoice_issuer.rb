@@ -90,11 +90,14 @@ module Toconline
     end
 
     def line_attributes
+      quantity = @order.plan_type == "daily" && @order.desk_count > 1 ? @order.desk_count : 1
+      unit_cents = quantity > 1 ? @order.unit_amount_cents : @order.amount_cents
+
       {
         item_type: "Service",
         description: line_description,
-        quantity: 1,
-        unit_price: (@order.amount_cents / 100.0).round(2),
+        quantity: quantity,
+        unit_price: (unit_cents / 100.0).round(2),
         tax_percentage: ENV.fetch("TOCONLINE_TAX_PERCENTAGE", "23").to_i,
         tax_country_region: "PT",
         tax_code: ENV.fetch("TOCONLINE_TAX_CODE", "NOR")

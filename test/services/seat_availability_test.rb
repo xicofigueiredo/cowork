@@ -49,4 +49,35 @@ class SeatAvailabilityTest < ActiveSupport::TestCase
 
     assert SeatAvailability.available_on?(@seat, @date)
   end
+
+  test "pending multi-seat daily order holds every selected seat" do
+    second_seat = seats(:main_002)
+    order = Order.new(
+      user: @user,
+      plan_type: "daily",
+      status: "pending",
+      booking_date: @date,
+      vat_number: "123456789"
+    )
+    order.assign_selected_seats!([ @seat.id, second_seat.id ])
+    order.amount_cents = Order.daily_amount_cents(2)
+    order.save!
+
+    assert_equal [ @seat.id, second_seat.id ], order.seat_ids
+    assert SeatAvailability.available_on?(@seat, @date, except_order: order)
+    assert_not SeatAvailability.available_on?(@seat, @date)
+    assert_not SeatAvailability.available_on?(second_seat, @date)
+
+    conflicting = Order.new(
+      user: @other_user,
+      plan_type: "daily",
+      amount_cents: 1300,
+      status: "pending",
+      seat: second_seat,
+      booking_date: @date,
+      vat_number: "123456789"
+    )
+    assert_not conflicting.valid?
+    assert_includes conflicting.errors[:seat].join, "not available"
+  end
 end

@@ -11,7 +11,12 @@
         <strong><%= @order.plan_label %></strong>
       </p>
 
-      <% if @order.seat %>
+      <% if @order.plan_type == "daily" && @order.desk_count.positive? %>
+        <p class="booking-summary-row">
+          <span><%= @order.desk_count > 1 ? "Desks" : "Desk" %></span>
+          <strong><%= @order.desk_labels %></strong>
+        </p>
+      <% elsif @order.seat %>
         <p class="booking-summary-row">
           <span><%= @order.seat.meeting_room? ? "Room" : "Desk" %></span>
           <strong><%= @order.seat.label %></strong>

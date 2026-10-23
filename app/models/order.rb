@@ -23,7 +23,7 @@ class Order < ApplicationRecord
   belongs_to :seat, optional: true
   belongs_to :promocode, optional: true
   has_one :credit_pack, dependent: :destroy
-  has_one :booking, dependent: :destroy
+  has_many :bookings, dependent: :destroy
 
   validates :plan_type, presence: true, inclusion: { in: PLAN_TYPES.keys }
   validates :amount_cents, presence: true, numericality: { greater_than: 0 }
@@ -34,10 +34,11 @@ class Order < ApplicationRecord
   validates :booking_date, presence: true, if: -> { (plan_type == "daily" || plan_type == "meeting_daily") && !promocode_credit_pack? }
   validates :starts_at, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
   validates :hours, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
-  validate :seat_available, if: -> { pending? && requires_desk? && seat.present? && !promocode_credit_pack? }
+  validate :seat_available, if: -> { pending? && requires_desk? && desk_count.positive? && !promocode_credit_pack? }
   validate :meeting_booking_valid, if: -> { pending? && meeting_plan? && !promocode_credit_pack? }
 
   before_validation :normalize_vat_number
+  before_validation :sync_seat_ids_from_seat, if: -> { requires_desk? && !promocode_credit_pack? }
   before_validation :assign_meeting_room_seat, if: -> { meeting_plan? && seat.blank? && !promocode_credit_pack? }
 
   scope :pending, -> { where(status: "pending") }
@@ -49,6 +50,22 @@ class Order < ApplicationRecord
 
   def self.original_amount_cents_for(plan_type)
     plan_config(plan_type)[:original_amount_cents]
+  end
+
+  def self.daily_unit_amount_cents
+    plan_config("daily")[:amount_cents]
+  end
+
+  def self.daily_unit_original_amount_cents
+    plan_config("daily")[:original_amount_cents]
+  end
+
+  def self.daily_amount_cents(count)
+    daily_unit_amount_cents * count.to_i
+  end
+
+  def self.daily_original_amount_cents(count)
+    daily_unit_original_amount_cents * count.to_i
   end
 
   def self.meeting_hourly_rate_cents
@@ -67,9 +84,51 @@ class Order < ApplicationRecord
     (base * (BigDecimal("1") - MEETING_HOURLY_DISCOUNT_RATE)).round
   end
 
+  def booking
+    bookings.first
+  end
+
+  def selected_seat_ids
+    ids = Array(seat_ids).map(&:to_i).reject(&:zero?).uniq
+    return ids if ids.present?
+    return [ seat_id ] if seat_id.present?
+
+    []
+  end
+
+  def ordered_seats
+    ids = selected_seat_ids
+    return Seat.none if ids.empty?
+
+    Seat.where(id: ids).index_by(&:id).values_at(*ids).compact
+  end
+
+  def desk_count
+    count = selected_seat_ids.size
+    return count if count.positive?
+    return 1 if seat.present?
+
+    0
+  end
+
+  def desk_labels
+    seats = ordered_seats
+    return seat&.label if seats.empty?
+
+    seats.map(&:label).join(", ")
+  end
+
+  def assign_selected_seats!(ids)
+    ids = Array(ids).map(&:to_i).reject(&:zero?).uniq
+    self.seat_ids = ids
+    self.seat_id = ids.first
+  end
+
   def original_amount_cents
     if plan_type == "meeting_hourly" && meeting_hours > MEETING_HOURLY_DISCOUNT_THRESHOLD
       self.class.meeting_hourly_original_amount_cents(meeting_hours)
+    elsif plan_type == "daily" && desk_count > 1
+      self.class.daily_original_amount_cents(desk_count)
     else
       self.class.original_amount_cents_for(plan_type)
     end
@@ -95,11 +154,13 @@ class Order < ApplicationRecord
     return true if credit_pack?
 
     if plan_type == "daily"
-      SeatAvailability.available_on?(
-        seat, booking_date,
-        except_order: self,
-        ignore_pending: ignore_pending
-      )
+      ordered_seats.all? do |desk|
+        SeatAvailability.available_on?(
+          desk, booking_date,
+          except_order: self,
+          ignore_pending: ignore_pending
+        )
+      end
     elsif monthly_desk_plan?
       period = user.next_monthly_period(months: desk_months)
       SeatAvailability.available_for_monthly?(
@@ -153,6 +214,9 @@ class Order < ApplicationRecord
     return "#{promocode.credits}-day pack (#{promocode.code})" if promocode_credit_pack?
     if plan_type == "meeting_hourly" && meeting_hours > 1
       return "#{meeting_hours}-hour meeting room"
+    end
+    if plan_type == "daily" && desk_count > 1
+      return "#{desk_count} × Daily pass"
     end
 
     PLAN_TYPES.dig(plan_type, :label)
@@ -213,6 +277,12 @@ class Order < ApplicationRecord
     [ user.first_name, user.last_name ].compact_blank.join(" ").presence || user.email
   end
 
+  def unit_amount_cents
+    return amount_cents if desk_count <= 1
+
+    (amount_cents.to_d / desk_count).round
+  end
+
   def fulfillment_details
     details = []
 
@@ -221,20 +291,37 @@ class Order < ApplicationRecord
       details << [ "Credits", "#{pack&.total_credits || credit_count} day credits" ]
       details << [ "Promo code", promocode.code ] if promocode.present?
       details << [ "Valid until", pack&.expires_at&.strftime("%-d %B %Y") ] if pack&.expires_at
-    elsif booking.present?
-      details << [ booking.seat.meeting_room? ? "Room" : "Desk", booking.seat.label ]
-      details << [ "When", booking.period_label ]
+    elsif bookings.any?
+      first = booking
+      if first.seat.meeting_room?
+        details << [ "Room", first.seat.label ]
+      elsif bookings.size > 1
+        details << [ "Desks", desk_labels ]
+      else
+        details << [ "Desk", first.seat.label ]
+      end
+      details << [ "When", first.period_label ]
       if monthly_desk_plan? && credit_pack.present?
         details << [ "Meeting hours", "#{credit_pack.total_credits} hours included" ]
       end
     else
       details << [ "Plan", plan_label ]
+      details << [ "Desks", desk_labels ] if plan_type == "daily" && desk_count.positive?
     end
 
     details
   end
 
   private
+
+  def sync_seat_ids_from_seat
+    if selected_seat_ids.present?
+      self.seat_id = selected_seat_ids.first if seat_id.blank?
+      self.seat_ids = selected_seat_ids
+    elsif seat_id.present?
+      self.seat_ids = [ seat_id ]
+    end
+  end
 
   def normalize_vat_number
     if vat_number.blank?
@@ -264,12 +351,15 @@ class Order < ApplicationRecord
 
   def assign_meeting_room_seat
     self.seat = Seat.meeting_room
+    self.seat_ids = [ seat.id ] if seat
   end
 
   def seat_available
     if plan_type == "daily"
-      unless SeatAvailability.available_on?(seat, booking_date, except_order: self)
-        errors.add(:seat, "is not available on #{booking_date}")
+      ordered_seats.each do |desk|
+        unless SeatAvailability.available_on?(desk, booking_date, except_order: self)
+          errors.add(:seat, "#{desk.label} is not available on #{booking_date}")
+        end
       end
     elsif monthly_desk_plan?
       period = user.next_monthly_period(months: desk_months)

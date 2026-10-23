@@ -56,6 +56,7 @@ class OrderMailer < ApplicationMailer
     @order = order
     @user = order.user
     @booking = order.booking
+    @bookings = order.bookings.includes(:seat).to_a
     @access_code = @order.user&.access_code
     @door_code = if @access_code&.synced_to_lock?
       @access_code.code

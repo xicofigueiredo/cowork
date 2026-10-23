@@ -30,6 +30,8 @@ class CheckoutsController < ApplicationController
 
     if @plan_type == "meeting_hourly"
       apply_meeting_hourly_slots!(@order)
+    elsif @plan_type == "daily"
+      apply_daily_seats!(@order)
     else
       @order.amount_cents = Order.plan_config(@plan_type)[:amount_cents]
     end
@@ -141,12 +143,29 @@ class CheckoutsController < ApplicationController
   end
 
   def order_params
-    params.require(:order).permit(:plan_type, :seat_id, :booking_date, :vat_number, starts_at: [])
+    params.require(:order).permit(:plan_type, :seat_id, :booking_date, :vat_number, starts_at: [], seat_ids: [])
       .tap do |permitted|
         # Multi-hour checkboxes post an array; strip it so build does not assign an Array.
         # apply_meeting_hourly_slots! sets starts_at + hours from the raw params.
         permitted.delete(:starts_at)
+        # Multi-desk daily posts an array; apply_daily_seats! sets seat_ids + amount.
+        permitted.delete(:seat_ids)
       end
+  end
+
+  def apply_daily_seats!(order)
+    raw = params.dig(:order, :seat_ids)
+    ids = Array(raw).map(&:to_i).reject(&:zero?).uniq
+    ids = [ params.dig(:order, :seat_id).to_i ].reject(&:zero?) if ids.empty?
+
+    if ids.empty?
+      order.errors.add(:seat, "Select at least one desk")
+      order.amount_cents = Order.daily_unit_amount_cents
+      return
+    end
+
+    order.assign_selected_seats!(ids)
+    order.amount_cents = Order.daily_amount_cents(ids.size)
   end
 
   def apply_meeting_hourly_slots!(order)
@@ -227,6 +246,7 @@ class CheckoutsController < ApplicationController
     return unless @order.promocode_credit_pack?
 
     @order.seat_id = nil
+    @order.seat_ids = []
     @order.booking_date = nil
     @order.starts_at = nil
     @order.hours = nil

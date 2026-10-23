@@ -2,7 +2,7 @@ module CheckoutsHelper
   def checkout_plan_description(plan_type)
     case plan_type
     when "daily"
-      "Choose a weekday and desk for your day pass."
+      "Choose a weekday and one or more desks. The total updates with each desk you select."
     when "monthly", "monthly_3"
       months = Order.plan_config(plan_type)[:months] || 1
       meeting_hours = Order.plan_config(plan_type)[:meeting_hours]

@@ -25,6 +25,60 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
     assert order.paid?
     assert_not_nil order.booking
     assert_equal "daily", order.booking.booking_type
+    assert_equal [ @seat.id ], order.seat_ids
+  end
+
+  test "fulfills multi-seat daily order with one booking per desk" do
+    second_seat = seats(:main_002)
+    order = Order.new(
+      user: @user,
+      plan_type: "daily",
+      status: "pending",
+      booking_date: @booking_date,
+      vat_number: "123456789"
+    )
+    order.assign_selected_seats!([ @seat.id, second_seat.id ])
+    order.amount_cents = Order.daily_amount_cents(2)
+    order.save!
+
+    assert_equal 2600, order.amount_cents
+    assert_equal 3000, order.original_amount_cents
+    assert_equal "2 × Daily pass", order.plan_label
+
+    assert OrderFulfillment.call(order)
+    order.reload
+
+    assert order.paid?
+    assert_equal 2, order.bookings.count
+    assert_equal [ @seat.id, second_seat.id ].sort, order.bookings.map(&:seat_id).sort
+    assert order.bookings.all? { |booking| booking.daily? && booking.date == @booking_date }
+  end
+
+  test "multi-seat daily fails when any seat is taken" do
+    second_seat = seats(:main_002)
+    Booking.create!(
+      user: @other_user,
+      seat: second_seat,
+      booking_type: "daily",
+      date: @booking_date
+    )
+
+    order = Order.new(
+      user: @user,
+      plan_type: "daily",
+      status: "pending",
+      booking_date: @booking_date,
+      vat_number: "123456789"
+    )
+    order.assign_selected_seats!([ @seat.id, second_seat.id ])
+    order.amount_cents = Order.daily_amount_cents(2)
+    assert order.save(validate: false)
+
+    assert_not OrderFulfillment.call(order)
+    order.reload
+
+    assert order.failed?
+    assert_equal 0, order.bookings.count
   end
 
   test "fulfills second monthly order starting after the first ends" do

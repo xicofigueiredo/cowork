@@ -61,9 +61,10 @@ class StripeCheckout
   private
 
   def lock_inventory!
-    return if @order.seat_id.blank?
+    ids = @order.selected_seat_ids
+    return if ids.empty?
 
-    Seat.lock.find(@order.seat_id)
+    Seat.lock.where(id: ids).order(:id).load
   end
 
   def reusable_session
@@ -77,7 +78,11 @@ class StripeCheckout
 
   def line_item_description
     parts = [ "Includes 23% IVA" ]
-    parts << "Desk #{@order.seat.label}" if @order.seat&.desk?
+    if @order.plan_type == "daily" && @order.desk_count.positive?
+      parts << @order.desk_labels
+    elsif @order.seat&.desk?
+      parts << @order.seat.label
+    end
     parts << "Date #{@order.booking_date}" if @order.booking_date
     parts << "Starts #{@order.starts_at.strftime('%Y-%m-%d %H:%M')}" if @order.starts_at
     parts.join(" · ")

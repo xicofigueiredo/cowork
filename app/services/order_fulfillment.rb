@@ -44,9 +44,10 @@ class OrderFulfillment
   private
 
   def lock_inventory!
-    return if @order.seat_id.blank?
+    ids = @order.selected_seat_ids
+    return if ids.empty?
 
-    Seat.lock.find(@order.seat_id)
+    Seat.lock.where(id: ids).order(:id).load
   end
 
   def create_resources!
@@ -128,13 +129,18 @@ class OrderFulfillment
   end
 
   def create_daily_booking!
-    Booking.create!(
-      user: @order.user,
-      seat: @order.seat,
-      booking_type: "daily",
-      date: @order.booking_date,
-      order: @order
-    )
+    seats = @order.ordered_seats
+    seats = [ @order.seat ].compact if seats.empty?
+
+    seats.each do |desk|
+      Booking.create!(
+        user: @order.user,
+        seat: desk,
+        booking_type: "daily",
+        date: @order.booking_date,
+        order: @order
+      )
+    end
   end
 
   def create_monthly_booking!

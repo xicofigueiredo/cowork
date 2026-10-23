@@ -13,7 +13,7 @@ class CreditBooking
 
   def call
     raise Error, "Desks are not available on weekends" unless SeatAvailability.weekday?(@date)
-    raise Error, "Same-day bookings close at 17:00" unless SeatAvailability.bookable_date?(@date)
+    raise Error, "That date isn't available" unless SeatAvailability.bookable_date?(@date)
 
     booking = nil
 

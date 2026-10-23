@@ -257,6 +257,50 @@ main {
   }
 }
 
+/* WhatsApp floating action button (logged-in users) */
+.whatsapp-fab {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right, 0px));
+  bottom: max(24px, calc(16px + env(safe-area-inset-bottom, 0px)));
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.22);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.whatsapp-fab:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.28);
+}
+
+.whatsapp-fab:active {
+  transform: scale(0.96);
+}
+
+.whatsapp-fab svg {
+  display: block;
+}
+
+@media (min-width: 769px) {
+  body:has(.landing-footer) .whatsapp-fab {
+    bottom: calc(78px + 16px);
+  }
+}
+
+@media (max-width: 768px) {
+  .whatsapp-fab {
+    bottom: calc(var(--mobile-footbar-height) + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+}
+
 /* Shared Footer */
 .shared-footer {
   background: var(--landing-accent);

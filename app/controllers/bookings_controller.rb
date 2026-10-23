@@ -31,7 +31,7 @@ class BookingsController < ApplicationController
 
     @booking_date = parsed_booking_date
     unless SeatAvailability.bookable_date?(@booking_date)
-      redirect_to new_booking_path, alert: "Same-day bookings close at 17:00. Pick another date."
+      redirect_to new_booking_path, alert: "That date isn't available. Pick another date."
       return
     end
     @calendar_start = SeatAvailability.earliest_bookable_date
@@ -93,7 +93,7 @@ class BookingsController < ApplicationController
     @calendar_days = SeatAvailability.calendar_days(@calendar_start, except_booking: @booking)
     @booking_date = params[:date].present? ? parsed_edit_date : @booking.date
     if validate_date && !SeatAvailability.bookable_date?(@booking_date)
-      redirect_to edit_booking_path(@booking), alert: "Same-day bookings close at 17:00. Pick another date."
+      redirect_to edit_booking_path(@booking), alert: "That date isn't available. Pick another date."
       return false
     end
 

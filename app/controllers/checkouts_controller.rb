@@ -9,12 +9,11 @@ class CheckoutsController < ApplicationController
       return
     end
 
-    @order = Order.new(plan_type: @plan_type, amount_cents: Order.plan_config(@plan_type)[:amount_cents])
+    @order = current_user.orders.build(plan_type: @plan_type, amount_cents: Order.plan_config(@plan_type)[:amount_cents])
     apply_promocode_from_params!
     load_plan_defaults
     load_selected_meeting_slots
     @seats = Seat.desks.ordered
-    @monthly_period = current_user.next_monthly_period(months: Order.plan_config(@plan_type)[:months] || 1) if Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
     load_unavailable_desks
   end
 
@@ -53,7 +52,7 @@ class CheckoutsController < ApplicationController
 
   def show
     redirect_to bookings_path, notice: "This order has already been paid." if @order.paid?
-    @monthly_period = @order.user.next_monthly_period(months: @order.desk_months) if @order.monthly_desk_plan?
+    @monthly_period = @order.monthly_period if @order.monthly_desk_plan?
   end
 
   def pay
@@ -198,7 +197,6 @@ class CheckoutsController < ApplicationController
   def reload_checkout_form
     @seats = Seat.desks.ordered
     load_plan_defaults
-    @monthly_period = current_user.next_monthly_period(months: Order.plan_config(@plan_type)[:months] || 1) if Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
     load_unavailable_desks
     load_selected_meeting_slots
   end
@@ -257,6 +255,10 @@ class CheckoutsController < ApplicationController
     when "daily"
       load_daily_checkout_calendar
       @order.booking_date = @booking_date
+    when "monthly", "monthly_3"
+      load_monthly_checkout_calendar
+      @order.booking_date = @booking_date
+      @monthly_period = @order.monthly_period
     when "meeting_daily"
       load_meeting_daily_calendar
       @order.booking_date = @booking_date
@@ -271,8 +273,7 @@ class CheckoutsController < ApplicationController
       date = @booking_date || @order.booking_date || parsed_booking_date
       @unavailable_desks = SeatAvailability.unavailable_desk_codes(date)
     elsif Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type)
-      months = Order.plan_config(@plan_type)[:months] || 1
-      period = current_user.next_monthly_period(months: months)
+      period = @monthly_period || @order.monthly_period
       @unavailable_desks = SeatAvailability.unavailable_desk_codes_for_monthly(period[:starts_on], period[:ends_on])
     else
       @unavailable_desks = []
@@ -292,6 +293,26 @@ class CheckoutsController < ApplicationController
     @calendar_start = SeatAvailability.earliest_bookable_date
     @calendar_days = SeatAvailability.calendar_days(@calendar_start)
     @booking_date = parsed_booking_date
+  end
+
+  def parsed_monthly_start_date
+    earliest = current_user.next_monthly_starts_on
+    calendar_start = SeatAvailability.ensure_weekday(earliest)
+    date_param = params[:date].presence || params.dig(:order, :booking_date)
+    return calendar_start if date_param.blank?
+
+    date = SeatAvailability.ensure_weekday(Date.parse(date_param))
+    date < calendar_start ? calendar_start : date
+  rescue ArgumentError
+    calendar_start
+  end
+
+  def load_monthly_checkout_calendar
+    months = Order.plan_config(@plan_type)[:months] || 1
+    earliest = current_user.next_monthly_starts_on
+    @calendar_start = SeatAvailability.ensure_weekday(earliest)
+    @calendar_days = SeatAvailability.monthly_start_calendar_days(@calendar_start, months: months)
+    @booking_date = parsed_monthly_start_date
   end
 
   def parsed_meeting_daily_date

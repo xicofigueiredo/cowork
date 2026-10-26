@@ -23,7 +23,7 @@
         </p>
       <% end %>
 
-      <% if @order.booking_date %>
+      <% if @order.booking_date && !@order.monthly_desk_plan? %>
         <p class="booking-summary-row">
           <span>Date</span>
           <strong><%= @order.booking_date.strftime("%-d %B %Y") %></strong>

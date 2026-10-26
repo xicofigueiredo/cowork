@@ -83,7 +83,12 @@ class StripeCheckout
     elsif @order.seat&.desk?
       parts << @order.seat.label
     end
-    parts << "Date #{@order.booking_date}" if @order.booking_date
+    if @order.monthly_desk_plan?
+      period = @order.monthly_period
+      parts << "Period #{period[:starts_on]} – #{period[:ends_on]}"
+    elsif @order.booking_date
+      parts << "Date #{@order.booking_date}"
+    end
     parts << "Starts #{@order.starts_at.strftime('%Y-%m-%d %H:%M')}" if @order.starts_at
     parts.join(" · ")
   end

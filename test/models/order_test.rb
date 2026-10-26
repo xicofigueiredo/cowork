@@ -51,4 +51,34 @@ class OrderTest < ActiveSupport::TestCase
     assert_equal 3000, order.original_amount_cents
     assert order.discounted?
   end
+
+  test "monthly period uses the selected booking date" do
+    start_date = Date.current + 10.days
+    order = Order.new(
+      user: @user,
+      plan_type: "monthly",
+      amount_cents: 14_000,
+      booking_date: start_date,
+      seat: @seat
+    )
+
+    period = order.monthly_period
+    assert_equal start_date, period[:starts_on]
+    assert_equal start_date + 1.month, period[:ends_on]
+  end
+
+  test "monthly start date cannot be before the next available start" do
+    order = Order.new(
+      user: @user,
+      plan_type: "monthly",
+      amount_cents: 14_000,
+      status: "pending",
+      seat: @seat,
+      booking_date: Date.current - 1.day,
+      vat_number: "123456789"
+    )
+
+    assert_not order.valid?
+    assert order.errors[:booking_date].any?
+  end
 end

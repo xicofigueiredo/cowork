@@ -88,6 +88,7 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       amount_cents: 14_000,
       status: "pending",
       seat: @seat,
+      booking_date: Date.current,
       vat_number: "123456789"
     )
     assert OrderFulfillment.call(first_order)
@@ -99,6 +100,7 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       amount_cents: 14_000,
       status: "pending",
       seat: @seat,
+      booking_date: first_booking.ends_on + 1.day,
       vat_number: "123456789"
     )
 
@@ -107,6 +109,25 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
     second_booking = second_order.reload.booking
     assert_equal first_booking.ends_on + 1.day, second_booking.starts_on
     assert_equal second_booking.starts_on + 1.month, second_booking.ends_on
+  end
+
+  test "fulfills monthly order with a chosen future start date" do
+    start_date = Date.current + 2.weeks
+    order = Order.create!(
+      user: @user,
+      plan_type: "monthly",
+      amount_cents: 14_000,
+      status: "pending",
+      seat: @seat,
+      booking_date: start_date,
+      vat_number: "123456789"
+    )
+
+    assert OrderFulfillment.call(order)
+    booking = order.reload.booking
+
+    assert_equal start_date, booking.starts_on
+    assert_equal start_date + 1.month, booking.ends_on
   end
 
   test "fulfills pack order with credits" do
@@ -157,6 +178,7 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       amount_cents: 14_000,
       status: "pending",
       seat: @seat,
+      booking_date: Date.current,
       vat_number: "123456789"
     )
 
@@ -180,6 +202,7 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       amount_cents: 12_000,
       status: "pending",
       seat: @seat,
+      booking_date: Date.current,
       vat_number: "123456789"
     )
 

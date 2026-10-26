@@ -6,12 +6,13 @@ module CheckoutsHelper
     when "monthly", "monthly_3"
       months = Order.plan_config(plan_type)[:months] || 1
       meeting_hours = Order.plan_config(plan_type)[:meeting_hours]
-      period_label = months == 1 ? "the next month" : "the next #{months} months"
+      period_label = months == 1 ? "one month" : "#{months} months"
       hours_label = "#{meeting_hours} #{"hour".pluralize(meeting_hours)} of meeting room access"
-      if current_user.next_monthly_starts_on > Date.current
-        "Choose your dedicated desk. Your plan starts #{current_user.next_monthly_starts_on.strftime('%-d %B %Y')} after your current one ends. Includes #{hours_label}."
+      earliest = current_user.next_monthly_starts_on
+      if earliest > Date.current
+        "Pick a start date from #{earliest.strftime('%-d %B %Y')} (after your current plan) and choose your dedicated desk for #{period_label}. Includes #{hours_label}."
       else
-        "Choose your dedicated desk for #{period_label}. Includes #{hours_label}."
+        "Pick a start date and choose your dedicated desk for #{period_label}. Includes #{hours_label}."
       end
     when "pack_5"
       "Purchase 5 day credits, valid for 3 months."

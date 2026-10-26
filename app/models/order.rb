@@ -31,7 +31,8 @@ class Order < ApplicationRecord
   validates :hours, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validate :vat_number_format
   validates :seat, presence: true, if: -> { requires_desk? && !promocode_credit_pack? }
-  validates :booking_date, presence: true, if: -> { (plan_type == "daily" || plan_type == "meeting_daily") && !promocode_credit_pack? }
+  validates :booking_date, presence: true, if: -> { (plan_type == "daily" || plan_type == "meeting_daily" || monthly_desk_plan?) && !promocode_credit_pack? }
+  validate :monthly_start_date_valid, if: -> { monthly_desk_plan? && booking_date.present? && !promocode_credit_pack? }
   validates :starts_at, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
   validates :hours, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
   validate :seat_available, if: -> { pending? && requires_desk? && desk_count.positive? && !promocode_credit_pack? }
@@ -162,7 +163,7 @@ class Order < ApplicationRecord
         )
       end
     elsif monthly_desk_plan?
-      period = user.next_monthly_period(months: desk_months)
+      period = monthly_period
       SeatAvailability.available_for_monthly?(
         seat, period[:starts_on], period[:ends_on],
         except_order: self,
@@ -196,6 +197,18 @@ class Order < ApplicationRecord
 
   def desk_months
     self.class.plan_config(plan_type)[:months] || 1
+  end
+
+  def monthly_starts_on
+    earliest = user.next_monthly_starts_on
+    return earliest if booking_date.blank?
+
+    [ booking_date, earliest ].max
+  end
+
+  def monthly_period
+    starts_on = monthly_starts_on
+    { starts_on: starts_on, ends_on: starts_on + desk_months.months }
   end
 
   def meeting_plan?
@@ -362,11 +375,18 @@ class Order < ApplicationRecord
         end
       end
     elsif monthly_desk_plan?
-      period = user.next_monthly_period(months: desk_months)
+      period = monthly_period
       unless SeatAvailability.available_for_monthly?(seat, period[:starts_on], period[:ends_on], except_order: self)
         errors.add(:seat, "is not available for a monthly booking")
       end
     end
+  end
+
+  def monthly_start_date_valid
+    earliest = user.next_monthly_starts_on
+    return if booking_date >= earliest
+
+    errors.add(:booking_date, "must be on or after #{earliest.strftime('%-d %B %Y')}")
   end
 
   def meeting_booking_valid

@@ -144,15 +144,14 @@ class OrderFulfillment
   end
 
   def create_monthly_booking!
-    starts_on = @order.user.next_monthly_starts_on
-    ends_on = starts_on + @order.desk_months.months
+    period = @order.monthly_period
 
     Booking.create!(
       user: @order.user,
       seat: @order.seat,
       booking_type: "monthly",
-      starts_on: starts_on,
-      ends_on: ends_on,
+      starts_on: period[:starts_on],
+      ends_on: period[:ends_on],
       order: @order
     )
   end

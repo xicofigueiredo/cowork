@@ -83,6 +83,18 @@ class SeatAvailability
     end
   end
 
+  def self.monthly_start_calendar_days(from_date, months:, days: CALENDAR_WEEKDAYS)
+    weekday_dates(from: from_date, count: days).map do |date|
+      ends_on = date + months.months
+      available = Seat.desks.any? { |seat| available_for_monthly?(seat, date, ends_on) }
+      {
+        date: date,
+        available: available,
+        meta: available ? "Available" : "Full"
+      }
+    end
+  end
+
   # Today is always bookable (weekdays only via bookable_date? / ensure_weekday).
   def self.minimum_bookable_date
     Date.current
@@ -156,14 +168,14 @@ class SeatAvailability
 
   def self.pending_monthly_covers_date?(seat, date, except_order: nil)
     pending_monthly_orders(seat, except_order: except_order).any? do |order|
-      period = order.user.next_monthly_period(months: order.desk_months)
+      period = order.monthly_period
       period[:starts_on] <= date && period[:ends_on] >= date
     end
   end
 
   def self.pending_monthly_overlap?(seat, starts_on, ends_on, except_order: nil)
     pending_monthly_orders(seat, except_order: except_order).any? do |order|
-      period = order.user.next_monthly_period(months: order.desk_months)
+      period = order.monthly_period
       period[:starts_on] <= ends_on && period[:ends_on] >= starts_on
     end
   end

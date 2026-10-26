@@ -128,6 +128,7 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
 
     assert_equal start_date, booking.starts_on
     assert_equal start_date + 1.month, booking.ends_on
+    assert order.paid?
   end
 
   test "fulfills pack order with credits" do

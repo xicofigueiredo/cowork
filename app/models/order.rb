@@ -32,7 +32,7 @@ class Order < ApplicationRecord
   validate :vat_number_format
   validates :seat, presence: true, if: -> { requires_desk? && !promocode_credit_pack? }
   validates :booking_date, presence: true, if: -> { (plan_type == "daily" || plan_type == "meeting_daily" || monthly_desk_plan?) && !promocode_credit_pack? }
-  validate :monthly_start_date_valid, if: -> { monthly_desk_plan? && booking_date.present? && !promocode_credit_pack? }
+  validate :monthly_start_date_valid, if: -> { pending? && monthly_desk_plan? && booking_date.present? && !promocode_credit_pack? }
   validates :starts_at, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
   validates :hours, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
   validate :seat_available, if: -> { pending? && requires_desk? && desk_count.positive? && !promocode_credit_pack? }

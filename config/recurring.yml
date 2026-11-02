@@ -21,3 +21,13 @@ production:
   toconline_connection_check_afternoon:
     class: ToconlineConnectionCheckJob
     schedule: at 3pm every day
+
+  google_calendar_inbound_sync:
+    class: GoogleCalendar::SyncJob
+    schedule: every 5 minutes
+
+development:
+  google_calendar_inbound_sync:
+    class: GoogleCalendar::SyncJob
+    schedule: every 5 minutes
+

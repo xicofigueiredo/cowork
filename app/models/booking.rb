@@ -1,5 +1,6 @@
 class Booking < ApplicationRecord
   BOOKING_TYPES = %w[daily monthly meeting_hourly meeting_daily].freeze
+  SOURCES = %w[app google_calendar].freeze
   EDIT_DEADLINE_HOUR = 22
   EDIT_DEADLINE_MINUTE = 58
 
@@ -11,6 +12,7 @@ class Booking < ApplicationRecord
   has_one :access_code, -> { where(status: "active") }, class_name: "AccessCode"
 
   validates :booking_type, presence: true, inclusion: { in: BOOKING_TYPES }
+  validates :source, presence: true, inclusion: { in: SOURCES }
   validates :date, presence: true, if: -> { daily? || meeting_daily? }
   validates :starts_on, :ends_on, presence: true, if: -> { monthly? }
   validates :starts_at, :ends_at, presence: true, if: -> { meeting_hourly? }
@@ -21,6 +23,9 @@ class Booking < ApplicationRecord
   validate :meeting_room_available_on_update, on: :update, if: -> { meeting_booking? && (date_changed? || starts_at_changed?) }
   validate :seat_available_on_update, on: :update, if: -> { daily? && (date_changed? || seat_id_changed?) }
   validate :monthly_seat_available_on_update, on: :update, if: -> { monthly? && seat_id_changed? }
+
+  after_commit :enqueue_google_calendar_upsert, on: [ :create, :update ]
+  after_commit :enqueue_google_calendar_delete, on: :destroy
 
   scope :daily, -> { where(booking_type: "daily") }
   scope :monthly, -> { where(booking_type: "monthly") }
@@ -67,6 +72,10 @@ class Booking < ApplicationRecord
     daily? || monthly?
   end
 
+  def google_calendar_source?
+    source == "google_calendar"
+  end
+
   def period_label
     if daily?
       date.strftime("%-d %B %Y")
@@ -105,6 +114,23 @@ class Booking < ApplicationRecord
   end
 
   private
+
+  def enqueue_google_calendar_upsert
+    return unless desk_booking?
+    return if google_calendar_source?
+    return unless GoogleCalendar::Client.configured?
+
+    GoogleCalendar::OutboundSyncJob.perform_later(id, "upsert")
+  end
+
+  def enqueue_google_calendar_delete
+    return unless desk_booking?
+    return if google_calendar_source?
+    return if google_event_id.blank?
+    return unless GoogleCalendar::Client.configured?
+
+    GoogleCalendar::OutboundSyncJob.perform_later(google_event_id, "delete")
+  end
 
   def date_not_in_past
     if date < SeatAvailability.minimum_bookable_date

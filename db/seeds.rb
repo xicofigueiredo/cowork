@@ -22,5 +22,9 @@ promo.credits = 5
 promo.active = true
 promo.save!
 
+croissant_user = GoogleCalendar::SystemUser.call
+
 puts "Seeded #{Seat.count} seats (#{Seat.desks.count} desks + meeting room)"
 puts "Seeded promocode #{promo.code} (#{promo.credits} credits / #{Order.format_euros(promo.amount_cents)})"
+puts "Seeded Croissant booking user #{croissant_user.email}"
+

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_21_170100) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_115247) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -41,13 +41,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_170100) do
     t.date "date"
     t.datetime "ends_at"
     t.date "ends_on"
+    t.string "google_event_id"
     t.bigint "order_id"
     t.bigint "seat_id", null: false
+    t.string "source", default: "app", null: false
     t.datetime "starts_at"
     t.date "starts_on"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["credit_pack_id"], name: "index_bookings_on_credit_pack_id"
+    t.index ["google_event_id"], name: "index_bookings_on_google_event_id", unique: true, where: "(google_event_id IS NOT NULL)"
     t.index ["order_id"], name: "index_bookings_on_order_id", where: "(order_id IS NOT NULL)"
     t.index ["seat_id", "date"], name: "index_bookings_on_seat_and_meeting_daily_date", unique: true, where: "((booking_type)::text = 'meeting_daily'::text)"
     t.index ["seat_id", "date"], name: "index_bookings_on_seat_id_and_date", unique: true, where: "((booking_type)::text = 'daily'::text)"

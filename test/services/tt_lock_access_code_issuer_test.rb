@@ -77,9 +77,11 @@ class TtLockAccessCodeIssuerTest < ActiveSupport::TestCase
     end
   end
 
-  test "stores FALLBACK_CODE when gateway is offline" do
-    previous_fallback = ENV["FALLBACK_CODE"]
-    ENV["FALLBACK_CODE"] = "1904"
+  test "stores a random FALLBACK_CODES entry when gateway is offline" do
+    previous_fallback = ENV["FALLBACK_CODES"]
+    previous_singular = ENV["FALLBACK_CODE"]
+    ENV.delete("FALLBACK_CODE")
+    ENV["FALLBACK_CODES"] = "1904,2201,3344"
 
     client = Object.new
     def client.add_passcode!(**)
@@ -96,16 +98,21 @@ class TtLockAccessCodeIssuerTest < ActiveSupport::TestCase
         )
 
         assert access_code.persisted?
-        assert_equal "1904", access_code.code
+        assert_includes %w[1904 2201 3344], access_code.code
         assert access_code.fallback?
         assert access_code.synced_to_lock?
-        assert_equal "1904", @user.reload.access_code.code
+        assert_equal access_code.code, @user.reload.access_code.code
         assert_equal :synced, @user.door_code_status
       end
     end
   ensure
     if previous_fallback
-      ENV["FALLBACK_CODE"] = previous_fallback
+      ENV["FALLBACK_CODES"] = previous_fallback
+    else
+      ENV.delete("FALLBACK_CODES")
+    end
+    if previous_singular
+      ENV["FALLBACK_CODE"] = previous_singular
     else
       ENV.delete("FALLBACK_CODE")
     end

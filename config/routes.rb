@@ -54,7 +54,12 @@ Rails.application.routes.draw do
         delete :access_code, action: :destroy_access_code
       end
     end
+    resource :google_calendar, only: [ :show ] do
+      get :callback
+      post :sync
+    end
   end
+
 
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)

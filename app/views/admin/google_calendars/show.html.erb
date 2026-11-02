@@ -1,0 +1,48 @@
+<% content_for :title, "Google Calendar" %>
+
+<section class="admin-section">
+  <h1 class="admin-title">Google Calendar · Croissant</h1>
+  <p class="admin-lede">
+    Connect the Google account that owns the shared desk calendar. Croissant and this app both use that calendar.
+  </p>
+
+  <dl class="admin-kv">
+    <div>
+      <dt>Status</dt>
+      <dd><%= @configured ? "Connected" : "Not connected" %></dd>
+    </div>
+    <div>
+      <dt>Calendar ID</dt>
+      <dd><code><%= @calendar_id.presence || "(set GOOGLE_CALENDAR_ID)" %></code></dd>
+    </div>
+    <div>
+      <dt>Redirect URI</dt>
+      <dd><code><%= @redirect_uri %></code></dd>
+    </div>
+    <div>
+      <dt>Croissant user</dt>
+      <dd><code><%= @system_user_email %></code></dd>
+    </div>
+  </dl>
+
+  <ol class="admin-steps">
+    <li>
+      In Google Cloud Console → Credentials → your OAuth client, add this authorized redirect URI:
+      <code><%= @redirect_uri %></code>
+    </li>
+    <li>Enable the <strong>Google Calendar API</strong> for the same project.</li>
+    <li>Sign in below with <code>hello@mezzaninecowork.com</code> (the calendar owner).</li>
+  </ol>
+
+  <div class="admin-actions">
+    <% if @authorize_url.present? %>
+      <%= link_to "Connect Google Calendar", @authorize_url, class: "btn btn-primary", data: { turbo: false } %>
+    <% else %>
+      <p class="admin-alert">Set GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET first.<%= " #{@authorize_error}" if @authorize_error.present? %></p>
+    <% end %>
+
+    <% if @configured %>
+      <%= button_to "Sync now", sync_admin_google_calendar_path, method: :post, class: "btn" %>
+    <% end %>
+  </div>
+</section>

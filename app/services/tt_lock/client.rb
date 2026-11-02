@@ -25,8 +25,15 @@ module TtLock
         ENV["TTLOCK_LOCK_ID"].present?
     end
 
+    # Comma-separated codes already programmed on the lock (FALLBACK_CODES).
+    # Falls back to singular FALLBACK_CODE for older env files.
+    def self.fallback_codes
+      raw = ENV["FALLBACK_CODES"].presence || ENV["FALLBACK_CODE"].to_s
+      raw.split(",").map { |code| code.to_s.strip }.reject(&:blank?).uniq
+    end
+
     def self.fallback_code
-      ENV["FALLBACK_CODE"].to_s.strip.presence
+      fallback_codes.sample
     end
 
     def initialize

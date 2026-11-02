@@ -85,14 +85,14 @@ module TtLock
       "Member — #{label}"
     end
 
-    # Store FALLBACK_CODE in the DB so email + My Bookings can show it.
-    # The code itself is already programmed on the lock via the TTLock app.
+    # Store a random FALLBACK_CODES entry in the DB so email + My Bookings can show it.
+    # The codes themselves are already programmed on the lock via the TTLock app.
     def self.apply_fallback!(access_code)
       code = Client.fallback_code
-      raise ApiError, "TTLock gateway is offline and FALLBACK_CODE is not set" if code.blank?
+      raise ApiError, "TTLock gateway is offline and FALLBACK_CODES is not set" if code.blank?
 
       Rails.logger.warn(
-        "TTLock gateway offline; storing FALLBACK_CODE for access_code ##{access_code.id || "new"} (#{access_code.name})"
+        "TTLock gateway offline; storing fallback code for access_code ##{access_code.id || "new"} (#{access_code.name})"
       )
 
       access_code.assign_attributes(

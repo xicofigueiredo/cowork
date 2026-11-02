@@ -2,9 +2,16 @@ class SeatAvailability
   CALENDAR_WEEKDAYS = 14
   PENDING_HOLD_TTL = 15.minutes
 
+  # Day pass / day-credit desk bookings only. Monthly desk passes remain allowed.
+  BLOCKED_DAILY_DATES = [
+    Date.new(2026, 11, 14),
+    Date.new(2026, 11, 18)
+  ].freeze
+
   def self.available_on?(seat, date, except_booking: nil, except_order: nil, ignore_pending: false)
     return false unless weekday?(date)
     return false if date < minimum_bookable_date
+    return false if blocked_daily_date?(date)
 
     available = !daily_booking_exists?(seat, date, except_booking: except_booking) &&
       !monthly_booking_covers?(seat, date, except_booking: except_booking)
@@ -68,18 +75,23 @@ class SeatAvailability
   def self.any_desk_available?(date, except_booking: nil, except_order: nil)
     return false unless weekday?(date)
     return false if date < minimum_bookable_date
+    return false if blocked_daily_date?(date)
 
     Seat.desks.any? { |seat| available_on?(seat, date, except_booking: except_booking, except_order: except_order) }
   end
 
   def self.calendar_days(from_date, days: CALENDAR_WEEKDAYS, except_booking: nil, except_order: nil)
     weekday_dates(from: from_date, count: days).map do |date|
-      available = any_desk_available?(date, except_booking: except_booking, except_order: except_order)
-      {
-        date: date,
-        available: available,
-        meta: available ? "Available" : "Full"
-      }
+      if blocked_daily_date?(date)
+        { date: date, available: false, meta: "Closed" }
+      else
+        available = any_desk_available?(date, except_booking: except_booking, except_order: except_order)
+        {
+          date: date,
+          available: available,
+          meta: available ? "Available" : "Full"
+        }
+      end
     end
   end
 
@@ -105,7 +117,11 @@ class SeatAvailability
   end
 
   def self.bookable_date?(date)
-    weekday?(date) && date >= minimum_bookable_date
+    weekday?(date) && date >= minimum_bookable_date && !blocked_daily_date?(date)
+  end
+
+  def self.blocked_daily_date?(date)
+    date.present? && BLOCKED_DAILY_DATES.include?(date.to_date)
   end
 
   def self.weekday?(date)

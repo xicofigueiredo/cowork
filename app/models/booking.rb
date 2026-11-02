@@ -108,7 +108,11 @@ class Booking < ApplicationRecord
   private
 
   def date_not_in_past
-    errors.add(:date, "cannot be in the past") unless SeatAvailability.bookable_date?(date)
+    if date < SeatAvailability.minimum_bookable_date
+      errors.add(:date, "cannot be in the past")
+    elsif SeatAvailability.blocked_daily_date?(date)
+      errors.add(:date, "is not available for day pass or credit bookings")
+    end
   end
 
   def daily_weekday

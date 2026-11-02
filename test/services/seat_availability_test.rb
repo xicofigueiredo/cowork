@@ -80,4 +80,27 @@ class SeatAvailabilityTest < ActiveSupport::TestCase
     assert_not conflicting.valid?
     assert_includes conflicting.errors[:seat].join, "not available"
   end
+
+  test "blocked daily dates reject day bookings but allow monthly" do
+    blocked = Date.new(2026, 11, 18)
+
+    assert SeatAvailability.blocked_daily_date?(blocked)
+    assert_not SeatAvailability.bookable_date?(blocked)
+    assert_not SeatAvailability.available_on?(@seat, blocked)
+    assert_not SeatAvailability.any_desk_available?(blocked)
+
+    day = SeatAvailability.calendar_days(blocked - 7.days).find { |entry| entry[:date] == blocked }
+    assert day
+    assert_not day[:available]
+    assert_equal "Closed", day[:meta]
+
+    starts_on = blocked
+    ends_on = starts_on + 1.month
+    assert SeatAvailability.available_for_monthly?(@seat, starts_on, ends_on)
+
+    monthly_day = SeatAvailability.monthly_start_calendar_days(blocked - 7.days, months: 1)
+      .find { |entry| entry[:date] == blocked }
+    assert monthly_day
+    assert monthly_day[:available]
+  end
 end

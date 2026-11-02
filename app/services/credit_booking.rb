@@ -13,6 +13,9 @@ class CreditBooking
 
   def call
     raise Error, "Desks are not available on weekends" unless SeatAvailability.weekday?(@date)
+    if SeatAvailability.blocked_daily_date?(@date)
+      raise Error, "Day pass and credit bookings are closed on #{@date.strftime('%-d %B')}. Monthly passes only."
+    end
     raise Error, "That date isn't available" unless SeatAvailability.bookable_date?(@date)
 
     booking = nil

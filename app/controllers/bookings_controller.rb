@@ -30,6 +30,10 @@ class BookingsController < ApplicationController
     end
 
     @booking_date = parsed_booking_date
+    if SeatAvailability.blocked_daily_date?(@booking_date)
+      redirect_to new_booking_path, alert: "Day pass and credit bookings are closed on #{@booking_date.strftime('%-d %B')}. Monthly passes only."
+      return
+    end
     unless SeatAvailability.bookable_date?(@booking_date)
       redirect_to new_booking_path, alert: "That date isn't available. Pick another date."
       return
@@ -92,6 +96,10 @@ class BookingsController < ApplicationController
     @calendar_start = SeatAvailability.earliest_bookable_date
     @calendar_days = SeatAvailability.calendar_days(@calendar_start, except_booking: @booking)
     @booking_date = params[:date].present? ? parsed_edit_date : @booking.date
+    if validate_date && SeatAvailability.blocked_daily_date?(@booking_date)
+      redirect_to edit_booking_path(@booking), alert: "Day pass and credit bookings are closed on #{@booking_date.strftime('%-d %B')}. Monthly passes only."
+      return false
+    end
     if validate_date && !SeatAvailability.bookable_date?(@booking_date)
       redirect_to edit_booking_path(@booking), alert: "That date isn't available. Pick another date."
       return false

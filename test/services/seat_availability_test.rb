@@ -103,4 +103,17 @@ class SeatAvailabilityTest < ActiveSupport::TestCase
     assert monthly_day
     assert monthly_day[:available]
   end
+
+  test "weekends are bookable for desks" do
+    saturday = Date.current.next_occurring(:saturday)
+    sunday = Date.current.next_occurring(:sunday)
+
+    [ saturday, sunday ].each do |weekend_day|
+      next if SeatAvailability.blocked_daily_date?(weekend_day)
+
+      assert SeatAvailability.bookable_date?(weekend_day)
+      assert SeatAvailability.available_on?(@seat, weekend_day)
+      assert SeatAvailability.any_desk_available?(weekend_day)
+    end
+  end
 end

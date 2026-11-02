@@ -77,7 +77,7 @@ module SeoHelper
       "openingHoursSpecification" => [
         {
           "@type" => "OpeningHoursSpecification",
-          "dayOfWeek" => %w[Monday Tuesday Wednesday Thursday Friday],
+          "dayOfWeek" => %w[Monday Tuesday Wednesday Thursday Friday Saturday Sunday],
           "opens" => "08:00",
           "closes" => "20:00"
         }

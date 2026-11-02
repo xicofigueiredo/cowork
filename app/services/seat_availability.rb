@@ -1,5 +1,5 @@
 class SeatAvailability
-  CALENDAR_WEEKDAYS = 14
+  CALENDAR_WEEKDAYS = 15
   PENDING_HOLD_TTL = 15.minutes
 
   # Day pass / day-credit desk bookings only. Monthly desk passes remain allowed.
@@ -9,7 +9,6 @@ class SeatAvailability
   ].freeze
 
   def self.available_on?(seat, date, except_booking: nil, except_order: nil, ignore_pending: false)
-    return false unless weekday?(date)
     return false if date < minimum_bookable_date
     return false if blocked_daily_date?(date)
 
@@ -73,7 +72,6 @@ class SeatAvailability
   end
 
   def self.any_desk_available?(date, except_booking: nil, except_order: nil)
-    return false unless weekday?(date)
     return false if date < minimum_bookable_date
     return false if blocked_daily_date?(date)
 
@@ -107,17 +105,17 @@ class SeatAvailability
     end
   end
 
-  # Today is always bookable (weekdays only via bookable_date? / ensure_weekday).
+  # Today is always bookable, including weekends (except blocked daily dates).
   def self.minimum_bookable_date
     Date.current
   end
 
   def self.earliest_bookable_date
-    ensure_weekday(minimum_bookable_date)
+    minimum_bookable_date
   end
 
   def self.bookable_date?(date)
-    weekday?(date) && date >= minimum_bookable_date && !blocked_daily_date?(date)
+    date >= minimum_bookable_date && !blocked_daily_date?(date)
   end
 
   def self.blocked_daily_date?(date)

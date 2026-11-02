@@ -1,7 +1,7 @@
 class MeetingRoomAvailability
   OPEN_HOUR = 8
   CLOSE_HOUR = 20
-  CALENDAR_WEEKDAYS = 14
+  CALENDAR_WEEKDAYS = 15
   PENDING_HOLD_TTL = SeatAvailability::PENDING_HOLD_TTL
 
   Hold = Struct.new(:starts_at, :ends_at, :date, keyword_init: true) do
@@ -25,7 +25,6 @@ class MeetingRoomAvailability
 
     def hourly_available?(starts_at, ends_at)
       return false if starts_at < earliest_hourly_at
-      return false unless MeetingRoomAvailability.weekday?(starts_at.to_date)
       return false unless MeetingRoomAvailability.slot_within_opening_hours?(starts_at, ends_at)
       return false if meeting_daily_on?(starts_at.to_date)
       return false if hourly_overlap?(starts_at, ends_at)
@@ -63,29 +62,21 @@ class MeetingRoomAvailability
   end
 
   class << self
+    # Kept for callers; weekends are bookable for all booking types.
     def weekday?(date)
-      !date.saturday? && !date.sunday?
+      date.present?
     end
 
     def next_weekday(date)
-      date += 1.day until weekday?(date)
       date
     end
 
     def ensure_weekday(date)
-      weekday?(date) ? date : next_weekday(date)
+      date
     end
 
     def weekday_dates(from:, count: CALENDAR_WEEKDAYS)
-      dates = []
-      date = from
-
-      while dates.size < count
-        dates << date if weekday?(date)
-        date += 1.day
-      end
-
-      dates
+      Array.new(count) { |offset| from + offset.days }
     end
 
     def earliest_hourly_at
@@ -93,11 +84,11 @@ class MeetingRoomAvailability
     end
 
     def earliest_hourly_date
-      ensure_weekday(earliest_hourly_at.to_date)
+      earliest_hourly_at.to_date
     end
 
     def earliest_daily_date
-      ensure_weekday(Date.current + 1.day)
+      Date.current + 1.day
     end
 
     def schedule_for(range, except_booking: nil, except_order: nil, ignore_pending: false)
@@ -128,7 +119,6 @@ class MeetingRoomAvailability
         except_order: except_order,
         ignore_pending: ignore_pending
       )
-      return false unless weekday?(date)
       return false if date < earliest_daily_date
       return false if schedule.meeting_daily_on?(date)
       return false if schedule.hourly_bookings.any? { |booking| booking.starts_at.to_date == date }

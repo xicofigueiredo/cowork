@@ -15,7 +15,6 @@ class MeetingCreditBooking
 
   def call
     raise Error, "This time slot has already started" if @starts_at < MeetingRoomAvailability.earliest_hourly_at
-    raise Error, "Meeting room is not available on weekends" unless MeetingRoomAvailability.weekday?(@starts_at.to_date)
     raise Error, "Booking must be within opening hours (8:00–20:00)" unless within_opening_hours?
 
     booking = nil

@@ -2,7 +2,7 @@ module CheckoutsHelper
   def checkout_plan_description(plan_type)
     case plan_type
     when "daily"
-      "Choose a weekday and one or more desks. The total updates with each desk you select."
+      "Choose a date and one or more desks. The total updates with each desk you select."
     when "monthly", "monthly_3"
       months = Order.plan_config(plan_type)[:months] || 1
       meeting_hours = Order.plan_config(plan_type)[:meeting_hours]
@@ -19,9 +19,9 @@ module CheckoutsHelper
     when "pack_10"
       "Purchase 10 day credits, valid for 3 months."
     when "meeting_hourly"
-      "Book the meeting room by the hour on a weekday, including today. Select consecutive hours — bookings over 3 hours get 20% off."
+      "Book the meeting room by the hour, including today. Select consecutive hours — bookings over 3 hours get 20% off."
     when "meeting_daily"
-      "Book the meeting room for a full weekday (8:00–20:00). Must be booked at least 24 hours in advance."
+      "Book the meeting room for a full day (8:00–20:00). Must be booked at least 24 hours in advance."
     else
       ""
     end

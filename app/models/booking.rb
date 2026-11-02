@@ -15,7 +15,6 @@ class Booking < ApplicationRecord
   validates :starts_on, :ends_on, presence: true, if: -> { monthly? }
   validates :starts_at, :ends_at, presence: true, if: -> { meeting_hourly? }
   validate :date_not_in_past, if: -> { daily? && date.present? }
-  validate :daily_weekday, if: -> { daily? && date.present? }
   validate :meeting_daily_advance, if: -> { meeting_daily? && date.present? }
   validate :seat_available, on: :create, if: -> { desk_booking? }
   validate :meeting_room_available, on: :create, if: -> { meeting_booking? }
@@ -113,10 +112,6 @@ class Booking < ApplicationRecord
     elsif SeatAvailability.blocked_daily_date?(date)
       errors.add(:date, "is not available for day pass or credit bookings")
     end
-  end
-
-  def daily_weekday
-    errors.add(:date, "must be a weekday") unless MeetingRoomAvailability.weekday?(date)
   end
 
   def meeting_daily_advance

@@ -14,5 +14,6 @@ class UserMailerTest < ActionMailer::TestCase
     assert_equal "Welcome to Mezzanine", email.subject
     assert_match "Dear One", email.body.encoded
     assert_match "Welcome to Mezzanine", email.body.encoded
+    assert_match "https://wa.me/351917204091", email.body.encoded
   end
 end

@@ -290,6 +290,14 @@
   border-bottom: 1px solid #6C312E;
 }
 
+.pricing-plan-note {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.9;
+  color: #fff;
+}
+
 .pricing-details .pricing-plan > :nth-last-child(2) {
   margin-bottom: 16px;
 }

@@ -141,7 +141,8 @@ function initializePricing() {
             'Dedicated desk for the booked period ',
             '5h access to the meeting room',
             'Free access to the phone booth'
-          ]
+          ],
+          note: 'Trying us out first? Buy one daily pass and its value is deducted from your monthly plan.'
         },
         {
           title: '3 Months',
@@ -153,7 +154,8 @@ function initializePricing() {
             'Dedicated desk for the booked period ',
             '15h access to the meeting room',
             'Free access to the phone booth'
-          ]
+          ],
+          note: 'Trying us out first? Buy one daily pass and its value is deducted from your monthly plan.'
         }
       ]
     },
@@ -198,6 +200,9 @@ function initializePricing() {
     const featuresHtml = plan.features?.length
       ? `<ul class="pricing-plan-features">${plan.features.map(feature => `<li>${feature}</li>`).join('')}</ul>`
       : '';
+    const noteHtml = plan.note
+      ? `<p class="pricing-plan-note">${plan.note}</p>`
+      : '';
 
     const planType = planTypeMap[plan.title];
     const bookUrl = planType ? `${checkoutBase}?plan=${planType}` : '<%= location_path %>';
@@ -211,6 +216,7 @@ function initializePricing() {
         <p class="pricing-plan-price">${plan.price}${plan.pricePeriod ? `<span class="pricing-plan-price-period">${plan.pricePeriod}</span>` : ''}${showVat ? ' <span class="pricing-plan-vat">+VAT</span>' : ''}</p>
       </div>
       ${featuresHtml}
+      ${noteHtml}
       ${bookButton}
     `;
   }

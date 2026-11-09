@@ -1,7 +1,7 @@
 class MeetingRoomAvailability
   OPEN_HOUR = 8
   CLOSE_HOUR = 20
-  CALENDAR_WEEKDAYS = 15
+  CALENDAR_WEEKDAYS = 20
   PENDING_HOLD_TTL = SeatAvailability::PENDING_HOLD_TTL
 
   Hold = Struct.new(:starts_at, :ends_at, :date, keyword_init: true) do

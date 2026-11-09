@@ -1,5 +1,5 @@
 class SeatAvailability
-  CALENDAR_WEEKDAYS = 15
+  CALENDAR_WEEKDAYS = 20
   PENDING_HOLD_TTL = 15.minutes
 
   # Day pass / day-credit desk bookings only. Monthly desk passes remain allowed.

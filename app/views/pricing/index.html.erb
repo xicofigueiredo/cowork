@@ -14,8 +14,7 @@
     <h2>Monthly</h2>
     <ul>
       <li>1 Month — 140,00 € (was 150,00 €): includes 5h meeting room</li>
-      <li>3 Months — 120,00 € (was 130,00 €): includes 15h meeting room</li>
-      <li>Long term desk — custom pricing</li>
+      <li>3 Months — 120,00 € /month (was 130,00 €): includes 15h meeting room</li>
     </ul>
     <h2>Virtual office</h2>
     <ul>
@@ -148,18 +147,13 @@ function initializePricing() {
           title: '3 Months',
           originalPrice: '140,00 €',
           price: '120,00 €',
+          pricePeriod: '/month',
           features: [
             '25% discount',
             'Dedicated desk for the booked period ',
             '15h access to the meeting room',
             'Free access to the phone booth'
           ]
-        },
-        {
-          title: 'Long term desk',
-          price: 'Custom pricing',
-          features: [
-         ]
         }
       ]
     },
@@ -214,7 +208,7 @@ function initializePricing() {
       <h4 class="pricing-plan-title">${plan.title}</h4>
       <div class="pricing-plan-prices">
         ${showOriginalPrice ? `<span class="pricing-plan-original-price">${plan.originalPrice}</span>` : ''}
-        <p class="pricing-plan-price">${plan.price}${showVat ? ' <span class="pricing-plan-vat">+VAT</span>' : ''}</p>
+        <p class="pricing-plan-price">${plan.price}${plan.pricePeriod ? `<span class="pricing-plan-price-period">${plan.pricePeriod}</span>` : ''}${showVat ? ' <span class="pricing-plan-vat">+VAT</span>' : ''}</p>
       </div>
       ${featuresHtml}
       ${bookButton}

@@ -266,14 +266,23 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
+  gap: 8px;
   height: 56px;
-  border-radius: 50%;
+  padding: 0 16px 0 18px;
+  border-radius: 999px;
   background: #25d366;
   color: #fff;
   box-shadow: 0 4px 14px rgb(0 0 0 / 0.22);
   text-decoration: none;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.whatsapp-fab-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .whatsapp-fab:hover {
@@ -287,6 +296,7 @@ main {
 
 .whatsapp-fab svg {
   display: block;
+  flex-shrink: 0;
 }
 
 @media (min-width: 769px) {

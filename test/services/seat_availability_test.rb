@@ -92,7 +92,7 @@ class SeatAvailabilityTest < ActiveSupport::TestCase
     day = SeatAvailability.calendar_days(blocked - 7.days).find { |entry| entry[:date] == blocked }
     assert day
     assert_not day[:available]
-    assert_equal "Closed", day[:meta]
+    assert_equal "Private event", day[:meta]
 
     starts_on = blocked
     ends_on = starts_on + 1.month

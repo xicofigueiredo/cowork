@@ -4,7 +4,7 @@ class SeatAvailability
 
   # Day pass / day-credit desk bookings only. Monthly desk passes remain allowed.
   BLOCKED_DAILY_DATES = [
-    Date.new(2026, 11, 14),
+    Date.new(2026, 11, 12),
     Date.new(2026, 11, 18)
   ].freeze
 
@@ -81,7 +81,7 @@ class SeatAvailability
   def self.calendar_days(from_date, days: CALENDAR_WEEKDAYS, except_booking: nil, except_order: nil)
     weekday_dates(from: from_date, count: days).map do |date|
       if blocked_daily_date?(date)
-        { date: date, available: false, meta: "Closed" }
+        { date: date, available: false, meta: "Private event" }
       else
         available = any_desk_available?(date, except_booking: except_booking, except_order: except_order)
         {

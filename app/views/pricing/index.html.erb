@@ -18,7 +18,8 @@
     </ul>
     <h2>Virtual office</h2>
     <ul>
-      <li>Virtual office — coming soon</li>
+      <li>Virtual office — 240,00 € (20 €/month): legal domiciliation, mail collection, email notification, mail scanning up to 20 pages</li>
+      <li>Virtual office plus — 600,00 € (50 €/month): same as virtual office with unlimited scanning and 4h meeting room per month</li>
     </ul>
     <h2>Meeting room</h2>
     <ul>
@@ -87,8 +88,12 @@ function initializePricing() {
     '1 Month': 'monthly',
     '3 Months': 'monthly_3',
     'Hourly booking': 'meeting_hourly',
-    'Daily booking': 'meeting_daily'
+    'Daily booking': 'meeting_daily',
+    'Basic': 'virtual',
+    'Plus': 'virtual_plus'
   };
+
+  const subscribePlanTypes = new Set(['virtual', 'virtual_plus']);
 
   const pricingData = {
     daily: {
@@ -160,12 +165,33 @@ function initializePricing() {
       ]
     },
     virtual: {
-      title: 'Virtual office (Coming soon)',
+      title: 'Virtual office - Annual plans',
       plans: [
-        { title: 'Virtual office', price: 'Coming soon' },
-        // { title: 'Address + email', price: '20,00 €' },
-        // { title: '+20 pages scan', price: '35,00 €' },
-        // { title: '+4h in the meeting room', price: '50,00 €' }
+        {
+          title: 'Basic',
+          planType: 'virtual',
+          price: '240,00 €',
+          pricePeriod: ' (20 €/month)',
+          features: [
+            'Legal domiciliation',
+            'Mail collection',
+            'Notification by email',
+            'Mail scanning up to 20 pages'
+          ]
+        },
+        {
+          title: 'Plus',
+          planType: 'virtual_plus',
+          price: '600,00 €',
+          pricePeriod: ' (50 €/month)',
+          features: [
+            'Legal domiciliation',
+            'Mail collection',
+            'Notification by email',
+            'Unlimited mail scanning',
+            '4h meeting room per month'
+          ]
+        }
       ]
     },
     meeting: {
@@ -204,9 +230,11 @@ function initializePricing() {
       ? `<p class="pricing-plan-note">${plan.note}</p>`
       : '';
 
-    const planType = planTypeMap[plan.title];
+    const planType = plan.planType || planTypeMap[plan.title];
     const bookUrl = planType ? `${checkoutBase}?plan=${planType}` : '<%= location_path %>';
-    const bookLabel = planType ? 'Book now' : 'Contact us';
+    const bookLabel = planType
+      ? (subscribePlanTypes.has(planType) ? 'Subscribe' : 'Book now')
+      : 'Contact us';
     const bookButton = `<a href="${bookUrl}" class="pricing-plan-button">${bookLabel}</a>`;
 
     return `

@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   get "location" => "location#index"
   post "location" => "location#create"
   get "privacy-policy" => "legal#privacy_policy", as: :privacy_policy
+  get "terms-and-conditions" => redirect("/termosecondicoes.pdf"), as: :terms_and_conditions
 
   resources :checkouts, only: [ :new, :create, :show ] do
     member do

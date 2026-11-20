@@ -23,7 +23,7 @@
         </p>
       <% end %>
 
-      <% if @order.booking_date && !@order.monthly_desk_plan? %>
+      <% if @order.booking_date && !@order.monthly_desk_plan? && !@order.virtual_plan? %>
         <p class="booking-summary-row">
           <span>Date</span>
           <strong><%= @order.booking_date.strftime("%-d %B %Y") %></strong>
@@ -65,6 +65,48 @@
           <span>Credits</span>
           <strong><%= @order.credit_count %> days</strong>
         </p>
+      <% end %>
+
+      <% if @order.virtual_plan? %>
+        <% virtual_config = Order.plan_config(@order.plan_type) %>
+        <p class="booking-summary-row">
+          <span>Period</span>
+          <strong>12 months</strong>
+        </p>
+        <p class="booking-summary-row">
+          <span>Monthly equivalent</span>
+          <strong><%= Order.format_euros(virtual_config[:monthly_amount_cents]) %>/month</strong>
+        </p>
+        <% if virtual_config[:meeting_hours].present? %>
+          <p class="booking-summary-row">
+            <span>Meeting room</span>
+            <strong>4h per month (<%= virtual_config[:meeting_hours] %>h total)</strong>
+          </p>
+        <% end %>
+        <% if @order.booking_date.present? %>
+          <p class="booking-summary-row">
+            <span>Start date</span>
+            <strong><%= @order.booking_date.strftime("%-d %B %Y") %></strong>
+          </p>
+        <% end %>
+        <% if @order.company_name.present? %>
+          <p class="booking-summary-row">
+            <span>Company name</span>
+            <strong><%= @order.company_name %></strong>
+          </p>
+        <% end %>
+        <% @order.partners.each_with_index do |partner, index| %>
+          <p class="booking-summary-row">
+            <span><%= @order.partners.size > 1 ? "Partner #{index + 1}" : "Partner" %></span>
+            <strong><%= partner["name"] %> · <%= partner["national_id"] %></strong>
+          </p>
+        <% end %>
+        <% if @order.contact_email.present? %>
+          <p class="booking-summary-row">
+            <span>Email</span>
+            <strong><%= @order.contact_email %></strong>
+          </p>
+        <% end %>
       <% end %>
 
       <% if @order.vat_number.present? %>

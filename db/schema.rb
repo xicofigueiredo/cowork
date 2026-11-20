@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_174307) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_191251) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -125,9 +125,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_174307) do
   create_table "orders", force: :cascade do |t|
     t.integer "amount_cents", null: false
     t.date "booking_date"
+    t.string "company_name"
+    t.string "contact_email"
     t.datetime "created_at", null: false
     t.integer "hours"
     t.datetime "paid_at"
+    t.jsonb "partners", default: [], null: false
     t.string "plan_type", null: false
     t.bigint "promocode_id"
     t.bigint "seat_id"
@@ -135,6 +138,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_174307) do
     t.datetime "starts_at"
     t.string "status", default: "pending", null: false
     t.string "stripe_session_id"
+    t.boolean "terms_accepted", default: false, null: false
     t.string "toconline_document_id"
     t.string "toconline_document_number"
     t.datetime "updated_at", null: false

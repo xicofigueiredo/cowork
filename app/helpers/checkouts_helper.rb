@@ -22,6 +22,10 @@ module CheckoutsHelper
       "Book the meeting room by the hour, including today. Select consecutive hours — bookings over 3 hours get 20% off."
     when "meeting_daily"
       "Book the meeting room for a full day (8:00–20:00). Must be booked at least 24 hours in advance."
+    when "virtual"
+      "Annual virtual office subscription. Includes legal domiciliation, mail collection, email notifications, and scanning up to 20 pages."
+    when "virtual_plus"
+      "Annual virtual office plus subscription. Includes unlimited mail scanning and 4 hours of meeting room access per month."
     else
       ""
     end

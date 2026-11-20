@@ -269,4 +269,54 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
     assert OrderFulfillment.call(order.reload)
     assert_equal 1, Booking.where(order: order).count
   end
+
+  test "fulfills virtual office order without booking resources" do
+    order = Order.create!(
+      user: @user,
+      plan_type: "virtual",
+      amount_cents: 24_000,
+      status: "pending",
+      vat_number: "123456789",
+      booking_date: Date.current,
+      company_name: "Mezzanine LDA",
+      partners: [
+        { "name" => "Ana Silva", "national_id" => "12345678" },
+        { "name" => "João Costa", "national_id" => "87654321" }
+      ],
+      contact_email: "ana@example.com",
+      terms_accepted: true
+    )
+
+    assert OrderFulfillment.call(order)
+    order.reload
+
+    assert order.paid?
+    assert_nil order.booking
+    assert_nil order.credit_pack
+  end
+
+  test "fulfills virtual office plus with annual meeting hours" do
+    order = Order.create!(
+      user: @user,
+      plan_type: "virtual_plus",
+      amount_cents: 60_000,
+      status: "pending",
+      vat_number: "123456789",
+      booking_date: Date.current,
+      company_name: "Mezzanine Plus LDA",
+      partners: [ { "name" => "Ana Silva", "national_id" => "87654321" } ],
+      contact_email: "plus@example.com",
+      terms_accepted: true
+    )
+
+    assert OrderFulfillment.call(order)
+    order.reload
+
+    assert order.paid?
+    assert_nil order.booking
+    assert_equal "meeting_hour", order.credit_pack.credit_type
+    assert_equal 48, order.credit_pack.total_credits
+    assert_equal 48, order.credit_pack.remaining_credits
+    assert_in_delta 12.months.from_now.to_i, order.credit_pack.expires_at.to_i, 5
+  end
 end

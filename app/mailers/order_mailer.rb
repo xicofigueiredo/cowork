@@ -76,4 +76,17 @@ class OrderMailer < ApplicationMailer
       subject: "Welcome to Mezzanine — space guide & house rules"
     )
   end
+
+  def virtual_office_activation(order)
+    @order = order
+    @user = order.user
+    @greeting_name = @user.first_name.presence || @user.email
+    @bookings_url = bookings_url
+
+    mail(
+      to: @user.email,
+      bcc: admin_emails,
+      subject: "Your Virtual Office is now active — Mezzanine"
+    )
+  end
 end

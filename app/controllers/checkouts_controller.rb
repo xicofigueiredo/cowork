@@ -10,6 +10,7 @@ class CheckoutsController < ApplicationController
     end
 
     @order = current_user.orders.build(plan_type: @plan_type, amount_cents: Order.plan_config(@plan_type)[:amount_cents])
+    assign_checkout_form_attrs!
     apply_promocode_from_params!
     load_plan_defaults
     load_selected_meeting_slots
@@ -142,8 +143,12 @@ class CheckoutsController < ApplicationController
   end
 
   def order_params
-    params.require(:order).permit(:plan_type, :seat_id, :booking_date, :vat_number, starts_at: [], seat_ids: [])
-      .tap do |permitted|
+    params.require(:order).permit(
+      :plan_type, :seat_id, :booking_date, :vat_number,
+      :company_name, :contact_email, :terms_accepted,
+      partners: [ :name, :national_id ],
+      starts_at: [], seat_ids: []
+    ).tap do |permitted|
         # Multi-hour checkboxes post an array; strip it so build does not assign an Array.
         # apply_meeting_hourly_slots! sets starts_at + hours from the raw params.
         permitted.delete(:starts_at)
@@ -265,7 +270,39 @@ class CheckoutsController < ApplicationController
     when "meeting_hourly"
       load_meeting_hourly_calendar
       @order.starts_at = Time.zone.parse(params[:slot]) if params[:slot].present?
+    when "virtual", "virtual_plus"
+      load_virtual_checkout_defaults
     end
+  end
+
+  def assign_checkout_form_attrs!
+    return if params[:order].blank?
+
+    @order.assign_attributes(
+      params.require(:order).permit(
+        :booking_date, :vat_number, :seat_id,
+        :company_name, :contact_email, :terms_accepted,
+        partners: [ :name, :national_id ],
+        seat_ids: []
+      )
+    )
+  end
+
+  def load_virtual_checkout_defaults
+    @order.contact_email ||= current_user.email
+    @order.booking_date ||= parsed_virtual_start_date
+    @virtual_start_min = Date.current
+    @virtual_start_max = Date.current + 1.month
+  end
+
+  def parsed_virtual_start_date
+    date_param = params[:date].presence || params.dig(:order, :booking_date)
+    return Date.current if date_param.blank?
+
+    date = Date.parse(date_param)
+    date.clamp(Date.current, Date.current + 1.month)
+  rescue ArgumentError
+    Date.current
   end
 
   def load_unavailable_desks

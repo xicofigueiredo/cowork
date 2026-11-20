@@ -62,13 +62,15 @@ class OrderFulfillment
       create_meeting_hourly_booking!
     elsif @order.plan_type == "meeting_daily"
       create_meeting_daily_booking!
+    elsif @order.plan_type == "virtual_plus"
+      create_virtual_plus_meeting_hours!
     end
   end
 
   def after_fulfillment!
     @order.reload
 
-    issue_access_code_for_user!
+    issue_access_code_for_user! unless @order.virtual_plan? && @order.plan_type == "virtual"
 
     official = Toconline::InvoiceIssuer.call(@order)
 
@@ -82,10 +84,18 @@ class OrderFulfillment
       Rails.logger.error("Payment confirmation email failed for order #{@order.id}: #{e.class}: #{e.message}")
     end
 
-    begin
-      OrderMailer.space_guide(@order).deliver_now
-    rescue StandardError => e
-      Rails.logger.error("Space guide email failed for order #{@order.id}: #{e.class}: #{e.message}")
+    if @order.virtual_plan?
+      begin
+        OrderMailer.virtual_office_activation(@order).deliver_now
+      rescue StandardError => e
+        Rails.logger.error("Virtual office activation email failed for order #{@order.id}: #{e.class}: #{e.message}")
+      end
+    else
+      begin
+        OrderMailer.space_guide(@order).deliver_now
+      rescue StandardError => e
+        Rails.logger.error("Space guide email failed for order #{@order.id}: #{e.class}: #{e.message}")
+      end
     end
   end
 
@@ -167,6 +177,20 @@ class OrderFulfillment
       total_credits: config[:meeting_hours],
       remaining_credits: config[:meeting_hours],
       expires_at: booking.ends_on.end_of_day
+    )
+  end
+
+  def create_virtual_plus_meeting_hours!
+    config = Order.plan_config(@order.plan_type)
+    months = config[:months] || 12
+
+    CreditPack.create!(
+      user: @order.user,
+      order: @order,
+      credit_type: "meeting_hour",
+      total_credits: config[:meeting_hours],
+      remaining_credits: config[:meeting_hours],
+      expires_at: months.months.from_now
     )
   end
 

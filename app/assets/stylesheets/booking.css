@@ -163,6 +163,26 @@
   font-size: 20px;
 }
 
+.booking-summary-features {
+  margin: 8px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid #eee;
+  list-style: none;
+}
+
+.booking-summary-features li {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--landing-dark);
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.booking-summary-features li:last-child {
+  border-bottom: none;
+}
+
 .booking-summary-note {
   margin: 16px 0 0;
   padding-top: 16px;
@@ -170,6 +190,116 @@
   color: #666;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.booking-virtual-top-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 20px;
+  margin-bottom: 8px;
+}
+
+.booking-virtual-top-fields .booking-input {
+  max-width: none;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .booking-virtual-top-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+.booking-partner-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr) auto;
+  gap: 0;
+  align-items: stretch;
+  margin: 0 0 10px;
+}
+
+.booking-partner-row .booking-input {
+  max-width: none;
+  width: 100%;
+  border-radius: 0;
+}
+
+.booking-partner-row .booking-input:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.booking-partner-row .booking-input + .booking-input {
+  border-left: none;
+}
+
+.booking-partner-remove {
+  padding: 10px 14px;
+  white-space: nowrap;
+  border-radius: 0 8px 8px 0;
+  border-left: none;
+  height: 100%;
+}
+
+.booking-partner-add {
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .booking-partner-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .booking-partner-row .booking-input:first-child,
+  .booking-partner-row .booking-input + .booking-input,
+  .booking-partner-remove {
+    border-radius: 0;
+    border-left: 1px solid #ddd;
+  }
+
+  .booking-partner-row .booking-input:first-child {
+    border-radius: 8px 8px 0 0;
+  }
+
+  .booking-partner-row .booking-input + .booking-input {
+    border-top: none;
+  }
+
+  .booking-partner-remove {
+    border-radius: 0 0 8px 8px;
+    border-top: none;
+    justify-self: stretch;
+  }
+}
+
+.booking-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--landing-dark);
+  cursor: pointer;
+}
+
+.booking-terms-checkbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--landing-accent);
+  cursor: pointer;
+}
+
+.booking-terms-link {
+  color: var(--landing-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.booking-terms-link:hover {
+  color: var(--landing-dark);
 }
 
 .booking-price-row {

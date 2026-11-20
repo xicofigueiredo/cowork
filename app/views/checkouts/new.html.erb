@@ -2,6 +2,7 @@
 <% meeting_checkout = Order::MEETING_PLAN_TYPES.include?(@plan_type) %>
 <% desk_checkout = @plan_type == "daily" %>
 <% monthly_checkout = Order::MONTHLY_DESK_PLAN_TYPES.include?(@plan_type) %>
+<% virtual_checkout = Order::VIRTUAL_PLAN_TYPES.include?(@plan_type) %>
 <% promo_credit_checkout = @promocode.present? %>
 <% selected_calendar_day = @calendar_days&.find { |day| day[:date].to_date == @booking_date.to_date } if (desk_checkout || meeting_checkout || monthly_checkout) && @booking_date.present? %>
 <% # Floor plan and this flag must agree: use actual desk availability, not only the calendar lookup.
@@ -221,6 +222,144 @@
                 promocode: @promocode %>
         </div>
 
+      <% elsif virtual_checkout %>
+        <% virtual_config = Order.plan_config(@plan_type) %>
+
+        <div class="booking-virtual-top-fields">
+          <div class="booking-field">
+            <%= f.label :booking_date, "Start date (within 1 month)*", class: "booking-label" %>
+            <%= f.date_field :booking_date,
+                  class: "booking-input booking-input--full",
+                  required: true,
+                  min: @virtual_start_min,
+                  max: @virtual_start_max,
+                  value: @order.booking_date %>
+            <p class="booking-note">Choose a start date within the next month.</p>
+          </div>
+
+          <div class="booking-field">
+            <%= f.label :company_name, "Company name to incorporate*", class: "booking-label" %>
+            <%= f.text_field :company_name,
+                  class: "booking-input booking-input--full",
+                  required: true,
+                  autocomplete: "organization",
+                  placeholder: "Company name" %>
+          </div>
+
+          <div class="booking-field">
+            <%= f.label :vat_number, "NIF / VAT number*", class: "booking-label" %>
+            <%= f.text_field :vat_number,
+                  class: "booking-input booking-input--full",
+                  required: true,
+                  autocomplete: "off",
+                  inputmode: "numeric",
+                  maxlength: 12,
+                  placeholder: "123456789",
+                  value: @order.vat_number %>
+            <p class="booking-note">Portuguese NIF (9 digits) or PT + NIF.</p>
+          </div>
+        </div>
+
+        <div class="booking-field" data-partner-rows>
+          <span class="booking-label">Partners*</span>
+          <p class="booking-note">Add each partner’s full name and national ID.</p>
+          <div data-partner-rows-list>
+            <% @order.partner_rows_for_form.each do |partner| %>
+              <div class="booking-partner-row" data-partner-row>
+                <input type="text"
+                       name="order[partners][][name]"
+                       value="<%= partner['name'] %>"
+                       class="booking-input"
+                       required
+                       autocomplete="name"
+                       placeholder="Full name"
+                       aria-label="Partner name">
+                <input type="text"
+                       name="order[partners][][national_id]"
+                       value="<%= partner['national_id'] %>"
+                       class="booking-input"
+                       required
+                       autocomplete="off"
+                       placeholder="National ID"
+                       aria-label="Partner national ID">
+                <button type="button"
+                        class="booking-btn booking-btn--secondary booking-partner-remove"
+                        data-partner-remove
+                        aria-label="Remove partner"
+                        hidden>Remove</button>
+              </div>
+            <% end %>
+          </div>
+          <button type="button"
+                  class="booking-btn booking-btn--secondary booking-partner-add"
+                  data-partner-add>Add partner</button>
+          <template data-partner-row-template>
+            <div class="booking-partner-row" data-partner-row>
+              <input type="text"
+                     name="order[partners][][name]"
+                     class="booking-input"
+                     required
+                     autocomplete="name"
+                     placeholder="Full name"
+                     aria-label="Partner name">
+              <input type="text"
+                     name="order[partners][][national_id]"
+                     class="booking-input"
+                     required
+                     autocomplete="off"
+                     placeholder="National ID"
+                     aria-label="Partner national ID">
+              <button type="button"
+                      class="booking-btn booking-btn--secondary booking-partner-remove"
+                      data-partner-remove
+                      aria-label="Remove partner">Remove</button>
+            </div>
+          </template>
+        </div>
+
+        <div class="booking-field">
+          <%= f.label :contact_email, "Email*", class: "booking-label" %>
+          <%= f.email_field :contact_email,
+                class: "booking-input booking-input--full",
+                required: true,
+                autocomplete: "email",
+                placeholder: "name@example.com" %>
+        </div>
+
+        <label class="booking-terms">
+          <%= f.check_box :terms_accepted, { class: "booking-terms-checkbox", required: true }, "1", "0" %>
+          <span>I accept the <%= link_to "terms and conditions", terms_and_conditions_path, class: "booking-terms-link", target: "_blank", rel: "noopener" %>*</span>
+        </label>
+
+        <div class="booking-summary-card">
+          <p class="booking-summary-row">
+            <span>Plan</span>
+            <strong><%= virtual_config[:label] %></strong>
+          </p>
+          <p class="booking-summary-row">
+            <span>Period</span>
+            <strong>12 months</strong>
+          </p>
+          <p class="booking-summary-row">
+            <span>Monthly equivalent</span>
+            <strong><%= Order.format_euros(virtual_config[:monthly_amount_cents]) %>/month</strong>
+          </p>
+          <% if virtual_config[:meeting_hours].present? %>
+            <p class="booking-summary-row">
+              <span>Meeting room</span>
+              <strong>4h per month (<%= virtual_config[:meeting_hours] %>h total)</strong>
+            </p>
+          <% end %>
+          <ul class="booking-summary-features">
+            <% Array(virtual_config[:features]).each do |feature| %>
+              <li><%= feature %></li>
+            <% end %>
+          </ul>
+          <p class="booking-summary-note">Annual subscription billed once. Continue to pay securely with Stripe.</p>
+
+          <%= render "shared/checkout_total", **checkout_total_locals %>
+        </div>
+
       <% else %>
         <div class="booking-summary-card">
           <p class="booking-summary-row">
@@ -241,52 +380,54 @@
         <%= render "shared/checkout_total", **checkout_total_locals %>
       <% end %>
 
-      <div class="booking-inline-fields">
-        <div class="booking-field">
-          <label class="booking-label" for="promocode">Promo code</label>
-          <div class="booking-promocode-row">
-            <input type="text"
-                   name="promocode"
-                   id="promocode"
-                   value="<%= @promocode_input.presence || @promocode&.code %>"
-                   class="booking-input booking-input--promocode"
-                   autocomplete="off"
-                   spellcheck="false"
-                   placeholder="Enter code">
-            <button type="submit"
-                    class="booking-btn booking-btn--secondary booking-btn--promocode"
-                    formaction="<%= new_checkout_path %>"
-                    formmethod="get"
-                    formnovalidate
-                    data-turbo="false"
-                    name="commit"
-                    value="apply_promocode">
-              Apply
-            </button>
+      <% unless virtual_checkout %>
+        <div class="booking-inline-fields">
+          <div class="booking-field">
+            <label class="booking-label" for="promocode">Promo code</label>
+            <div class="booking-promocode-row">
+              <input type="text"
+                     name="promocode"
+                     id="promocode"
+                     value="<%= @promocode_input.presence || @promocode&.code %>"
+                     class="booking-input booking-input--promocode"
+                     autocomplete="off"
+                     spellcheck="false"
+                     placeholder="Enter code">
+              <button type="submit"
+                      class="booking-btn booking-btn--secondary booking-btn--promocode"
+                      formaction="<%= new_checkout_path %>"
+                      formmethod="get"
+                      formnovalidate
+                      data-turbo="false"
+                      name="commit"
+                      value="apply_promocode">
+                Apply
+              </button>
+            </div>
+            <% if @promocode_error.present? %>
+              <p class="booking-note booking-note--error"><%= @promocode_error %></p>
+            <% elsif @promocode.present? %>
+              <p class="booking-note booking-note--success">
+                <%= @promocode.code %> applied — <%= @promocode.credits %> day credits for <%= Order.format_euros(@promocode.amount_cents) %>.
+              </p>
+            <% else %>
+              <p class="booking-note">Optional — enter a code if you have one.</p>
+            <% end %>
           </div>
-          <% if @promocode_error.present? %>
-            <p class="booking-note booking-note--error"><%= @promocode_error %></p>
-          <% elsif @promocode.present? %>
-            <p class="booking-note booking-note--success">
-              <%= @promocode.code %> applied — <%= @promocode.credits %> day credits for <%= Order.format_euros(@promocode.amount_cents) %>.
-            </p>
-          <% else %>
-            <p class="booking-note">Optional — enter a code if you have one.</p>
-          <% end %>
-        </div>
 
-        <div class="booking-field">
-          <%= f.label :vat_number, "NIF / VAT number (optional)", class: "booking-label" %>
-          <%= f.text_field :vat_number,
-                class: "booking-input booking-input--full",
-                autocomplete: "off",
-                inputmode: "numeric",
-                maxlength: 12,
-                placeholder: "123456789",
-                value: @order.vat_number %>
-          <p class="booking-note">Optional — add it if you need NIF on your invoice. Portuguese NIF (9 digits) or PT + NIF.</p>
+          <div class="booking-field">
+            <%= f.label :vat_number, "NIF / VAT number (optional)", class: "booking-label" %>
+            <%= f.text_field :vat_number,
+                  class: "booking-input booking-input--full",
+                  autocomplete: "off",
+                  inputmode: "numeric",
+                  maxlength: 12,
+                  placeholder: "123456789",
+                  value: @order.vat_number %>
+            <p class="booking-note">Optional — add it if you need NIF on your invoice. Portuguese NIF (9 digits) or PT + NIF.</p>
+          </div>
         </div>
-      </div>
+      <% end %>
 
       <div class="booking-actions">
         <%= f.submit "Continue to payment",
@@ -504,6 +645,59 @@ document.addEventListener("turbo:before-cache", () => {
 
 document.addEventListener("DOMContentLoaded", initializeMeetingHourlyCheckout);
 document.addEventListener("turbo:load", initializeMeetingHourlyCheckout);
+</script>
+<% end %>
+
+<% if virtual_checkout %>
+<script>
+function initializePartnerRows() {
+  const root = document.querySelector("[data-partner-rows]");
+  if (!root || root.dataset.ready === "true") return;
+  root.dataset.ready = "true";
+
+  const list = root.querySelector("[data-partner-rows-list]");
+  const template = root.querySelector("[data-partner-row-template]");
+  const addButton = root.querySelector("[data-partner-add]");
+
+  function syncRemoveButtons() {
+    const rows = list.querySelectorAll("[data-partner-row]");
+    rows.forEach((row) => {
+      const removeButton = row.querySelector("[data-partner-remove]");
+      if (!removeButton) return;
+      removeButton.hidden = rows.length <= 1;
+    });
+  }
+
+  addButton?.addEventListener("click", () => {
+    if (!template || !list) return;
+    const node = template.content.firstElementChild.cloneNode(true);
+    list.appendChild(node);
+    syncRemoveButtons();
+    node.querySelector("input")?.focus();
+  });
+
+  list?.addEventListener("click", (event) => {
+    const removeButton = event.target.closest("[data-partner-remove]");
+    if (!removeButton) return;
+
+    const row = removeButton.closest("[data-partner-row]");
+    const rows = list.querySelectorAll("[data-partner-row]");
+    if (!row || rows.length <= 1) return;
+
+    row.remove();
+    syncRemoveButtons();
+  });
+
+  syncRemoveButtons();
+}
+
+document.addEventListener("turbo:before-cache", () => {
+  const root = document.querySelector("[data-partner-rows]");
+  if (root) delete root.dataset.ready;
+});
+
+document.addEventListener("DOMContentLoaded", initializePartnerRows);
+document.addEventListener("turbo:load", initializePartnerRows);
 </script>
 <% end %>
 

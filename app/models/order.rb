@@ -10,7 +10,35 @@ class Order < ApplicationRecord
     "monthly" => { amount_cents: 14_000, original_amount_cents: 15_000, label: "1 Month", credits: nil, meeting_hours: 5, months: 1 },
     "monthly_3" => { amount_cents: 12_000, original_amount_cents: 13_000, label: "3 Months", credits: nil, meeting_hours: 15, months: 3 },
     "meeting_hourly" => { amount_cents: 1500, label: "Hourly booking", credits: nil },
-    "meeting_daily" => { amount_cents: 6500, label: "Daily booking", credits: nil }
+    "meeting_daily" => { amount_cents: 6500, label: "Daily booking", credits: nil },
+    "virtual" => {
+      amount_cents: 24_000,
+      label: "Virtual office",
+      credits: nil,
+      months: 12,
+      monthly_amount_cents: 2_000,
+      features: [
+        "Legal domiciliation",
+        "Mail collection",
+        "Notification by email",
+        "Mail scanning up to 20 pages"
+      ]
+    },
+    "virtual_plus" => {
+      amount_cents: 60_000,
+      label: "Virtual office plus",
+      credits: nil,
+      months: 12,
+      monthly_amount_cents: 5_000,
+      meeting_hours: 48,
+      features: [
+        "Legal domiciliation",
+        "Mail collection",
+        "Notification by email",
+        "Unlimited mail scanning",
+        "4h meeting room per month"
+      ]
+    }
   }.freeze
 
   STATUSES = %w[pending paid failed].freeze
@@ -18,6 +46,7 @@ class Order < ApplicationRecord
   MONTHLY_DESK_PLAN_TYPES = %w[monthly monthly_3].freeze
   DESK_PLAN_TYPES = (%w[daily] + MONTHLY_DESK_PLAN_TYPES).freeze
   MEETING_PLAN_TYPES = %w[meeting_hourly meeting_daily].freeze
+  VIRTUAL_PLAN_TYPES = %w[virtual virtual_plus].freeze
 
   belongs_to :user
   belongs_to :seat, optional: true
@@ -31,19 +60,34 @@ class Order < ApplicationRecord
   validates :hours, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validate :vat_number_format
   validates :seat, presence: true, if: -> { requires_desk? && !promocode_credit_pack? }
-  validates :booking_date, presence: true, if: -> { (plan_type == "daily" || plan_type == "meeting_daily" || monthly_desk_plan?) && !promocode_credit_pack? }
+  validates :booking_date, presence: true, if: -> { (plan_type == "daily" || plan_type == "meeting_daily" || monthly_desk_plan? || virtual_plan?) && !promocode_credit_pack? }
   validate :monthly_start_date_valid, if: -> { pending? && monthly_desk_plan? && booking_date.present? && !promocode_credit_pack? }
+  validate :virtual_start_date_valid, if: -> { pending? && virtual_plan? && booking_date.present? }
   validates :starts_at, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
   validates :hours, presence: true, if: -> { plan_type == "meeting_hourly" && !promocode_credit_pack? }
   validate :seat_available, if: -> { pending? && requires_desk? && desk_count.positive? && !promocode_credit_pack? }
   validate :meeting_booking_valid, if: -> { pending? && meeting_plan? && !promocode_credit_pack? }
+  validates :company_name, :contact_email, :vat_number, presence: true, if: :virtual_plan?
+  validates :contact_email, format: { with: URI::MailTo::EMAIL_REGEXP }, if: -> { virtual_plan? && contact_email.present? }
+  validates :terms_accepted, acceptance: true, if: :virtual_plan?
+  validate :partners_present_and_complete, if: :virtual_plan?
 
   before_validation :normalize_vat_number
+  before_validation :normalize_virtual_office_fields, if: :virtual_plan?
   before_validation :sync_seat_ids_from_seat, if: -> { requires_desk? && !promocode_credit_pack? }
   before_validation :assign_meeting_room_seat, if: -> { meeting_plan? && seat.blank? && !promocode_credit_pack? }
 
   scope :pending, -> { where(status: "pending") }
   scope :paid, -> { where(status: "paid") }
+
+  def self.human_attribute_name(attr, options = {})
+    {
+      "partners" => "Partners",
+      "company_name" => "Company name",
+      "contact_email" => "Email",
+      "terms_accepted" => "Terms and conditions"
+    }[attr.to_s] || super
+  end
 
   def self.plan_config(plan_type)
     PLAN_TYPES.fetch(plan_type)
@@ -215,6 +259,46 @@ class Order < ApplicationRecord
     MEETING_PLAN_TYPES.include?(plan_type)
   end
 
+  def virtual_plan?
+    VIRTUAL_PLAN_TYPES.include?(plan_type)
+  end
+
+  def partners
+    Array(super)
+  end
+
+  def partners=(value)
+    rows = case value
+    when String
+      begin
+        JSON.parse(value)
+      rescue JSON::ParserError
+        []
+      end
+    else
+      Array(value)
+    end
+
+    normalized = rows.filter_map do |row|
+      attrs = row.respond_to?(:to_unsafe_h) ? row.to_unsafe_h : row.to_h
+      name = attrs["name"] || attrs[:name]
+      national_id = attrs["national_id"] || attrs[:national_id]
+      name = name.to_s.strip
+      national_id = national_id.to_s.strip
+      next if name.blank? && national_id.blank?
+
+      { "name" => name, "national_id" => national_id }
+    end
+
+    super(normalized)
+  end
+
+  def partner_rows_for_form
+    rows = partners
+    rows = [ { "name" => "", "national_id" => "" } ] if rows.empty?
+    rows
+  end
+
   def credit_pack?
     CREDIT_PACK_TYPES.include?(plan_type) || promocode_credit_pack?
   end
@@ -304,6 +388,19 @@ class Order < ApplicationRecord
       details << [ "Credits", "#{pack&.total_credits || credit_count} day credits" ]
       details << [ "Promo code", promocode.code ] if promocode.present?
       details << [ "Valid until", pack&.expires_at&.strftime("%-d %B %Y") ] if pack&.expires_at
+    elsif virtual_plan?
+      details << [ "Plan", plan_label ]
+      details << [ "Period", "12 months" ]
+      details << [ "Start date", booking_date.strftime("%-d %B %Y") ] if booking_date.present?
+      details << [ "Company name", company_name ] if company_name.present?
+      partners.each_with_index do |partner, index|
+        label = partners.size > 1 ? "Partner #{index + 1}" : "Partner"
+        details << [ label, "#{partner['name']} (#{partner['national_id']})" ]
+      end
+      details << [ "Email", contact_email ] if contact_email.present?
+      if plan_type == "virtual_plus" && credit_pack.present?
+        details << [ "Meeting hours", "#{credit_pack.total_credits} hours included" ]
+      end
     elsif bookings.any?
       first = booking
       if first.seat.meeting_room?
@@ -343,6 +440,39 @@ class Order < ApplicationRecord
     end
 
     self.vat_number = vat_number.to_s.upcase.gsub(/[\s.\-]/, "")
+  end
+
+  def normalize_virtual_office_fields
+    self.company_name = company_name.to_s.strip.presence
+    self.contact_email = contact_email.to_s.strip.downcase.presence
+    self.partners = partners
+  end
+
+  def partners_present_and_complete
+    if partners.empty?
+      errors.add(:partners, "add at least one partner with name and national ID")
+      return
+    end
+
+    partners.each_with_index do |partner, index|
+      missing = []
+      missing << "name" if partner["name"].blank?
+      missing << "national ID" if partner["national_id"].blank?
+      next if missing.empty?
+
+      errors.add(:partners, "partner #{index + 1} needs #{missing.join(' and ')}")
+    end
+  end
+
+  def virtual_start_date_valid
+    today = Date.current
+    latest = today + 1.month
+
+    if booking_date < today
+      errors.add(:booking_date, "must be today or later")
+    elsif booking_date > latest
+      errors.add(:booking_date, "must be within 1 month from today")
+    end
   end
 
   def vat_number_format

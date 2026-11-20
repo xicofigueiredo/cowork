@@ -86,6 +86,8 @@ class StripeCheckout
     if @order.monthly_desk_plan?
       period = @order.monthly_period
       parts << "Period #{period[:starts_on]} – #{period[:ends_on]}"
+    elsif @order.virtual_plan?
+      parts << "Annual subscription (12 months)"
     elsif @order.booking_date
       parts << "Date #{@order.booking_date}"
     end

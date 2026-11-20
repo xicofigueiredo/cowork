@@ -1,0 +1,53 @@
+<%= form_with model: [:admin, event], class: "booking-form booking-form--centered", local: true, html: { multipart: true } do |form| %>
+  <% if event.errors.any? %>
+    <div class="booking-credits-banner">
+      <p><%= event.errors.full_messages.to_sentence %></p>
+    </div>
+  <% end %>
+
+  <div class="booking-field booking-field--wide">
+    <%= form.label :title, class: "booking-label" %>
+    <%= form.text_field :title, class: "booking-input", placeholder: "Optional title" %>
+  </div>
+
+  <div class="booking-field booking-field--wide">
+    <%= form.label :event_date, "Date", class: "booking-label" %>
+    <%= form.date_field :event_date, class: "booking-input" %>
+    <p class="booking-note">Optional. Shown on the public News & Events page.</p>
+  </div>
+
+  <div class="booking-field booking-field--wide">
+    <%= form.label :description, class: "booking-label" %>
+    <%= form.text_area :description, class: "booking-input", rows: 4, placeholder: "Optional description" %>
+  </div>
+
+  <div class="booking-field booking-field--wide">
+    <%= form.label :url, "Link", class: "booking-label" %>
+    <%= form.url_field :url, class: "booking-input", placeholder: "https://…" %>
+    <p class="booking-note">Optional. Opens in a new tab from the public page.</p>
+  </div>
+
+  <div class="booking-field booking-field--wide">
+    <%= form.label :position, class: "booking-label" %>
+    <%= form.number_field :position, class: "booking-input", min: 0, step: 1 %>
+    <p class="booking-note">Lower numbers appear first in the carousel.</p>
+  </div>
+
+  <div class="booking-field booking-field--wide">
+    <%= form.label :photo, class: "booking-label" %>
+    <%= form.file_field :photo, class: "booking-input", accept: "image/*" %>
+    <% if event.photo.attached? %>
+      <div class="admin-event-current-photo">
+        <%= image_tag event.photo, alt: event.display_title %>
+        <p class="booking-note">Current photo. Upload a new file to replace it.</p>
+      </div>
+    <% else %>
+      <p class="booking-note">Optional. Leave blank for a text-only slide.</p>
+    <% end %>
+  </div>
+
+  <div class="booking-actions">
+    <%= link_to "Cancel", admin_events_path, class: "booking-btn booking-btn--secondary" %>
+    <%= form.submit event.persisted? ? "Save changes" : "Create event", class: "booking-btn booking-btn--primary" %>
+  </div>
+<% end %>

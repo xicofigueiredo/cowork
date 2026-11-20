@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   root "home#index"
   get "pricing" => "pricing#index"
   get "our-space" => "our_space#index", as: :our_space
+  get "news-events" => "news_events#index", as: :news_events
   get "location" => "location#index"
   post "location" => "location#create"
   get "privacy-policy" => "legal#privacy_policy", as: :privacy_policy
@@ -43,6 +44,7 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: "dashboard#index"
     resources :leads, only: [ :index ]
+    resources :events, except: [ :show ]
     resources :access_codes, only: [ :index, :new, :create, :destroy ] do
       member do
         post :reissue

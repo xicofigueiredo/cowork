@@ -1,0 +1,247 @@
+<% content_for :title, "News & Events — Mezzanine Coworking in Matosinhos, Porto" %>
+<% content_for :meta_description, "News and events from Mezzanine coworking in Matosinhos, near Porto." %>
+
+<main class="newsevents">
+
+  <section class="newsevents-carousel" aria-label="News and events">
+    <div class="newsevents-carousel-inner">
+      <% if @events.any? %>
+        <div class="newsevents-carousel-viewport">
+          <div class="newsevents-carousel-track" data-newsevents-carousel-track>
+            <% @events.each do |event| %>
+              <figure class="newsevents-carousel-slide" data-newsevents-carousel-slide>
+                <% slide_inner = capture do %>
+                  <div class="newsevents-carousel-media">
+                    <% if event.photo.attached? %>
+                      <%= image_tag event.photo,
+                            alt: event.title.presence || "Mezzanine event",
+                            class: "newsevents-carousel-image",
+                            loading: "lazy" %>
+                    <% else %>
+                      <div class="newsevents-carousel-placeholder" aria-hidden="true"></div>
+                    <% end %>
+                  </div>
+
+                  <% if event.event_date.present? || event.title.present? || event.description.present? || event.url.present? %>
+                    <figcaption class="newsevents-carousel-caption">
+                      <% if event.event_date.present? %>
+                        <time class="newsevents-carousel-caption-date" datetime="<%= event.event_date.iso8601 %>"><%= event.display_date %></time>
+                      <% end %>
+                      <% if event.title.present? %>
+                        <p class="newsevents-carousel-caption-title"><%= event.title %></p>
+                      <% end %>
+                      <% if event.description.present? %>
+                        <p class="newsevents-carousel-caption-copy"><%= event.description %></p>
+                      <% end %>
+                      <% if event.url.present? %>
+                        <span class="newsevents-carousel-caption-link">Learn more</span>
+                      <% end %>
+                    </figcaption>
+                  <% end %>
+                <% end %>
+
+                <% if event.url.present? %>
+                  <%= link_to event.url, class: "newsevents-carousel-link", target: "_blank", rel: "noreferrer" do %>
+                    <%= slide_inner %>
+                  <% end %>
+                <% else %>
+                  <%= slide_inner %>
+                <% end %>
+              </figure>
+            <% end %>
+          </div>
+
+          <button type="button" class="newsevents-carousel-control newsevents-carousel-control--prev" data-newsevents-carousel-prev aria-label="Previous event">
+            ‹
+          </button>
+          <button type="button" class="newsevents-carousel-control newsevents-carousel-control--next" data-newsevents-carousel-next aria-label="Next event">
+            ›
+          </button>
+        </div>
+
+        <div class="newsevents-carousel-dots" data-newsevents-carousel-dots hidden></div>
+      <% else %>
+        <p class="newsevents-empty">No news or events to share right now. Check back soon.</p>
+      <% end %>
+    </div>
+  </section>
+</main>
+
+<% if @events.any? %>
+<script>
+function initializeNewsEventsCarousel() {
+  const root = document.querySelector(".newsevents-carousel");
+  if (!root || root.dataset.carouselReady === "true") return;
+  root.dataset.carouselReady = "true";
+
+  const viewport = root.querySelector(".newsevents-carousel-viewport");
+  const track = root.querySelector("[data-newsevents-carousel-track]");
+  const dotsContainer = root.querySelector("[data-newsevents-carousel-dots]");
+  const prevButton = root.querySelector("[data-newsevents-carousel-prev]");
+  const nextButton = root.querySelector("[data-newsevents-carousel-next]");
+
+  let slides = [];
+  let originalCount = 0;
+  let offset = 0;
+  let activeIndex = 0;
+  let isAnimating = false;
+
+  function visibleCount() {
+    const value = getComputedStyle(viewport).getPropertyValue("--slides-visible").trim();
+    return Number(value) || 3;
+  }
+
+  function maxLogicalIndex() {
+    return Math.max(0, originalCount - visibleCount());
+  }
+
+  function logicalIndex() {
+    return Math.max(0, Math.min(activeIndex - offset, maxLogicalIndex()));
+  }
+
+  function stepSize() {
+    if (!slides[0]) return 0;
+    const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 0;
+    return slides[0].getBoundingClientRect().width + gap;
+  }
+
+  function clearClones() {
+    track.querySelectorAll("[data-carousel-clone]").forEach((node) => node.remove());
+  }
+
+  function buildTrack() {
+    clearClones();
+    const originals = Array.from(track.querySelectorAll("[data-newsevents-carousel-slide]:not([data-carousel-clone])"));
+    originalCount = originals.length;
+    offset = visibleCount();
+
+    originals.slice(-offset).forEach((slide) => {
+      const clone = slide.cloneNode(true);
+      clone.dataset.carouselClone = "true";
+      track.insertBefore(clone, track.firstChild);
+    });
+
+    originals.slice(0, offset).forEach((slide) => {
+      const clone = slide.cloneNode(true);
+      clone.dataset.carouselClone = "true";
+      track.appendChild(clone);
+    });
+
+    slides = Array.from(track.querySelectorAll("[data-newsevents-carousel-slide]"));
+    activeIndex = offset;
+  }
+
+  function setTransform(index, animate) {
+    track.style.transition = animate ? "" : "none";
+    track.style.transform = `translateX(-${index * stepSize()}px)`;
+    if (!animate) {
+      track.offsetHeight;
+      track.style.transition = "";
+    }
+  }
+
+  function updateSlideStyles() {
+    const visible = visibleCount();
+    slides.forEach((slide, index) => {
+      slide.classList.remove("is-side", "is-center");
+
+      if (visible === 3 && index >= activeIndex && index < activeIndex + visible) {
+        if (index === activeIndex + 1) slide.classList.add("is-center");
+        else slide.classList.add("is-side");
+      }
+    });
+  }
+
+  function updateDots() {
+    if (!dotsContainer) return;
+
+    dotsContainer.querySelectorAll("[data-newsevents-carousel-dot]").forEach((dot) => {
+      dot.classList.toggle("is-active", Number(dot.dataset.newseventsCarouselDot) === logicalIndex());
+    });
+  }
+
+  function renderDots() {
+    if (!dotsContainer) return;
+
+    dotsContainer.innerHTML = "";
+    const pages = maxLogicalIndex() + 1;
+    dotsContainer.hidden = pages <= 1;
+
+    for (let index = 0; index < pages; index += 1) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "newsevents-carousel-dot";
+      dot.dataset.newseventsCarouselDot = String(index);
+      dot.setAttribute("aria-label", `Show event set ${index + 1}`);
+      dot.addEventListener("click", () => goToLogical(index));
+      dotsContainer.appendChild(dot);
+    }
+  }
+
+  function goToLogical(index) {
+    if (isAnimating) return;
+    activeIndex = offset + index;
+    isAnimating = true;
+    setTransform(activeIndex, true);
+    updateSlideStyles();
+    updateDots();
+  }
+
+  function snapIfNeeded() {
+    if (activeIndex >= offset + originalCount) {
+      activeIndex = offset;
+      setTransform(activeIndex, false);
+    } else if (activeIndex < offset) {
+      activeIndex = offset + maxLogicalIndex();
+      setTransform(activeIndex, false);
+    }
+
+    updateSlideStyles();
+    updateDots();
+    isAnimating = false;
+  }
+
+  function handleTransitionEnd(event) {
+    if (event.target !== track || event.propertyName !== "transform") return;
+    snapIfNeeded();
+  }
+
+  function step(direction) {
+    if (isAnimating || originalCount === 0) return;
+
+    isAnimating = true;
+    activeIndex += direction;
+    setTransform(activeIndex, true);
+    updateSlideStyles();
+    updateDots();
+  }
+
+  function rebuild() {
+    buildTrack();
+    renderDots();
+    setTransform(activeIndex, false);
+    updateSlideStyles();
+    updateDots();
+    isAnimating = false;
+  }
+
+  track.addEventListener("transitionend", handleTransitionEnd);
+  prevButton?.addEventListener("click", () => step(-1));
+  nextButton?.addEventListener("click", () => step(1));
+  window.addEventListener("resize", rebuild);
+
+  rebuild();
+}
+
+document.addEventListener("turbo:before-cache", () => {
+  const carousel = document.querySelector(".newsevents-carousel");
+  if (carousel) {
+    delete carousel.dataset.carouselReady;
+    carousel.querySelectorAll("[data-carousel-clone]").forEach((node) => node.remove());
+  }
+});
+
+document.addEventListener("DOMContentLoaded", initializeNewsEventsCarousel);
+document.addEventListener("turbo:load", initializeNewsEventsCarousel);
+</script>
+<% end %>

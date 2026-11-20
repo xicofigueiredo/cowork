@@ -1,0 +1,53 @@
+<% content_for :title, "Events - Mezzanine" %>
+
+<main class="booking-page">
+  <div class="booking-container">
+    <div class="booking-section-header">
+      <h1 class="booking-title">Events</h1>
+      <%= link_to "Add event", new_admin_event_path, class: "booking-btn booking-btn--primary booking-btn--small" %>
+    </div>
+
+    <%= render "admin/shared/nav" %>
+
+    <section class="booking-section">
+      <% if @events.any? %>
+        <ul class="booking-list">
+          <% @events.each do |event| %>
+            <li class="booking-list-item">
+              <div class="admin-event-row">
+                <% if event.photo.attached? %>
+                  <%= image_tag event.photo, alt: "", class: "admin-event-thumb" %>
+                <% else %>
+                  <div class="admin-event-thumb admin-event-thumb--placeholder" aria-hidden="true"></div>
+                <% end %>
+                <div>
+                  <strong><%= event.display_title %></strong>
+                  <% if event.event_date.present? %>
+                    <span class="booking-list-meta"><%= event.display_date %></span>
+                  <% end %>
+                  <span class="booking-list-meta">Position <%= event.position %></span>
+                  <% if event.description.present? %>
+                    <span class="booking-list-meta"><%= truncate(event.description, length: 100) %></span>
+                  <% end %>
+                  <% if event.url.present? %>
+                    <span class="booking-list-meta"><%= event.url %></span>
+                  <% end %>
+                </div>
+              </div>
+              <div class="booking-list-actions">
+                <%= link_to "Edit", edit_admin_event_path(event), class: "booking-btn booking-btn--secondary booking-btn--small" %>
+                <%= button_to "Delete",
+                      admin_event_path(event),
+                      method: :delete,
+                      class: "booking-btn booking-btn--secondary booking-btn--small",
+                      data: { turbo_confirm: "Delete this event?" } %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="booking-empty">No events yet. Add one to show it on the News & Events page.</p>
+      <% end %>
+    </section>
+  </div>
+</main>

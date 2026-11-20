@@ -146,7 +146,8 @@ class CheckoutsController < ApplicationController
     params.require(:order).permit(
       :plan_type, :seat_id, :booking_date, :vat_number,
       :company_name, :contact_email, :terms_accepted,
-      partners: [ :name, :national_id ],
+      partners: [ :name ],
+      partner_id_documents: [],
       starts_at: [], seat_ids: []
     ).tap do |permitted|
         # Multi-hour checkboxes post an array; strip it so build does not assign an Array.
@@ -282,7 +283,7 @@ class CheckoutsController < ApplicationController
       params.require(:order).permit(
         :booking_date, :vat_number, :seat_id,
         :company_name, :contact_email, :terms_accepted,
-        partners: [ :name, :national_id ],
+        partners: [ :name ],
         seat_ids: []
       )
     )

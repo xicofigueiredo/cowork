@@ -96,9 +96,15 @@
           </p>
         <% end %>
         <% @order.partners.each_with_index do |partner, index| %>
+          <% document = @order.partner_id_document_for(index) %>
           <p class="booking-summary-row">
             <span><%= @order.partners.size > 1 ? "Partner #{index + 1}" : "Partner" %></span>
-            <strong><%= partner["name"] %> · <%= partner["national_id"] %></strong>
+            <strong>
+              <%= partner["name"] %>
+              <% if document.present? %>
+                · <%= document.filename %>
+              <% end %>
+            </strong>
           </p>
         <% end %>
         <% if @order.contact_email.present? %>

@@ -48,11 +48,22 @@ class Order < ApplicationRecord
   MEETING_PLAN_TYPES = %w[meeting_hourly meeting_daily].freeze
   VIRTUAL_PLAN_TYPES = %w[virtual virtual_plus].freeze
 
+  PARTNER_ID_CONTENT_TYPES = %w[
+    image/jpeg
+    image/png
+    image/webp
+    image/gif
+    application/pdf
+  ].freeze
+  PARTNER_ID_MAX_BYTES = 5.megabytes
+  MAX_PARTNERS = 10
+
   belongs_to :user
   belongs_to :seat, optional: true
   belongs_to :promocode, optional: true
   has_one :credit_pack, dependent: :destroy
   has_many :bookings, dependent: :destroy
+  has_many_attached :partner_id_documents
 
   validates :plan_type, presence: true, inclusion: { in: PLAN_TYPES.keys }
   validates :amount_cents, presence: true, numericality: { greater_than: 0 }
@@ -282,12 +293,10 @@ class Order < ApplicationRecord
     normalized = rows.filter_map do |row|
       attrs = row.respond_to?(:to_unsafe_h) ? row.to_unsafe_h : row.to_h
       name = attrs["name"] || attrs[:name]
-      national_id = attrs["national_id"] || attrs[:national_id]
       name = name.to_s.strip
-      national_id = national_id.to_s.strip
-      next if name.blank? && national_id.blank?
+      next if name.blank?
 
-      { "name" => name, "national_id" => national_id }
+      { "name" => name }
     end
 
     super(normalized)
@@ -295,8 +304,12 @@ class Order < ApplicationRecord
 
   def partner_rows_for_form
     rows = partners
-    rows = [ { "name" => "", "national_id" => "" } ] if rows.empty?
+    rows = [ { "name" => "" } ] if rows.empty?
     rows
+  end
+
+  def partner_id_document_for(index)
+    partner_id_documents[index]
   end
 
   def credit_pack?
@@ -395,8 +408,11 @@ class Order < ApplicationRecord
       details << [ "Company name", company_name ] if company_name.present?
       partners.each_with_index do |partner, index|
         label = partners.size > 1 ? "Partner #{index + 1}" : "Partner"
-        details << [ label, "#{partner['name']} (#{partner['national_id']})" ]
+        document = partner_id_document_for(index)
+        document_label = document&.filename&.to_s
+        details << [ label, document_label.present? ? "#{partner['name']} (#{document_label})" : partner["name"] ]
       end
+
       details << [ "Email", contact_email ] if contact_email.present?
       if plan_type == "virtual_plus" && credit_pack.present?
         details << [ "Meeting hours", "#{credit_pack.total_credits} hours included" ]
@@ -450,17 +466,35 @@ class Order < ApplicationRecord
 
   def partners_present_and_complete
     if partners.empty?
-      errors.add(:partners, "add at least one partner with name and national ID")
+      errors.add(:partners, "add at least one partner with name and national ID document")
+      return
+    end
+
+    if partners.size > MAX_PARTNERS
+      errors.add(:partners, "you can add up to #{MAX_PARTNERS} partners")
       return
     end
 
     partners.each_with_index do |partner, index|
-      missing = []
-      missing << "name" if partner["name"].blank?
-      missing << "national ID" if partner["national_id"].blank?
-      next if missing.empty?
+      errors.add(:partners, "partner #{index + 1} needs a name") if partner["name"].blank?
+    end
 
-      errors.add(:partners, "partner #{index + 1} needs #{missing.join(' and ')}")
+    documents = partner_id_documents.reject { |doc| doc.respond_to?(:marked_for_destruction?) && doc.marked_for_destruction? }
+    if documents.size < partners.size
+      errors.add(:partners, "upload a national ID document for each partner")
+    end
+
+    documents.each_with_index do |document, index|
+      content_type = document.content_type
+      byte_size = document.byte_size
+
+      unless PARTNER_ID_CONTENT_TYPES.include?(content_type)
+        errors.add(:partners, "partner #{index + 1} ID must be an image or PDF")
+      end
+
+      if byte_size.to_i > PARTNER_ID_MAX_BYTES
+        errors.add(:partners, "partner #{index + 1} ID must be #{PARTNER_ID_MAX_BYTES / 1.megabyte}MB or less")
+      end
     end
   end
 

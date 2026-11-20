@@ -6,7 +6,7 @@ class OrderMailerTest < ActionMailer::TestCase
   end
 
   test "virtual office activation email" do
-    order = Order.create!(
+    order = Order.new(
       user: @user,
       plan_type: "virtual",
       amount_cents: 24_000,
@@ -15,10 +15,16 @@ class OrderMailerTest < ActionMailer::TestCase
       vat_number: "123456789",
       booking_date: Date.current,
       company_name: "Mezzanine LDA",
-      partners: [ { "name" => "Ana Silva", "national_id" => "12345678" } ],
+      partners: [ { "name" => "Ana Silva" } ],
       contact_email: "ana@example.com",
       terms_accepted: true
     )
+    order.partner_id_documents.attach(
+      io: File.open(file_fixture("national_id.pdf")),
+      filename: "ana.pdf",
+      content_type: "application/pdf"
+    )
+    order.save!
 
     email = OrderMailer.virtual_office_activation(order)
 

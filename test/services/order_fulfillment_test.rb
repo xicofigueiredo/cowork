@@ -271,7 +271,7 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
   end
 
   test "fulfills virtual office order without booking resources" do
-    order = Order.create!(
+    order = Order.new(
       user: @user,
       plan_type: "virtual",
       amount_cents: 24_000,
@@ -280,12 +280,19 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       booking_date: Date.current,
       company_name: "Mezzanine LDA",
       partners: [
-        { "name" => "Ana Silva", "national_id" => "12345678" },
-        { "name" => "João Costa", "national_id" => "87654321" }
+        { "name" => "Ana Silva" },
+        { "name" => "João Costa" }
       ],
       contact_email: "ana@example.com",
       terms_accepted: true
     )
+    order.partner_id_documents.attach(
+      [
+        { io: File.open(file_fixture("national_id.pdf")), filename: "ana.pdf", content_type: "application/pdf" },
+        { io: File.open(file_fixture("national_id.pdf")), filename: "joao.pdf", content_type: "application/pdf" }
+      ]
+    )
+    order.save!
 
     assert OrderFulfillment.call(order)
     order.reload
@@ -296,7 +303,7 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
   end
 
   test "fulfills virtual office plus with annual meeting hours" do
-    order = Order.create!(
+    order = Order.new(
       user: @user,
       plan_type: "virtual_plus",
       amount_cents: 60_000,
@@ -304,10 +311,16 @@ class OrderFulfillmentTest < ActiveSupport::TestCase
       vat_number: "123456789",
       booking_date: Date.current,
       company_name: "Mezzanine Plus LDA",
-      partners: [ { "name" => "Ana Silva", "national_id" => "87654321" } ],
+      partners: [ { "name" => "Ana Silva" } ],
       contact_email: "plus@example.com",
       terms_accepted: true
     )
+    order.partner_id_documents.attach(
+      io: File.open(file_fixture("national_id.pdf")),
+      filename: "ana.pdf",
+      content_type: "application/pdf"
+    )
+    order.save!
 
     assert OrderFulfillment.call(order)
     order.reload
